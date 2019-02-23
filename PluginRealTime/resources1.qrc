@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/code.png</file>
+        <file>resources/help.png</file>
+        <file>resources/information.png</file>
+        <file>resources/red-button.png</file>
+    </qresource>
+</RCC>
