@@ -348,7 +348,7 @@ public:
         RenderComplete = 0xff
     };
 
-    /// Display geometry in 3D, with respect to the station coordinate system. This should be called using \ref DrawGeometry ONLY when a EventRender is triggered.
+    /// Display geometry in 3D, with respect to the station coordinate system. This should be called using \ref DrawGeometry ONLY when a \ref PluginEvent of type \ref EventRender is triggered.
     enum {
         /// Draw surfaces
         DrawTriangles = 1,
@@ -863,21 +863,21 @@ public:
     virtual int CollisionActive()=0;
 
     /// <summary>
-    /// Draw geometry to the 3D scene. This function must be called only froma a EventRender event.
+    /// Draw geometry to RoboDK's 3D view. This function must be called only inside a \ref PluginEvent of type \ref EventRender is triggered.
     /// </summary>
-    /// <param name="drawtype">type of geometry (trianlges, lines or points)</param>
+    /// <param name="drawtype">type of geometry (triangles, lines or points)</param>
     /// <param name="vtx_pointer">Pointer to an array of vertexs in mm, with respect to the RoboDK station (absolute reference)</param>
     /// <param name="vtx_size">Size of the geometry (number of trinagles, number of vertex lines or number of points)</param>
     /// <param name="color">Color as RGBA [0,1]</param>
     /// <param name="geo_size">Size of the lines or points (ignored for surfaces)</param>
     /// <param name="geo_size">vertex normals as unitary vectors (only required to draw surfaces)</param>
-    /// <returns>true if successful, false if input is not correct or build does not support drawing in double or single precision floating point</returns>
+    /// <returns>true if successful, false if input is not correct or build does not support drawing in double or single precision floating point.</returns>
     virtual bool DrawGeometry(int drawtype, double *vtx_pointer, int vtx_size, float color[4], float geo_size=2.0, double *vtx_normals=nullptr)=0;
 
     /// <summary>
-    /// Draw geometry to the 3D scene. This function must be called only froma a EventRender event.
+    /// Draw geometry to RoboDK's 3D view. This function must be called only inside a \ref PluginEvent of type \ref EventRender is triggered. Important: In most RoboDK versions you should use the version with doubles.
     /// </summary>
-    /// <param name="drawtype">type of geometry (trianlges, lines or points)</param>
+    /// <param name="drawtype">type of geometry (triangles, lines, points or spheres)</param>
     /// <param name="vtx_pointer">Pointer to an array of vertexs in mm, with respect to the RoboDK station (absolute reference)</param>
     /// <param name="vtx_size">Size of the geometry (number of trinagles, number of vertex lines or number of points)</param>
     /// <param name="color">Color as RGBA [0,1]</param>

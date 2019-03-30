@@ -45,6 +45,9 @@ private slots:
     /// Callback to list endpoints
     void on_btnClientListEndpoints_clicked();
 
+    /// Display an OPC-UA log window
+    void on_btnLog_clicked();
+
 private:
     /// Pointer to the user interface form
     Ui::FormOpcSettings *ui;

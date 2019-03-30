@@ -656,6 +656,11 @@ public:
     /// \return
     virtual bool Collided(int *id=nullptr)=0;
 
+    /// <summary>
+    /// Check if a set of joints are valid
+    /// </summary>
+    virtual bool JointsValid(const tJoints &jnts)=0;
+
 };
 
 

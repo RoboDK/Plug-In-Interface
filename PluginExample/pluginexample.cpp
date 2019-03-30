@@ -281,7 +281,7 @@ void PluginExample::callback_robotpilot_closed(){
     RDK->ShowMessage("Closed robot pilot", false);
 }
 void PluginExample::callback_help(){
-    QDesktopServices::openUrl(QUrl("https://robodk.com/doc/CreatePlugin"));
+    QDesktopServices::openUrl(QUrl("https://robodk.com/CreatePlugin"));
 }
 
 

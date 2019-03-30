@@ -8,11 +8,12 @@ message("")
 message("")
 message("")
 message("")
-message("Useful tip that helps development: Enter RoboDK as executable and pass the argument /PLUGINSLOAD to start with all available plugins")
+message("Useful tip that helps development: Enter RoboDK as executable and pass the argument -PLUGINSLOAD to start with all available plugins")
 # Example to reload all plugins:
-# C:/RoboDK/bin/RoboDK.exe "/PLUGINSLOAD"
+# C:/RoboDK/bin/RoboDK.exe "-PLUGINSLOAD"
 # Example to load the plugin on the fly:
-# C:/RoboDK/bin/RoboDK.exe "/PLUGINLOAD=C:/RoboDK/bin/plugins/pluginexample.dll"
+# C:/RoboDK/bin/RoboDK.exe "-PLUGINLOAD=C:/RoboDK/bin/plugins/pluginexample.dll"
+# You can also select Tools-PlugIns and manually load a plugin
 #------------------------------------
 
 
@@ -32,25 +33,64 @@ QT += network   # Allows using QTcpSocket
 TARGET          = PluginExample
 
 
-# Define the location to place the plugin library
-CONFIG(debug, debug|release) {
 
-message("Using debug binaries: Make sure you start the debug version of RoboDK ( C:/RoboDK/bind/ ). ")
-message("Select Projects-Run-Executable and set to C:/RoboDK/bind/RoboDK.exe ")
-message("(send us an email at info@robodk.com to obtain debug binaries that should go to the bind directory)")
-DESTDIR  = C:/RoboDK/bind/plugins   #Default path on Windows
-#DESTDIR  = ~/RoboDK/Applications/RoboDK.app/Contents/MacOS/RoboDK # Default path on MacOS
-#DESTDIR  = ~/RoboDK/bind/RoboDK     #Default path on Linux
+#-----------------------------------------------------
+# Define the location to place the plugin library (release and/or debug binaries)
+CONFIG(release, debug|release) {
+
+    message("Using release binaries.")
+    message("Select Projects-Run-Executable and set to C:/RoboDK/bin/RoboDK.exe ")
+    win32{
+        #Default path on Windows
+        DESTDIR  = C:/RoboDK/bin/plugins
+    } else {
+    macx {
+        # Default path on MacOS
+        DESTDIR  = ~/RoboDK-Dev/Deploy/RoboDK.app/Contents/MacOS/plugins
+    } else {
+        #Default path on Linux
+        DESTDIR  = ~/RoboDK/bin/plugins
+    }
+    }
 
 } else {
 
-message("Using release binaries.")
-message("Select Projects-Run-Executable and set to C:/RoboDK/bin/RoboDK.exe ")
-DESTDIR  = C:/RoboDK/bin/plugins   #Default path on Windows
-#DESTDIR  = ~/RoboDK/Applications/RoboDK.app/Contents/MacOS/RoboDK # Default path on MacOS
-#DESTDIR  = ~/RoboDK/bin/RoboDK     #Default path on Linux
+    message("Using debug binaries: Make sure you start the debug version of RoboDK ( C:/RoboDK/bind/ ). ")
+    message("Select Projects-Run-Executable and set to C:/RoboDK/bind/RoboDK.exe ")
+    message("(send us an email at info@robodk.com to obtain debug binaries that should go to the bind directory)")
+    win32{
+        #Default path on Windows (debug)
+        DESTDIR  = C:/RoboDK/bind/plugins
+    } else {
+    macx {
+        # Default path on MacOS (debug)
+        DESTDIR  = ~/RoboDK-Dev/Deploy/RoboDK.app/Contents/MacOS/plugins
+    } else {
+        #Default path on Linux (debug)
+        DESTDIR  = ~/RoboDK/bind/plugins
+    }
+    }
 
 }
+
+
+#--------------------------
+# Add header and source files (use File->New File or Project and add your files)
+# This can be modified manually or automatically by Qt Creator
+HEADERS += \
+    pluginexample.h \
+    formrobotpilot.h
+
+SOURCES += \
+    pluginexample.cpp \
+    formrobotpilot.cpp
+
+FORMS += \
+    formrobotpilot.ui
+
+RESOURCES += \
+    resources1.qrc
+
 
 
 #--------------------------
@@ -69,24 +109,3 @@ SOURCES += \
 
 INCLUDEPATH += robodk_interface
 #--------------------------
-
-
-#--------------------------
-# Add header and source files (use File->New File or Project and add your files)
-# This can be modified manually or automatically by Qt Creator
-
-
-HEADERS += \
-    pluginexample.h \
-    formrobotpilot.h
-
-SOURCES += \
-    pluginexample.cpp \
-    formrobotpilot.cpp
-
-FORMS += \
-    formrobotpilot.ui
-
-RESOURCES += \
-    resources1.qrc
-

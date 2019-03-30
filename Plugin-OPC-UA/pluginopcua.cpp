@@ -66,7 +66,8 @@ QString PluginOPCUA::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *
 
     // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
     action_StartServer = new QAction(iconOnOff, tr("Start OPC-UA Server"));
-    action_StartClient = new QAction(iconOnOff, tr("Start OPC-UA Client"));
+    //action_StartClient = new QAction(iconOnOff, tr("Start OPC-UA Client"));
+    action_StartClient = new QAction(tr("Start OPC-UA Client"));
     action_OpcSettings = new QAction(QIcon(":/resources/settings.png"), tr("OPC-UA Settings"));
     action_OpcLog = new QAction(QIcon(":/resources/settings.png"), tr("OPC-UA Log"));
     action_StartServer->setCheckable(true);
@@ -102,7 +103,7 @@ QString PluginOPCUA::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *
     // Load INI settings
     QSettings params(QSettings::IniFormat, QSettings::UserScope, "RoboDK-PluginsS", PluginName());
     // Retrieve server related settings
-    Server->Port =  params.value("ServerPort", Server->Port).toInt();
+    Server->Port = params.value("ServerPort", Server->Port).toInt();
     Server->AutoStart = params.value("ServerAutoStart", Server->AutoStart).toBool();
     if (Server->AutoStart){
         // This will emit the server callback start signal
@@ -173,7 +174,7 @@ void PluginOPCUA::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 
     // Add a new button to the toolbar
     toolbarOpc->addAction(action_StartServer);
-    toolbarOpc->addAction(action_StartClient);
+    //toolbarOpc->addAction(action_StartClient);
     toolbarOpc->addAction(action_OpcSettings);
 }
 

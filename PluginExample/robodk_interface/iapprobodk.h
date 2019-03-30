@@ -91,19 +91,19 @@
 * Requirements to make RoboDK Plug-Ins work:
 * - It is required to install RoboDK (v3.5.4 or later): https://robodk.com/download
 * - Make sure you properly run your plugin using the following version of Qt:
-*   - Qt version 5.11.2 for windows. Make sure to use Qt built for MSVC2017 on Windows.
-*   - Qt version 5.10 on Mac.
-*   - Qt version 5.10 on Linux.
+*   - Qt version 5.11.2 on Windows. Make sure to use Qt built for MSVC2017.
+*   - Qt version 5.12 on Mac.
+*   - Qt version 5.12 on Linux.
 * - It is possible to run in \ref LinkDebug debug mode on Windows.
 *
 * \image html qttoolkit.png width=800
 *
 * - Place your plugin files in the folder: C:/RoboDK/bin/plugins/ (DLL files). This is set by default in the PluginExample.pro file (as shown in the following image)
-* - Start RoboDK (<strong>C:/RoboDK/bin/RoboDK.exe</strong>) and pass the command line argument: <strong>/PLUGINSLOAD</strong> as shown in the following image.
-*   - Alternatively, you can pass "/PLUGINLOAD=path-to-your-plugin.dll" if the DLL is not placed in the default path.
+* - Start RoboDK (<strong>C:/RoboDK/bin/RoboDK.exe</strong>) and pass the command line argument: <strong>-PLUGINSLOAD</strong> as shown in the following image.
+*   - Alternatively, you can pass the argument "-PLUGINLOAD=path-to-your-plugin.dll" if the DLL is not placed in the default path. The value can be the path to the library, the name of the file in the plugins folder or the name of the plugin (\ref PluginName).
 *   - You can also start RoboDK using the BAT file: C:/RoboDK/RoboDK-Allow-Plugins.bat. The example plugins will be displayed.
-*   - Future RoboDK versions will load plugins located in C:/RoboDK/bin/plugins automatically
-* - For development purposes, make sure to start the plugin with RoboDK and pass the /PLUGINSLOAD argument as shown in the following image.
+*   - Select Tools-Plug-Ins for more options. Future RoboDK versions of RoboDK will load plugins located in C:/RoboDK/bin/plugins automatically
+* - For development purposes, make sure to start the plugin with RoboDK and pass the -PLUGINSLOAD argument as shown in the following image.
 * <br>
 * Tip: Select Ctrl+Alt+Shift+I to load the RoboDK Plug-In manager. This allows you to select a specific plugin to load. Alternatively, select: Tools-Options-Other-Plug-In settings.
 *
@@ -211,19 +211,21 @@ public:
 
         /// An item has been added or deleted in the station or the active station has changed. This event is usually followed by a EventMoved and EventRender event.
         /// If we added a new item (for example, a reference frame) it is very likely that an EventMoved will follow with the updated position of the newly added item(s)
-        /// This event is also triggered when we change the active station and a new station gains focus (IRoboDK::getActiveStation returns the station that was just opened). In this case we can load station-specific settings using IRoboDK::getParam or IRoboDK::getData.
         EventChanged=3,
+
+        /// This event is triggered when we change the active station and a new station gains focus (IRoboDK::getActiveStation returns the station that was just opened). In this case we can load station-specific settings using IRoboDK::getParam or IRoboDK::getData.
+        EventChangedStation=4,
 
         /// The user requested to save the project and the RDK file will be saved to disk. It is recommended to save all station-specific settings at this moment.
         /// At this momment you can save station-specific parameters using \ref IRoboDK::setParam or \ref IRoboDK::setData
-        EventAbout2Save=4,
+        EventAbout2Save=5,
 
         /// The current RoboDK station is about to loose focus because the user requested to open a new station (or just changed the open station). It is recommended to save session/station-specific settings at this moment, if any.
-        EventAbout2ChangeStation=5,
+        EventAbout2ChangeStation=6,
 
         /// The current RoboDK station (RDK file) is about to be closed. Items in the tree will be deleted and become invalid pointers shortly after this event.
         /// The RDK file may be saved if the user accepted to save changes and the corresponding EventAbout2Save event will be triggered.
-        EventAbout2CloseStation=6
+        EventAbout2CloseStation=7
     };
 
 

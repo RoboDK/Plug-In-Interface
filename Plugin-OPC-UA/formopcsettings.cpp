@@ -80,3 +80,7 @@ void FormOpcSettings::on_btnClientListEndpoints_clicked(){
     msg.setText(msg_txt);
     msg.exec();
 }
+
+void FormOpcSettings::on_btnLog_clicked(){
+    pPlugin->LogShow();
+}

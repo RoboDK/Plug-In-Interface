@@ -12,7 +12,7 @@ message("Useful tip that helps development: Enter RoboDK as executable and pass 
 # Example to reload all plugins:
 # C:/RoboDK/bin/RoboDK.exe "-PLUGINSLOAD"
 # Example to load the plugin on the fly:
-# C:/RoboDK/bin/RoboDK.exe "-PLUGINLOAD=C:/RoboDK/bin/plugins/pluginexample.dll"
+# C:/RoboDK/bin/RoboDK.exe "-PLUGINLOAD=C:/RoboDK/bin/plugins/RobotPilot.dll"
 # You can also select Tools-PlugIns and manually load a plugin
 #------------------------------------
 
@@ -30,7 +30,7 @@ QT += widgets
 QT += network   # Allows using QTcpSocket
 
 # Define your plugin name (name of the DLL file generated)
-TARGET          = OPC-UA
+TARGET          = RobotPilot
 
 
 
@@ -73,28 +73,21 @@ CONFIG(release, debug|release) {
 
 }
 
+
 #--------------------------
 # Add header and source files (use File->New File or Project and add your files)
 # This can be modified manually or automatically by Qt Creator
 HEADERS += \
-    pluginopcua.h \
-    opcua_server.h \
-    opcua_client.h \
-    formopcsettings.h \
-    opcua_tools.h
+    pluginrobotpilot.h \
+    formrobotpilot.h
 
 SOURCES += \
-    pluginopcua.cpp \
-    opcua_server.cpp \
-    opcua_client.cpp \
-    formopcsettings.cpp \
-    opcua_tools.cpp
-
-RESOURCES += \
-    resources1.qrc
+    pluginrobotpilot.cpp \
+    formrobotpilot.cpp
 
 FORMS += \
-    formopcsettings.ui
+    formrobotpilot.ui
+
 
 
 
@@ -113,12 +106,4 @@ SOURCES += \
     robodk_interface/robodktypes.cpp
 
 INCLUDEPATH += robodk_interface
-#--------------------------
-
-#--------------------------
-# Header and source files required for OPC UA
-HEADERS += opcua/open62541.h
-SOURCES += opcua/open62541.c
-#LIBS += -lws2_32
-INCLUDEPATH += opcua
 #--------------------------
