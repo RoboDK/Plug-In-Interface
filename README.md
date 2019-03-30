@@ -7,7 +7,7 @@ RoboDK Plug-In interface documentation reference: https://robodk.com/doc/en/Plug
 
 The RoboDK Plug-In interface is available in the [robodk_interface](./robodk_interface/) folder. However, it is recommended to use one of the sample projects in this repository to get started (such as the [PluginExample](./PluginExample/)).
 
-**Important:** This Plug-In Interface and the [RoboDK API](https://github.com/RoboDK/RoboDK-API) are 2 different projects. This Plug-In Interface requires advanced programming skills.
+**Important:** This Plug-In Interface and the [RoboDK API](https://github.com/RoboDK/RoboDK-API) are 2 different projects. This Plug-In Interface requires advanced programming skills in C++.
 
 ![](plugin-example.png)
 
