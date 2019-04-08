@@ -76,7 +76,7 @@ Requirements to make RoboDK Plug-Ins work:
   - Qt version 5.12 on Linux.
  * It is possible to run in \ref LinkDebug debug mode on Windows.
 
-\image html qttoolkit.png width=800
+![](qttoolkit.png)
 
 Qt Tips
 -------------
