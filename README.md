@@ -60,7 +60,7 @@ Requirements
 -------------
 
 Each RoboDK Plug-In must be developed using the Qt Creator and follow Qt's project guidelines.
-It is recommended to use the \ref PluginExample project to get started with your new RoboDK Plug-In (double click PluginExample.pro to open it with Qt Creator).
+It is recommended to use the [PluginExample](./PluginExample/) project to get started with your new RoboDK Plug-In (double click PluginExample.pro to open it with Qt Creator).
 
 RoboDK must be installed to develop Plug-Ins. The free version of RoboDK is enough to develop a Plug-In as a proof of concept.
 
@@ -74,9 +74,9 @@ Requirements to make RoboDK Plug-Ins work:
   - Qt version 5.11.2 on Windows. Make sure to use Qt built for MSVC2017.
   - Qt version 5.12 on Mac.
   - Qt version 5.12 on Linux.
- * It is possible to run in \ref LinkDebug debug mode on Windows.
+ * It is possible to run in debug mode on Windows. Contact us for more information.
 
-![](qttoolkit.png)
+![](qtrun.png)
 
 Qt Tips
 -------------
