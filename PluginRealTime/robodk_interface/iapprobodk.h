@@ -7,8 +7,10 @@
 * Therefore, when the RoboDK API is used inside the Plugin Interface (using IItem and IRoboDK) the speed is faster than using the default API \ref LinkTiming.
 * However, all RoboDK Plug-In applications must exist within RoboDK's environment.
 *
-* Some RoboDK Example plugins can be downloaded here:
-* - https://robodk.com/doc/en/PlugIns/PluginExamples.zip
+* Some RoboDK Example plugins are available here:
+* - https://github.com/RoboDK/Plug-In-Interface
+*
+* Each example includes the *robodk_interface* folder. This folder is required by every plug-in and defines the interface to RoboDK.
 *
 * These examples include a customized robot panel applying robot forward and inverse kinematics, a real-time example, a plugin simulating the gravity and an OPC-UA interface based on [Open62541](https://open62541.org/) (Server and Client examples).
 *
@@ -24,6 +26,11 @@
 * Contrary to the standard API, the Plug-In interface allows you to interact with RoboDK's main window and customize the appearance of RoboDK through the IAppRoboDK class. The toolbar, the menu bar and windows can be customized by using the IAppRoboDK class.
 *
 * \image html plugin-example.png
+*
+* You can load one of the sample plug-ins by selecting:
+* - Tools - Plug-Ins
+* 
+* \image html plugin-load.png width=600
 *
 * \subsection LinkPluginRoboDKAPI RoboDK API inside a Plug-In
 *
@@ -105,10 +112,12 @@
 *   - Select Tools-Plug-Ins for more options. Future RoboDK versions of RoboDK will load plugins located in C:/RoboDK/bin/plugins automatically
 * - For development purposes, make sure to start the plugin with RoboDK and pass the -PLUGINSLOAD argument as shown in the following image.
 * <br>
-* Tip: Select Ctrl+Alt+Shift+I to load the RoboDK Plug-In manager. This allows you to select a specific plugin to load. Alternatively, select: Tools-Options-Other-Plug-In settings.
+* You can load one of the sample plug-ins by selecting:
+* - Tools - Plug-Ins
+*
+* The default location for RoboDK plugins is C:/RoboDK/bin/plugins
 *
 * \image html qtrun.png width=800
-*
 *
 *
 * \section LinkDebug Run in Debug mode
@@ -116,7 +125,7 @@
 * RoboDK debug binaries are not provided by default.
 *
 * To properly run your plugin in debug mode you should use the RoboDK debug binary files:
-* - Contact us at info@robodk.com to get the debug version of RoboDK (<strong>bind</strong> folder).
+* - Contact us to get the debug version of RoboDK (<strong>bind</strong> folder).
 * - Unzip the bind folder in <strong>C:/RoboDK/bind/</strong>.
 * - Select Projects-Run-Run Settings and set Executable to <strong>C:/RoboDK/bind/RoboDK.exe</strong> (as shown in the following image, don't forget the <strong>d</strong>).
 *

@@ -30,7 +30,7 @@ QString PluginExample::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar
     StatusBar = statusbar;
 
     // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
-    action_robotpilot = new QAction(tr("Robot Pilot Form"));
+    action_robotpilot = new QAction(tr("Robot Pilot"));
 
     // Make sure to connect the action to your callback (slot)
     connect(action_robotpilot, SIGNAL(triggered()), this, SLOT(callback_robotpilot()), Qt::QueuedConnection);
@@ -136,7 +136,7 @@ void PluginExample::PluginEvent(TypeEvent event_type){
         //    STATION = RDK->getActiveStation();
         //    LoadSettings(); // will select the robot if there are settings.
         //}
-        qDebug() << "==== EventChanged ====";
+        //qDebug() << "==== EventChanged ====";
         if (form_robotpilot != nullptr){
             form_robotpilot->SelectRobot();
         }
@@ -158,8 +158,8 @@ void PluginExample::PluginEvent(TypeEvent event_type){
         //SaveSettings();
         //ROBOT = nullptr;
         break;
-    default:
-        qDebug() << "Unknown/future event: " << event_type;
+    //default:
+        //qDebug() << "Unknown/future event: " << event_type;
 
     }
 }
