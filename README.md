@@ -23,7 +23,7 @@ Double click the .pro file in any of the sample projects to open the project wit
 Make sure to follow the installation requirements section to install Qt as a C++ development environment.
 
 You can load one of the sample plug-ins by selecting:
- * Tools-Plug-In
+ * Tools - Plug-Ins
  
 <img src="plugin-load.png" width="600">
 
