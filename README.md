@@ -25,8 +25,9 @@ Make sure to follow the installation requirements section to install Qt as a C++
 You can load one of the sample plug-ins by selecting:
  * Tools-Plug-In
  
-The default location for RoboDK plugins is C:/RoboDK/bin/plugins
+![](plugin-load.png)
 
+The default location for RoboDK plugins is C:/RoboDK/bin/plugins
 
 Plug-In Interface vs. RoboDK API
 -------------
@@ -51,7 +52,7 @@ The PluginExample project shows how to implement a basic plugin. Among other thi
 By selecting the "Plugin Speed Information" button you'll obtain the timing statistics.
 ![](sampleoutput.png)
 
-For example, forward and inverse kinematics are usually under 2 micro seconds and 10 micro seconds respectively (1 micro second = 0.000001 seconds).
+For example, forward and inverse kinematics are usually under 2 microseconds and 10 microseconds respectively (1 microsecond = 0.000001 seconds).
 
 
 
