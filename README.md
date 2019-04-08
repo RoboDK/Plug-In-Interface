@@ -25,7 +25,7 @@ Make sure to follow the installation requirements section to install Qt as a C++
 You can load one of the sample plug-ins by selecting:
  * Tools-Plug-In
  
-![](plugin-load.png)
+<img src="plugin-load.png" width="600">
 
 The default location for RoboDK plugins is C:/RoboDK/bin/plugins
 
