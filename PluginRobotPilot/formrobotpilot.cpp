@@ -17,8 +17,9 @@ FormRobotPilot::FormRobotPilot(RoboDK *rdk, QWidget *parent) : QWidget(parent),
     // Make this form as a separate window
     setWindowFlags(windowFlags() | Qt::Window);
 
-    // Use the Cartesian Tool movement by default
-    ui->radCartesianTool->click();
+    // Use the Cartesian Tool or Reference movement by default
+    //ui->radCartesianTool->click();
+    ui->radCartesianReference->click();
 
     // Try to select the robot (updates the robot label)
     SelectRobot();
@@ -126,6 +127,10 @@ void FormRobotPilot::IncrementalMove(int id, double sense){
     bool is_joint_move = ui->radJoints->isChecked();
     if (is_joint_move){
         tJoints joints = Robot->Joints();
+        if (!joints.Valid()){
+            RDK->ShowMessage(tr("Invalid robot joints or unable retrieve joints from connected robot"), false);
+            return;
+        }
         if (id >= joints.Length()){
             qDebug() << "Internal problem: Invalid joint ID";
             return;
