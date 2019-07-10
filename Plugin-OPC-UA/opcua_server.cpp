@@ -15,6 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <QFile>
+
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS //disable fopen deprecation warning in msvs

@@ -3,11 +3,11 @@
 # https://robodk.com/CreatePlugin
 
 # Clear some space in the General Messages window
-message("")
-message("")
-message("")
-message("")
-message("")
+message(".")
+message(".")
+message(".")
+message(".")
+message(".")
 message("Useful tip that helps development: Enter RoboDK as executable and pass the argument -PLUGINSLOAD to start with all available plugins")
 # Example to reload all plugins:
 # C:/RoboDK/bin/RoboDK.exe "-PLUGINSLOAD"
@@ -36,6 +36,11 @@ TARGET          = RobotPilot
 
 #-----------------------------------------------------
 # Define the location to place the plugin library (release and/or debug binaries)
+exists( "$$PWD/../../destdir_rdk_plugins.pri" ) {
+include("$$PWD/../../destdir_rdk_plugins.pri")
+DESTDIR = $$DESTDIR_RDK_PLUGINS
+
+} else {
 CONFIG(release, debug|release) {
 
     message("Using release binaries.")
@@ -72,7 +77,7 @@ CONFIG(release, debug|release) {
     }
 
 }
-
+}
 
 #--------------------------
 # Add header and source files (use File->New File or Project and add your files)

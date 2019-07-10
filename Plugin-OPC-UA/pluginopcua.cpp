@@ -16,6 +16,7 @@
 #include <QIcon>
 #include <QDesktopServices>
 #include <QSettings>
+#include <QDateTime>
 
 
 // only for Sleep()
@@ -43,7 +44,8 @@ QString PluginOPCUA::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *
 
     // Create empty log saved ini settings
     Log.clear();
-    Log.append(tr("OPC-UA log started on ") + QDateTime::currentDateTime().toString(Qt::DateFormat::ISODateWithMs));
+    //Log.append(tr("OPC-UA log started on ") + QDateTime::currentDateTime().toString(Qt::DateFormat::ISODateWithMs));
+    Log.append(tr("OPC-UA log started on ") + QDateTime::currentDateTime().toString(Qt::DateFormat::ISODate));
 
     //--------------------
     LogWindow = nullptr;
@@ -277,7 +279,8 @@ void PluginOPCUA::callback_OpcSettingsClosed(){
 //--------------------------------------------------------------
 // Operating with the log
 void PluginOPCUA::LogAdd(const QString &msgin){
-    QString strtime(QDateTime::currentDateTime().toString(Qt::DateFormat::ISODateWithMs));
+    //QString strtime(QDateTime::currentDateTime().toString(Qt::DateFormat::ISODateWithMs));
+    QString strtime(QDateTime::currentDateTime().toString(Qt::DateFormat::ISODate));
     QString msg(strtime + ":" + msgin);
     qDebug() << msg;
 

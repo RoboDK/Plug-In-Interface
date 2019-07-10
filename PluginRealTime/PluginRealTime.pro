@@ -3,11 +3,11 @@
 # https://robodk.com/CreatePlugin
 
 # Note: You can load a plugin while RoboDK is running
-message("")
-message("")
-message("")
-message("")
-message("")
+message(".")
+message(".")
+message(".")
+message(".")
+message(".")
 message("Useful tip that helps debugging: Enter RoboDK as executable and pass the DLL of your plugin using -PLUGINLOAD=path-to-dll")
 # Example to reload all plugins:
 # C:/RoboDK/bin/RoboDK.exe "-PLUGINSLOAD"
@@ -35,6 +35,10 @@ TARGET          = PluginRealTime
 
 #-----------------------------------------------------
 # Define the location to place the plugin library (release and/or debug binaries)
+exists( "$$PWD/../../destdir_rdk_plugins.pri" ) {
+include("$$PWD/../../destdir_rdk_plugins.pri")
+DESTDIR = $$DESTDIR_RDK_PLUGINS
+} else {
 CONFIG(release, debug|release) {
 
     message("Using release binaries.")
@@ -71,7 +75,7 @@ CONFIG(release, debug|release) {
     }
 
 }
-
+}
 
 #--------------------------
 # Add header and source files (use File->New File or Project and add your files)

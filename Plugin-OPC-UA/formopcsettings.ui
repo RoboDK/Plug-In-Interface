@@ -51,7 +51,7 @@
       <item>
        <widget class="QLabel" name="lblStatusServer">
         <property name="text">
-         <string>Status...</string>
+         <string>Status</string>
         </property>
        </widget>
       </item>

@@ -478,7 +478,7 @@ public:
 
 
     /// <summary>
-    /// Sets if the program will be run in simulation mode or on the real robot.
+    /// Sets if the program will be run in simulation mode or on the real robot (same flag obtained when right clicking a program and checking/unchecking the "Run on robot" option).
     /// Use: "PROGRAM_RUN_ON_SIMULATOR" to set the program to run on the simulator only or "PROGRAM_RUN_ON_ROBOT" to force the program to run on the robot.
     /// </summary>
     /// <returns>number of instructions that can be executed</returns>
@@ -659,7 +659,26 @@ public:
     /// <summary>
     /// Check if a set of joints are valid
     /// </summary>
-    virtual bool JointsValid(const tJoints &jnts)=0;
+    virtual bool JointsValid(const tJoints &jnts)=0;    
+
+    /// <summary>
+    /// Get if the program will be run in simulation mode or on the real robot (same flag obtained when right clicking a program and checking/unchecking the "Run on robot" option).
+    /// Use: "PROGRAM_RUN_ON_SIMULATOR" to set the program to run on the simulator only or "PROGRAM_RUN_ON_ROBOT" to force the program to run on the robot.
+    /// </summary>
+    /// <returns>number of instructions that can be executed</returns>
+    virtual int RunType()=0;
+
+    /// <summary>
+    /// Scale an object given a per-axis scale. Optionally provide a transformation matrix before and after the scale takes place. If the transformation after scaling is not provided it will use the inverse transformation of the pre-scaled pose automatically.
+    /// </summary>
+    /// <param name="ins_id"></param>
+    virtual bool Scale(const double scalexyz[3], const Mat *tr_pre_scale, const Mat *tr_post_scale=nullptr)=0;
+
+    /// <summary>
+    /// Returns the target item at the specified program instruction. It returns a null pointer if the instruction does not have a target or is not a movement instruction.
+    /// </summary>
+    /// <param name="ins_id"></param>
+    virtual Item InstructionTargetAt(int ins_id)=0;
 
 };
 
