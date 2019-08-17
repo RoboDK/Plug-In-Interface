@@ -482,7 +482,7 @@ public:
     /// <param name="shapeOverride">Set to true to replace any other existing geometry</param>
     /// <param name="color">Optionally specify the color as RGBA [0-1]</param>
     /// <returns>Added or modified item</returns>
-    virtual Item AddShape(tMatrix2D *trianglePoints, Item addTo = nullptr, bool shapeOverride = false, Color *color = nullptr)=0;
+    virtual Item AddShape(const tMatrix2D *trianglePoints, Item addTo = nullptr, bool shapeOverride = false, Color *color = nullptr)=0;
 
 
     /// <summary>
@@ -493,7 +493,7 @@ public:
     /// <param name="add_to_ref">If True, the curve will be added as part of the object in the RoboDK item tree (a reference object must be provided)</param>
     /// <param name="projection_type">Type of projection. For example: PROJECTION_ALONG_NORMAL_RECALC will project along the point normal and recalculate the normal vector on the surface projected.</param>
     /// <returns>added object/curve (null if failed)</returns>
-    virtual Item AddCurve(tMatrix2D *curvePoints, Item referenceObject = nullptr,bool addToRef = false,int ProjectionType = PROJECTION_ALONG_NORMAL_RECALC)=0;
+    virtual Item AddCurve(const tMatrix2D *curvePoints, Item referenceObject = nullptr,bool addToRef = false,int ProjectionType = PROJECTION_ALONG_NORMAL_RECALC)=0;
 
 
     /// <summary>
@@ -504,16 +504,16 @@ public:
     /// <param name="add_to_ref">If True, the points will be added as part of the object in the RoboDK item tree (a reference object must be provided)</param>
     /// <param name="projection_type">Type of projection.Use the PROJECTION_* flags.</param>
     /// <returns>added object/shape (0 if failed)</returns>
-    virtual Item AddPoints(tMatrix2D *points, Item referenceObject = nullptr, bool addToRef = false, int ProjectionType =  PROJECTION_ALONG_NORMAL_RECALC)=0;
+    virtual Item AddPoints(const tMatrix2D *points, Item referenceObject = nullptr, bool addToRef = false, int ProjectionType =  PROJECTION_ALONG_NORMAL_RECALC)=0;
 
     /// <summary>
-    /// Projects a point given its coordinates. The provided points must be a list of [XYZ] coordinates. Optionally, a vertex normal can be provided [XYZijk].
+    /// Projects a list of points given its coordinates. The provided points must be a list of [XYZ] coordinates. Optionally, a vertex normal can be provided [XYZijk].
     /// </summary>
-    /// <param name="points">Matrix 3xN or 6xN: list of points to project.</param>
+    /// <param name="points">Matrix 3xN or 6xN: list of points to project. This matrix will contain the modified points after the projection.</param>
     /// <param name="object_project">Object to project.</param>
     /// <param name="projection_type">Type of projection. For example: PROJECTION_ALONG_NORMAL_RECALC will project along the point normal and recalculate the normal vector on the surface projected.</param>
-    /// <returns></returns>
-    virtual Mat ProjectPoints(tMatrix2D *points, Item objectProject, int ProjectionType = PROJECTION_ALONG_NORMAL_RECALC)=0;
+    /// <returns>True if projection succeeded, False if input is not correct</returns>
+    virtual bool ProjectPoints(tMatrix2D *points, Item objectProject, int ProjectionType = PROJECTION_ALONG_NORMAL_RECALC)=0;
 
     /// <summary>
     /// Close the current station without asking to save.

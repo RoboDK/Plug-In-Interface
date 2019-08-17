@@ -98,6 +98,7 @@ public:
 
     /// <summary>
     /// Returns a list of the item childs that are attached to the provided item.
+    /// Exceptionally, if Childs is called on a program it will return the list of subprograms called by this program.
     /// </summary>
     /// <returns>item x n: list of child items</returns>
     virtual QList<Item> Childs()=0;
