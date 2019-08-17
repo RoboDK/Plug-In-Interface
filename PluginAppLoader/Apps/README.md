@@ -1,19 +1,21 @@
 AppLoader plugin for RoboDK
 ===========================
 
-The App loader plugin allows you to easily load scripts and executable files as if they were plugins in RoboDK software. 
+The App loader plugin allows you to easily load scripts and executable files as if they were plug-ins in RoboDK software. 
 This plugin allows integrating scripts as part of the RoboDK user interface and easily customize RoboDK for customized offline programming and simulation purposes. 
-Furthermore, you can easily distribute apps as packaged files.
+Adding scripts to an app will add buttons in the menu and the toolbar automatically. A settings file allows you to easily customize the appearance of a specific set of buttons/actions.
 
-The AppLoader plugin is available in RoboDK using the default installer. However, the plugin is disabled by default. 
+Once you complete developing your app you can easily distribute your app or set of apps as a package file.
+
+The AppLoader plugin is available in RoboDK by default. However, the plugin is disabled by default. 
 To load the AppLoader plugin:
- * Select Tools->Plug-Ins
- * Select Load Plug-Ins
- * Select AppLoader
+* Select Tools->Plug-Ins
+* Select Load Plug-Ins
+* Select AppLoader
  
-[Sample Apps Loaded](./doc/Apps-Loaded.png)
+![Sample Apps Loaded](./doc/Apps-Loaded.png)
  
-Each App is a subfolder inside the /RoboDK/Apps/ folder. You can add or remove apps. You can also add or remove Python scripts inside each subfolder (App). Scripts that start with an underscore (_) are ignored.
+Each App is a subfolder inside the /RoboDK/Apps/ folder. You can add or remove apps. You can also add or remove Python scripts inside each subfolder to add or remove actions/buttons. Scripts that start with an underscore (_) are ignored.
 
 Each App will have its own entry in the main menu and its own toolbar. Each script inside an app will create a new button in the menu and a new button in the toolbar.
 
@@ -28,7 +30,9 @@ This plugin is provided with RoboDK by default. You don't need to change it or r
 Example
 =======
 
-The following tree shows the sample tree structure inside the Apps folder:
+The following tree shows the sample tree structure inside the Apps folder. The sample apps provided are:
+* Record: Tools to record a video of the screen
+* SetStyle: Tools to change the appearance of objects and tools (change the color and display of surfaces, points and curves)
 
 ``` bash
 C:/RoboDK/
@@ -99,32 +103,32 @@ The Settings.ini file allows you to customize the priority of the App, the size 
 
 The top section (General) of the INI file allows you to customize the look. For example, the Recorder general App settings look like this:
 [General]
- *MenuName=Recorder - Name displayed in the main menu
- *MenuPriority=999 - Lower shows first compared to other apps
- *ToolbarArea=2 - Location in the toolbar, it can be: left (1), right (2), top (4), bottom (8) or default (-1)
- *ToolbarSizeRatio=2 - Size of the toolbar as a ratio compared to the default size (2.0 means twice the size of the default size)
- *RunCommands=@Invalid() - String with commands to execute when the toolbar is loaded
- *Enabled=true - Set to false to disable this app (not show it)
+* MenuName=Recorder - Name displayed in the main menu
+* MenuPriority=999 - Lower shows first compared to other apps
+* ToolbarArea=2 - Location in the toolbar, it can be: left (1), right (2), top (4), bottom (8) or default (-1)
+* ToolbarSizeRatio=2 - Size of the toolbar as a ratio compared to the default size (2.0 means twice the size of the default size)
+* RunCommands=@Invalid() - String with commands to execute when the toolbar is loaded
+* Enabled=true - Set to false to disable this app (not show it)
 
 Each action will also have some settings to customize the appearance. For example, the Record action (script Record.py) looks like this:
 [Record]
- *DisplayName=Record - Name displayed in the main menu
- *Description=Start/stop screen recording (3D view) - Description to display on hover
- *Checkable=true - Set to true if we want this to be checkable
- *AddToToolbar=true - Set to false to not show this action in the toolbar
- *Priority=1 - Set the priority within the same app (lower shows first)
- *TypeOnContextMenu=-1 - Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API)
- *Visible=true - Set to false to disable this action (not show it)
- *Shortcut= - Set a keyboard shortcut to trigger this action
+* DisplayName=Record - Name displayed in the main menu
+* Description=Start/stop screen recording (3D view) - Description to display on hover
+* Checkable=true - Set to true if we want this to be checkable
+* AddToToolbar=true - Set to false to not show this action in the toolbar
+* Priority=1 - Set the priority within the same app (lower shows first)
+* TypeOnContextMenu=-1 - Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API)
+* Visible=true - Set to false to disable this action (not show it)
+* Shortcut= - Set a keyboard shortcut to trigger this action
 
  
 Checkable actions
 =================
 
 When an action is checkable, the corresponding script will be executed when the action is checked and also when it is unchecked. A checkable action also include the following behavior:
- *A station parameter with the corresponding script name (name of the script file) will be set to 1 or 0 if the action is checked or uncheck respectively.
- *The argument "Checked" or "Unchecked" will be passed as argument through the process.  
- *An icon can be provided for the checked state by adding the Checked keyword (as shown with the RecordChecked.svg example) 
+* A station parameter with the corresponding script name (name of the script file) will be set to 1 or 0 if the action is checked or uncheck respectively.
+* The argument "Checked" or "Unchecked" will be passed as argument through the process.  
+* An icon can be provided for the checked state by adding the Checked keyword (as shown with the RecordChecked.svg example) 
 
 
 
