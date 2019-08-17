@@ -75,7 +75,7 @@ C:/RoboDK/
 
 The sample tree structure will create 2 menus and 2 toolbars (one for each subfolder). Each each script file in a subfolder will show as a button (action).
 
-[Sample Apps Menu](./doc/Apps-Menu.png)
+![Sample Apps Menu](./doc/Apps-Menu.png)
 
 
 Package
@@ -87,7 +87,7 @@ Double clicking an rdkp file provokes RoboDK to load the AppLoader plugin automa
 
 The script PackageCreate.py will pack the contents in the Apps folder and save it as Package.apploader.rdkp automatically. This file is then ready to distribute.
 
-[Create a package](./doc/PackageCreate.png)
+![Create a package](./doc/PackageCreate.png)
 
 Icons
 =====
@@ -106,7 +106,7 @@ The top section (General) of the INI file allows you to customize the look. For 
 * MenuName=Recorder - Name displayed in the main menu
 * MenuPriority=999 - Lower shows first compared to other apps
 * ToolbarArea=2 - Location in the toolbar, it can be: left (1), right (2), top (4), bottom (8) or default (-1)
-* ToolbarSizeRatio=2 - Size of the toolbar as a ratio compared to the default size (2.0 means twice the size of the default size)
+* ToolbarSizeRatio=2 - Size of the toolbar as a ratio with respect to the default size (2 means twice the size of the default size)
 * RunCommands=@Invalid() - String with commands to execute when the toolbar is loaded
 * Enabled=true - Set to false to disable this app (not show it)
 
