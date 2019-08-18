@@ -26,6 +26,11 @@ If the INI file does not exist it will be automatically generated the first time
 
 This plugin is provided with RoboDK by default. You don't need to change it or rebuild it to create and distribute your Apps in RoboDK. This document provides general information about how apps work in RoboDK and how you can easily customize RoboDK for your specific simulation and offline programing needs using this plugin.
 
+More information about the RoboDK API for Python here:
+* https://github.com/RoboDK/RoboDK-API/tree/master/Python
+* https://pypi.org/project/robodk/
+* https://robodk.com/doc/en/RoboDK-API.html#PythonAPI
+* https://robodk.com/doc/en/PythonAPI/robolink.html
 
 Example
 =======

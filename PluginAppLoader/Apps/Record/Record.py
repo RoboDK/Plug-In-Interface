@@ -1,19 +1,8 @@
+# This script is part of the app "Record" and allows saving a RoboDK simulation as an AVI video file
+
 # This action is "checkable" as defined in the INI settings. 
 # Therefore, we can use the Record station parameter to detect if the button is checked or unchecked.
 # This script will be triggered when the button is clicked (checked or unchecked)
-
-
-snapshot_style = "Snapshot"
-
-# Other snapshot styles are not recommended, otherwise it will create a lot of flickering.
-# Instead, change the appearance of RoboDK in the menu Tools-Options-Display
-#snapshot_style = "SnapshotWhite"
-#snapshot_style = "SnapshotWhiteNoText"
-#snapshot_style = "SnapshotNoTextNoFrames"
-
-frames_per_second = 30
-
-video_extension = "avi"
 
 import robodk   # import the robodk library (robotics toolbox)
 from robolink import *    # API to communicate with RoboDK
@@ -28,16 +17,33 @@ import shutil
 import tkinter
 from tkinter import filedialog
 
+# Default screenshot style:
+snapshot_style = "Snapshot"
+
+# Other snapshot styles are not recommended, otherwise it will create a lot of flickering.
+# Instead, change the appearance of RoboDK in the menu Tools-Options-Display
+#snapshot_style = "SnapshotWhite"
+#snapshot_style = "SnapshotWhiteNoText"
+#snapshot_style = "SnapshotNoTextNoFrames"
+
+# Define the frames per second:
+frames_per_second = 30
+
+# Define the video extension (you may need to change the coded)
+video_extension = "avi"
+
+# Choose the codec (mp4v, XVID or DIVX)
+#fourcc = cv2.VideoWriter_fourcc(*'XVID') # low quality
+fourcc = cv2.VideoWriter_fourcc(*'DIVX') # good quality
+
+
+#-------------------------------------------------------------------
 RDK = Robolink()
 
-item2station_pose = eye(4)
-last_item = None
-
-
+# Define a temporary frame image and video files
 frame_path = tempfile.gettempdir() + '/RoboDK_Frame.png'
 video_path = tempfile.gettempdir() + '/RoboDK_Video'
 file_video_temp = video_path
-
 
 # Get the file name of this file/script
 filename = getFileName(__file__)
@@ -47,9 +53,9 @@ infinite_loop = False
 if RDK.getParam(filename) is None:
     infinite_loop = True
 
+# Run until the station parameter AttachCamera is set to 0
 video = None
 render_time_last = 0
-# Run until the station parameter AttachCamera is set to 0
 while infinite_loop or RDK.getParam(filename) == 1:
     # Get the last time an image was rendered in ms (ms since epoch)
     render_time = int(RDK.Command("LastRender"))
@@ -63,28 +69,25 @@ while infinite_loop or RDK.getParam(filename) == 1:
             RDK.ShowMessage("Problems retrieving the RoboDK image buffer: " + frame_path, False)
             break
             
-
+    # Load the frame image using OpenCV
     frame = cv2.imread(frame_path)
     if video is None:
-        # Define the codec and create VideoWriter object 
-        
-        # Choose the codec (mp4v, XVID or DIVX)
-        #fourcc = cv2.VideoWriter_fourcc(*'XVID') # low quality
-        fourcc = cv2.VideoWriter_fourcc(*'DIVX') # good quality
+        # Create VideoWriter object
         
         # ".mp4" for mp4v.... ".avi" for XVID and DIVX
         file_video_temp = video_path + "." + video_extension
         
+        # Retrieve image size
         height, width = frame.shape[:2]
         video = cv2.VideoWriter(file_video_temp, fourcc, frames_per_second, (width, height))
     
     video.write(frame) # Write out frame to video
 
-if video is None:
-    # Nothing was saved
+# Check if nothing was saved
+if video is None:    
     quit()
 
-    
+# Save the file
 msg_str = "Saving video recording... "
 print(msg_str)
 RDK.ShowMessage(msg_str, False)
@@ -92,14 +95,13 @@ RDK.ShowMessage(msg_str, False)
 # Finish/release the file
 video.release()
 
-print("Saving video...")
-
 # Create a suggested file name
+print("Saving video...")
 date_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 path_rdk = RDK.getParam('PATH_OPENSTATION')
 file_name = "RoboDK-Video-" + date_str + "." + video_extension
 
-# Ask the user to provide 
+# Ask the user to provide a file to save
 root = tkinter.Tk()
 root.withdraw()
 root.wm_attributes('-topmost', 1)
@@ -114,9 +116,10 @@ if os.path.exists(file_path):
     print("Deleting existing file: " + file_path)
     os.remove(file_path)
 
-# move the file
+# Move the file
 os.rename(file_video_temp, file_path) 
 
+# Done
 msg_str = "Video recording saved: " + file_path
 print(msg_str)
 RDK.ShowMessage(msg_str, False)
