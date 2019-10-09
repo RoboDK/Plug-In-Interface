@@ -82,10 +82,12 @@ CONFIG(release, debug|release) {
 # Add header and source files (use File->New File or Project and add your files)
 # This can be modified manually or automatically by Qt Creator
 HEADERS += \
-    apploader.h
+    apploader.h \
+    dialogapplist.h
 
 SOURCES += \
-    apploader.cpp
+    apploader.cpp \
+    dialogapplist.cpp
 
 
 
@@ -106,3 +108,6 @@ SOURCES += \
 
 INCLUDEPATH += robodk_interface
 #--------------------------
+
+FORMS += \
+    dialogapplist.ui

@@ -1,4 +1,6 @@
 #include "apploader.h"
+#include "dialogapplist.h"
+
 #include "robodktools.h"
 #include "irobodk.h"
 #include "iitem.h"
@@ -51,8 +53,27 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
     //FilePythonExe = RDK->getParam("PYTHON_EXEC"); //python";
     PathApps = RDK->getParam("PATH_ROBODK") + "/Apps";
 
+    // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
+    action_Apps = new QAction(tr("Apps List"));
+    action_Apps->setShortcut(QKeySequence("Shift+A"));
+
+    // Make sure to connect the action to your callback (slot)
+    connect(action_Apps, SIGNAL(triggered()), this, SLOT(callback_AppList()), Qt::QueuedConnection);
+
     // look for apps and load them in the main menu
-    AppsLoad();
+    AppsSearch();
+    AppsLoadMenus();
+
+    // adding the action before the Plug-Ins action in the Tools menu
+    QMenu *menuTools = mw->findChild<QMenu *>("menu-Tools");
+    QAction *actionPlugins = mw->findChild<QAction *>("action-Plugins");
+
+    if (menuTools != nullptr && actionPlugins != nullptr){
+        qDebug() << "Inserting App List menu action";
+        menuTools->insertAction(actionPlugins, action_Apps);
+    } else {
+        qDebug() << "Warning! Plugins action not found: App List action not added to the menu";
+    }
 
     // return string is reserverd for future compatibility
     return "";
@@ -62,15 +83,21 @@ void AppLoader::PluginUnload(){
     // Cleanup the plugin
     qDebug() << "Unloading plugin " << PluginName();
 
-    AppsRemove();
+    // removing action app list
+    if (action_Apps != nullptr){
+        action_Apps->deleteLater();
+        action_Apps = nullptr;
+    }
+
+    AppsDelete();
 }
 
 void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
     // this function may be called more than once, RoboDK may delete all the toolbars when it is reset or the window state changes
     IconSize = icon_size;
 
-    // this function is called when RoboDK clears all toolbars
-    AllToolbars.clear();
+    // this function is called when RoboDK clears all toolbars, so all previously allocated toolbars have been deleted
+    AllToolbars.clear();    
 
     // Create a new toolbar
     AppsLoadToolbars();
@@ -166,10 +193,7 @@ exit(0)
         python_code.append(python_code_c);
 
         if (RunPythonShell(RDK->getParam("PYTHON_EXEC"), python_code)){
-            // force reload of apps
-            AppsLoad();
-            // force reload of the toolbar
-            AppsLoadToolbars();
+            AppsReload();
         } else {
             qDebug() << "Something went wrong executing Python code";
         }
@@ -182,13 +206,42 @@ void AppLoader::PluginEvent(TypeEvent event_type){
 }
 
 //----------------------------------------------------------------------------------
-void AppLoader::AppsLoad(){
-    AppsRemove();
+void AppLoader::AppsReload(){
+    // force reload of apps
+    AppsLoadMenus();
 
+    // force reload of the toolbar
+    AppsLoadToolbars();
+}
+
+void AppLoader::AppsDelete(){
+    AppsUnloadMenus();
+    AppsUnloadToolbars();
+
+    // delete all actions
+    for (int i=AllActions.length()-1; i>=0; i--){
+        AllActions.takeLast()->deleteLater();
+    }
+
+    // Delete collected lists (QActions, QToolbar and QMenus are deleted later)
+    for (int i=ListActions.length()-1; i>=0; i--){
+        delete ListActions.takeLast();
+    }
+    for (int i=ListMenus.length()-1; i>=0; i--){
+        delete ListMenus.takeLast();
+    }
+    for (int i=ListToolbars.length()-1; i>=0; i--){
+        delete ListToolbars.takeLast();
+    }
+}
+
+void AppLoader::AppsSearch(){
     // We keep the list of all toolbars and menus to sort them properly and display the toolbar when required
     // (global variable)
     //QList<tAppMenu*> ListMenus;
     //QList<tAppToolbar*> ListToolbars;
+
+    AppsDelete();
 
     // Get path to apps folder
     QString dir_apps_path = PathApps;
@@ -205,6 +258,7 @@ void AppLoader::AppsLoad(){
         QString dirAppComplete = dir_apps_path + "/" + dirApp;
         QString fileSettings = dirAppComplete + "/Settings.ini";
         qDebug() << "Checking if file does not exist and is not writtable: " + fileSettings;
+
         // Make sure we can write to the same location if the file does not exist, otherwise, save to app data location
         if (false && !QFile::exists(fileSettings)){
             QFileInfo fileInfo(fileSettings);
@@ -222,34 +276,38 @@ void AppLoader::AppsLoad(){
         // Load settings and save them (default settings will be set)
         QSettings settings(fileSettings, QSettings::IniFormat);
         QString menuName = settings.value("MenuName", dirApp).toString();
-        bool menuVisible = settings.value("Enabled", true).toBool();
+        bool appEnabled = settings.value("Enabled", true).toBool();
         double menuPriority = settings.value("MenuPriority", 50.0).toDouble();
         int toolbarArea = settings.value("ToolbarArea", 2).toInt();
-        double toolbarSize = settings.value("ToolbarSizeRatio", 1.5).toInt();
+        double toolbarSize = settings.value("ToolbarSizeRatio", 1.5).toDouble();
         QStringList RunCommands = settings.value("RunCommands", QStringList()).toStringList();
 
         settings.setValue("MenuName", menuName);
-        settings.setValue("Enabled", menuVisible);
+        settings.setValue("Enabled", appEnabled);
         settings.setValue("MenuPriority", menuPriority);
         settings.setValue("ToolbarArea", toolbarArea);
         settings.setValue("ToolbarSizeRatio", toolbarSize);
         settings.setValue("RunCommands", RunCommands);
 
-        // skip if we don't want this app (menu) visible. Toolbar won't be displayed either
-        if (!menuVisible){
-            continue;
-        }
-
-        // Run commands specified by each app (there could be conflicts/contradictions)
-        foreach (QString command, RunCommands){
-            RDK->Command(command);
-        }
 
         // Create a new list for menus and toolbars
-        tAppMenu *appMenu = new tAppMenu(menuName, menuPriority);
-        tAppToolbar *appToolbar = new tAppToolbar(menuName, menuPriority, toolbarArea, toolbarSize);
+        tAppToolbar *appToolbar = new tAppToolbar(menuName, menuPriority, toolbarArea, toolbarSize, appEnabled);
+        tAppMenu *appMenu = new tAppMenu(menuName, menuPriority, appEnabled, dirApp, fileSettings);
+        appMenu->Toolbar = appToolbar;
         ListMenus.append(appMenu);
         ListToolbars.append(appToolbar);
+
+        // skip if we don't want this app (menu) visible. Toolbar won't be displayed either
+        //if (!appEnabled){
+        //    continue;
+        //}
+
+        // Run commands specified by each app (there could be conflicts/contradictions)
+        if (appEnabled){
+            foreach (QString command, RunCommands){
+                RDK->Command(command);
+            }
+        }
 
         // List of actions for the menu
         QList<tAppAction*> menuActions;
@@ -263,6 +321,9 @@ void AppLoader::AppsLoad(){
         // Iterate through each App (folder)
         foreach (QString file, filesApp){
             if (!(file.endsWith(".py", Qt::CaseInsensitive) || file.endsWith(".exe", Qt::CaseInsensitive))){
+                continue;
+            }
+            if (file.startsWith("_")){
                 continue;
             }
 
@@ -291,7 +352,7 @@ void AppLoader::AppsLoad(){
                 displayName = keyName;
             }
 
-            // Save settings to AppSettings file to let the user change them if desired            
+            // Save settings to AppSettings file to let the user change them if desired
             settings.setValue(keyName + "/DisplayName", displayName);
             settings.setValue(keyName + "/Description", comment);
             settings.setValue(keyName + "/Visible", visible);
@@ -401,71 +462,73 @@ void AppLoader::AppsLoad(){
     if (ListToolbars.length() > 1){
         qSort(ListToolbars.begin(), ListToolbars.end(), CheckPriority());
     }
+}
+
+void AppLoader::AppsLoadMenus(){
+    AppsUnloadMenus();
+
+    //AppsSearch();
 
     // Create all menus
     for (int i=0; i<ListMenus.length(); i++){
-        QMenu *menui = MenuBar->addMenu(ListMenus[i]->Name);
-        menui->addActions(ListMenus[i]->Actions);
+        tAppMenu *appmenu = ListMenus[i];
+        if (!appmenu->Active){
+            continue;
+        }
+        QMenu *menui = MenuBar->addMenu(appmenu->Name);
+        menui->addActions(appmenu->Actions);
         AllMenus.append(menui);
     }
 
     // If we didn't find anything: add a help section
     if (AllMenus.length() <= 0 || AllActions.length() <= 0){
         // actions are callbacks from buttons selected from the menu or the toolbar
-        QAction *action_information = new QAction(tr("Help (no apps found)"));
+        QAction *action_information = new QAction(tr("Help (no RoboDK Apps loaded)"));
         connect(action_information, SIGNAL(triggered()), this, SLOT(callback_help()), Qt::QueuedConnection);
         AllActions.append(action_information);
 
         // Here you can add one or more actions in the menu
-        QMenu *menu_help = MenuBar->addMenu("App Loader Help");
+        QMenu *menu_help = MenuBar->addMenu(tr("RoboDK Apps"));
         qDebug() << "Setting up the help menu bar";
+        menu_help->addAction(action_Apps); // show list of apps
         menu_help->addAction(action_information);
         AllMenus.append(menu_help);
+        qDebug() << "Done";
     }
 }
 
-void AppLoader::AppsRemove(){
-    // Delete collected lists (QActions, QToolbar and QMenus are deleted later)
-    for (int i=ListActions.length()-1; i>=0; i--){
-        delete ListActions.takeLast();
-    }
-    for (int i=ListMenus.length()-1; i>=0; i--){
-        delete ListMenus.takeLast();
-    }
-    for (int i=ListToolbars.length()-1; i>=0; i--){
-        delete ListToolbars.takeLast();
-    }
-
-    // delete all actions
-    for (int i=AllActions.length()-1; i>=0; i--){
-        AllActions.takeLast()->deleteLater();
-    }
-
-    // delete all the toolbars
-    for (int i=AllToolbars.length()-1; i>=0; i--){
-        AllToolbars.takeLast()->deleteLater();
-    }
-
+void AppLoader::AppsUnloadMenus(){
     // delete all menus
     for (int i=AllMenus.length()-1; i>=0; i--){
         AllMenus.takeLast()->deleteLater();
     }
 }
 
+void AppLoader::AppsUnloadToolbars(){
+    // delete all the toolbars
+    for (int i=AllToolbars.length()-1; i>=0; i--){
+        AllToolbars.takeLast()->deleteLater();
+    }
+}
+
 void AppLoader::AppsLoadToolbars(){
+    AppsUnloadToolbars();
+
+    // load toolbars
     for (int i=0; i<ListToolbars.length(); i++){
-        if (ListToolbars[i]->Actions.length() <= 0){
+        tAppToolbar *appToolbar = ListToolbars[i];
+        if (!appToolbar->Active || appToolbar->Actions.length() <= 0){
             continue;
         }
-        QToolBar *toolbar_i = new QToolBar(ListToolbars[i]->Name);
-        toolbar_i->addActions(ListToolbars[i]->Actions);
+        QToolBar *toolbar_i = new QToolBar(appToolbar->Name);
+        toolbar_i->addActions(appToolbar->Actions);
         if (IconSize > 0){
-            toolbar_i->setIconSize(QSize(IconSize*ListToolbars[i]->SizeRatio, IconSize*ListToolbars[i]->SizeRatio));
+            toolbar_i->setIconSize(QSize(IconSize*appToolbar->SizeRatio, IconSize*appToolbar->SizeRatio));
         }
-        toolbar_i->setObjectName(PluginName() + "-" + ListToolbars[i]->Name);
+        toolbar_i->setObjectName(PluginName() + "-" + appToolbar->Name);
         Qt::ToolBarArea area = Qt::ToolBarArea::RightToolBarArea;
-        if (ListToolbars[i]->ToolbarArea >= 0){
-            area = (Qt::ToolBarArea) ListToolbars[i]->ToolbarArea;
+        if (appToolbar->ToolbarArea >= 0){
+            area = (Qt::ToolBarArea) appToolbar->ToolbarArea;
         }
         MainWindow->addToolBar(area, toolbar_i);
         AllToolbars.append(toolbar_i);
@@ -595,26 +658,22 @@ void AppLoader::onScriptFinished(){
 
 
 // Define your own button callbacks here
+void AppLoader::callback_AppList(){
+    DialogAppList *dlg = new DialogAppList(this, MainWindow);
+    dlg->exec();
+}
+
 void AppLoader::callback_help(){
     //QMessageBox::
-    QString msg("<u>" + tr("About the <strong>AppLoader</strong> plugin for RoboDK:") + "</u>");
+    QString msg("<u>" + tr("About the <strong>AppLoader</strong> Plug-In for RoboDK") + "</u>");
     msg = msg + "<br><br>";
     msg = msg + tr("The App loader plugin allows you to easily load scripts and executable files as if they were plugins, adding scripts to the menu and toolbar.");
     msg = msg + "<br><br>";
     msg = msg + tr("No apps have been found in the RoboDK/Apps/ folder. Make sure to create a folder in the RoboDK/Apps folder with your scripts inside. ");
-    msg = msg + tr("You can optionally provide INI files can also be used to customize integration (order, context menu option, etc). If the INI file does not exist it will be automatically generated the first time a folder inside Apps is found.");
+    msg = msg + tr("Select Tools-App List to enable existing apps. ");
+    msg = msg + tr("INI files can also be modified to customize integration (order, context menu option, etc). If the INI file does not exist it will be automatically generated the first time a folder inside Apps is found.");
     msg = msg + "<br><br>";
-    msg = msg + tr("Example tree structure inside the apps folder:");
-    msg = msg + "<br>C:/RoboDK/Apps/" + "<br>";
-    msg = msg + "&nbsp;&nbsp;/Name Menu 1/" + "<br>";
-    msg = msg + "&nbsp;&nbsp;&nbsp;&nbsp;/Action 1.py" + "<br>";
-    msg = msg + "&nbsp;&nbsp;&nbsp;&nbsp;/Action 1.svg" + "<br>";
-    msg = msg + "&nbsp;&nbsp;&nbsp;&nbsp;/Action 2.py" + "<br>";
-    msg = msg + "&nbsp;&nbsp;&nbsp;&nbsp;/Action 2.png" + "<br>";
-    msg = msg + "&nbsp;&nbsp;/Name Menu 2/" + "<br>";
-    msg = msg + "&nbsp;&nbsp;&nbsp;&nbsp;/Action 3.py" + "<br>";
-    msg = msg + "&nbsp;&nbsp;&nbsp;&nbsp;/Action 3.jpg" + "<br>";
-    msg = msg + "&nbsp;&nbsp;&nbsp;&nbsp;/Action 4.py" + "<br>";
-    msg = msg + "&nbsp;&nbsp;&nbsp;&nbsp;/Action 4.svg" + "<br>";
+    msg = msg + tr("More information here:");
+    msg = msg + "<br><a href='https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader'>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader</a><br>";
     RDK->ShowMessage(msg);
 }

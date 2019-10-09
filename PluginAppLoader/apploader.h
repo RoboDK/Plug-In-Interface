@@ -14,6 +14,8 @@ class QAction;
 class IRoboDK;
 class IItem;
 
+class DialogAppList;
+
 /// Hold information related to an action for sorting purposes
 class tAppAction {
 public:
@@ -26,31 +28,18 @@ public:
     QAction *Action;
     double Priority;
     int TypeShowOnContextMenu;
-};
-
-/// Hold the information related to a menu for sorting purposes
-class tAppMenu {
-public:
-    tAppMenu(const QString &name, double priority):
-        Name(name),
-        Priority(priority)
-    {
-
-    }
-    QString Name;
-    double Priority;
-    QList<QAction*> Actions;
 
 };
 
 /// Hold the information related to toolbars for sorting purposes
 class tAppToolbar {
 public:
-    tAppToolbar(const QString &name, double priority, int area, double szratio):
+    tAppToolbar(const QString &name, double priority, int area, double szratio, bool active):
         Name(name),
         Priority(priority),
         ToolbarArea(area),
-        SizeRatio(szratio)
+        SizeRatio(szratio),
+        Active(active)
     {
 
     }
@@ -59,7 +48,32 @@ public:
     QList<QAction*> Actions;
     int ToolbarArea;
     double SizeRatio;
+    bool Active;
 };
+
+/// Hold the information related to an App (menu) for sorting purposes
+class tAppMenu {
+public:
+    tAppMenu(const QString &name, double priority, bool active, const QString &apppath, const QString &inipath):
+        Name(name),
+        Priority(priority),
+        Active(active),
+        NamePath(apppath),
+        IniPath(inipath),
+        Toolbar(nullptr)
+    {
+
+    }
+    bool Active;
+    QString Name;
+    QString NamePath;
+    QString IniPath;
+    double Priority;
+    QList<QAction*> Actions;
+    tAppToolbar *Toolbar;
+};
+
+
 
 
 ///
@@ -86,16 +100,29 @@ public:
     virtual void PluginEvent(TypeEvent event_type) override;
 
     //----------------------------------------------------------------------------------
+    friend class DialogAppList;
 
 public:
-    /// Retrieve all apps and load them in the main menu
-    void AppsLoad();
+    /// Reload all apps
+    void AppsReload();
 
-    /// Remove all apps
-    void AppsRemove();
+    /// Unload and delete all apps (cleanup)
+    void AppsDelete();
+
+    /// Look for apps in the Apps folder
+    void AppsSearch();
+
+    /// Retrieve all apps and load them in the main menu
+    void AppsLoadMenus();
 
     /// Reload the toolbar
     void AppsLoadToolbars();
+
+    /// Remove all apps
+    void AppsUnloadMenus();
+
+    /// remove all toolbars
+    void AppsUnloadToolbars();
 
     /// Run Python code from Qt
     bool RunPythonShell(const QString &python_exec, const QString &python_code);
@@ -118,6 +145,9 @@ public:
 
 public slots:
     // define button callbacks (or slots) here. They are triggered automatically when the button is selected.
+
+    /// Called when we select Tools-App List
+    void callback_AppList();
 
     /// Called when the user select the button/action for help
     void callback_help();
@@ -159,7 +189,11 @@ private:
     QList<tAppMenu*> ListMenus;
 
     /// List of toolbars
-    QList<tAppToolbar*> ListToolbars;
+    QList<tAppToolbar*> ListToolbars;    
+
+    /// Pointer to Apps action to list current apps:
+    QAction *action_Apps;
+
 
 };
 //! [0]
