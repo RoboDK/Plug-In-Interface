@@ -4,6 +4,6 @@ from robolink import *    # RoboDK API
 
 RDK = Robolink()
 
-newsize = mbox("Set the screen size (size of the 3D window).\nSelect Cancel to set the window back to the default size.", entry="640x480")
+newsize = mbox("Set the screen size (size of the 3D window).\nSelect Cancel to set the window back to the default size.", entry="960x720")
 
 RDK.Command("SetSize3D", newsize)

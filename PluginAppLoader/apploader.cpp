@@ -106,6 +106,9 @@ void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
     qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
     for (int i=0; i<ListActions.length(); i++){
+        if (ListActions[i]->AppMenu != nullptr && !ListActions[i]->AppMenu->Active){
+            continue;
+        }
         int type_show = ListActions[i]->TypeShowOnContextMenu;
         if (item->Type() == type_show){
             menu->addAction(ListActions[i]->Action); // add action at the end
@@ -416,12 +419,12 @@ void AppLoader::AppsSearch(){
             }
 
             // Add the actions in the global list:
-            ListActions.append(new tAppAction(action, priority, type_leftclick));
+            ListActions.append(new tAppAction(action, priority, appMenu, type_leftclick));
 
             // Add the actions to the menu and toolbar
-            menuActions.append(new tAppAction(action, priority));
+            menuActions.append(new tAppAction(action, priority, appMenu));
             if (addToolBar){
-                toolbarActions.append(new tAppAction(action, priority));
+                toolbarActions.append(new tAppAction(action, priority, appMenu));
             }
 
             // Create a slot connection to trigger the script, use the object name to remember the file script that we need to run

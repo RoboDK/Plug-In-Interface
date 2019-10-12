@@ -16,19 +16,24 @@ class IItem;
 
 class DialogAppList;
 
+class tAppMenu;
+
+
+
 /// Hold information related to an action for sorting purposes
 class tAppAction {
 public:
-    tAppAction(QAction *action, double priority, int type=-1):
+    tAppAction(QAction *action, double priority, tAppMenu *app, int type=-1):
         Priority(priority),
-        TypeShowOnContextMenu(type)
+        TypeShowOnContextMenu(type),
+        AppMenu(app)
     {
         Action = action;
     }
     QAction *Action;
     double Priority;
     int TypeShowOnContextMenu;
-
+    tAppMenu *AppMenu;
 };
 
 /// Hold the information related to toolbars for sorting purposes

@@ -17,25 +17,26 @@ import shutil
 import tkinter
 from tkinter import filedialog
 
+# Define the frames per second:
+frames_per_second = 25
+
+# Define the video extension (you may need to change the coded)
+#video_extension = "avi"
+video_extension = "mp4"
+
+# Choose the codec (mp4v, XVID or DIVX)
+#fourcc = cv2.VideoWriter_fourcc(*'DIVX') # good quality (avi)
+#fourcc = cv2.VideoWriter_fourcc(*'XVID') # low quality (avi)
+fourcc = cv2.VideoWriter_fourcc(*'mp4v') # good quality (mp4)
+
 # Default screenshot style:
 snapshot_style = "Snapshot"
 
-# Other snapshot styles are not recommended, otherwise it will create a lot of flickering.
+# Other snapshot styles are not recommended, otherwise it will create a delay and a lot of flickering
 # Instead, change the appearance of RoboDK in the menu Tools-Options-Display
 #snapshot_style = "SnapshotWhite"
 #snapshot_style = "SnapshotWhiteNoText"
 #snapshot_style = "SnapshotNoTextNoFrames"
-
-# Define the frames per second:
-frames_per_second = 30
-
-# Define the video extension (you may need to change the coded)
-video_extension = "avi"
-
-# Choose the codec (mp4v, XVID or DIVX)
-#fourcc = cv2.VideoWriter_fourcc(*'XVID') # low quality
-fourcc = cv2.VideoWriter_fourcc(*'DIVX') # good quality
-
 
 #-------------------------------------------------------------------
 RDK = Robolink()
@@ -55,7 +56,10 @@ if RDK.getParam(filename) is None:
 
 # Run until the station parameter AttachCamera is set to 0
 video = None
+frame = None
 render_time_last = 0
+time_per_frame = 1/frames_per_second
+tic()
 while infinite_loop or RDK.getParam(filename) == 1:
     # Get the last time an image was rendered in ms (ms since epoch)
     render_time = int(RDK.Command("LastRender"))
@@ -63,25 +67,39 @@ while infinite_loop or RDK.getParam(filename) == 1:
         render_time_last = render_time        
         # A render happened in RoboDK. Retrieve the last frame
         #print("Retrieving new frame...")
+        #tic()
         status = RDK.Command(snapshot_style, frame_path)        
+        #print("getting snapshot:" + str(toc()))
         if status != "OK":
             # Something went wrong. Stop
             RDK.ShowMessage("Problems retrieving the RoboDK image buffer: " + frame_path, False)
             break
             
-    # Load the frame image using OpenCV
-    frame = cv2.imread(frame_path)
-    if video is None:
-        # Create VideoWriter object
+        # Load the frame image using OpenCV
+        #tic()
+        frame = cv2.imread(frame_path)
+        #print("Reading image:" + str(toc()))
         
-        # ".mp4" for mp4v.... ".avi" for XVID and DIVX
+    if video is None:
+        # Create VideoWriter object        
         file_video_temp = video_path + "." + video_extension
         
         # Retrieve image size
-        height, width = frame.shape[:2]
-        video = cv2.VideoWriter(file_video_temp, fourcc, frames_per_second, (width, height))
+        height, width = frame.shape[:2]        
+        video = cv2.VideoWriter(file_video_temp, fourcc, frames_per_second, (width, height))        
     
+    #tic()
     video.write(frame) # Write out frame to video
+    #print("Adding image:" + str(toc()))
+    
+    # Wait some time, if necessary, to have accurate frame rate
+    elapsed = toc()
+    if elapsed < time_per_frame:
+        t_sleep = time_per_frame-elapsed
+        print("Waiting for next frame: " + str(t_sleep))
+        pause(t_sleep)
+    
+    tic()
 
 # Check if nothing was saved
 if video is None:    
@@ -98,7 +116,8 @@ video.release()
 # Create a suggested file name
 print("Saving video...")
 date_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-path_rdk = RDK.getParam('PATH_OPENSTATION')
+#path_rdk = RDK.getParam('PATH_OPENSTATION')
+path_rdk = RDK.getParam('PATH_DESKTOP')
 file_name = "RoboDK-Video-" + date_str + "." + video_extension
 
 # Ask the user to provide a file to save
