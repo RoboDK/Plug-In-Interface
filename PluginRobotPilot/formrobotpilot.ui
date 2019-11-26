@@ -84,16 +84,16 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
        <property name="decimals">
-        <number>1</number>
+        <number>3</number>
        </property>
        <property name="maximum">
         <double>1000.000000000000000</double>
        </property>
        <property name="singleStep">
-        <double>5.000000000000000</double>
+        <double>1.000000000000000</double>
        </property>
        <property name="value">
-        <double>50.000000000000000</double>
+        <double>5.000000000000000</double>
        </property>
       </widget>
      </item>

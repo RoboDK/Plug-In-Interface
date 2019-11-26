@@ -179,13 +179,16 @@ void FormRobotPilot::IncrementalMove(int id, double sense){
             pose_robot_new = pose_robot * movement_pose_aligned;
         }
 
-        bool canmove = Robot->MoveJ(pose_robot_new);
+
+        bool canmove = false;
+        if (ui->chkRunOnRobot->isChecked()){
+            canmove = Robot->MoveJ(pose_robot_new);
+        } else {
+            canmove = Robot->setPose(pose_robot_new);
+        }
         if (!canmove){
             RDK->ShowMessage(tr("The robot can't move to this location"), false);
         }
-        /*if (!Robot->setPose(pose_robot_new)){
-            RDK->ShowMessage("The robot can not reach the requested position!", false);
-        }*/
     }
 
     // This is very important to update robot joints and force a display RoboDK
