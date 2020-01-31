@@ -681,6 +681,50 @@ public:
     /// <param name="ins_id"></param>
     virtual Item InstructionTargetAt(int ins_id)=0;
 
+    // added with RoboDK 4.2.1 on 2020-01-31
+
+    /// <summary>
+    /// Attach the closest object to the tool. Returns the item that was attached.
+    /// </summary>
+    /// <returns>Attached item</returns>
+    virtual Item AttachClosest()=0;
+
+    /// <summary>
+    /// Detach the closest object attached to the tool (see also setParentStatic).
+    /// </summary>
+    /// <returns>Detached item</returns>
+    virtual Item DetachClosest(Item parent=nullptr)=0;
+
+    /// <summary>
+    /// Detach any object attached to a tool.
+    /// </summary>
+    virtual void DetachAll(Item parent=nullptr)=0;
+
+    /// <summary>
+    /// Returns a list of joints an MxN matrix, where M is the number of robot axes plus 4 columns. Linear moves are rounded according to the smoothing parameter set inside the program.
+    /// </summary>
+    /// <param name="error_msg">Returns a human readable error message (if any)</param>
+    /// <param name="joint_list">Returns the list of joints as [J1, J2, ..., Jn, ERROR, MM_STEP, DEG_STEP, MOVE_ID] if a file name is not specified</param>
+    /// If flags == LISTJOINTS_SPEED: [J1, J2, ..., Jn, ERROR, MM_STEP, DEG_STEP, MOVE_ID,   TIME, X_TCP, Y_TCP, Z_TCP,  Speed_J1, Speed_J2, ..., Speed_Jn]
+    /// If flags == LISTJOINTS_ACCEL: [J1, J2, ..., Jn, ERROR, MM_STEP, DEG_STEP, MOVE_ID,   TIME, X_TCP, Y_TCP, Z_TCP,  Speed_J1, Speed_J2, ..., Speed_Jn,   Accel_J1, Accel_J2, ..., Accel_Jn] </param>
+    /// <param name="mm_step">Maximum step in millimeters for linear movements (millimeters)</param>
+    /// <param name="deg_step">Maximum step for joint movements (degrees)</param>
+    /// <param name="collision_check">Check for collisions</param>
+    /// <param name="result_flag">set to 1 to include the timings between movements, set to 2 to also include the joint speeds (deg/s), set to 3 to also include the accelerations, set to 4 to include all previous information and make the splitting time-based.</param>
+    /// <param name="time_step_s">(optional) set the time step in seconds for time based calculation. This value is only used when the result flag is set to 4 (time based).</param>
+    /// <returns>Returns 0 if success, otherwise, it will return negative values</returns>
+    virtual int InstructionListJoints(QString &error_msg, tMatrix2D *matrix, double step_mm=1, double step_deg=1, int check_collisions=IRoboDK::COLLISION_OFF, int flags=0, double time_step=0.1)=0;
+
+    /// <summary>
+    /// Copy this item (similar to Ctrl+C). The user clipboard is not altered.
+    /// </summary>
+    virtual void Copy()=0;
+
+    /// <summary>
+    /// Paste the copied item to this item (similar to Ctrl+V). For example, you can paste to a station, or coordinate system. Paste should be used after Copy(). It returns the newly created item.
+    /// </summary>
+    virtual Item Paste()=0;
+
 };
 
 

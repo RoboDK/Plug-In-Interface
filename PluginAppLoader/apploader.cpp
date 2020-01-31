@@ -607,8 +607,10 @@ void AppLoader::onRunScript(){
     // start the process
     QProcess *proc = new QProcess();
     QStringList args;
+    proc->setObjectName("Process: " + filepath);
 
     connect(proc, SIGNAL(finished(int)), this, SLOT(onScriptFinished()));
+    connect(proc, SIGNAL(readyRead()),this,SLOT(onScriptReadyRead()));
 
     // update environment to provide the same pythonpath used in RoboDK
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -631,7 +633,7 @@ void AppLoader::onRunScript(){
 }
 
 // Triggered when a script finished executing
-void AppLoader::onScriptFinished(){    
+void AppLoader::onScriptFinished(){
     QProcess *proc = qobject_cast<QProcess*>(QObject::sender());
     if (proc == nullptr){
         qDebug() << "Warning: Unknown process finished!";
@@ -648,7 +650,7 @@ void AppLoader::onScriptFinished(){
         }*/
         //QString msg("Error running script:<br>" + script_path + "<br>");
         QString msg;
-        msg = msg + "<font color='red'><strong>" + tr("Python script failed returning %1").arg(proc->exitCode()) + "</strong>";
+        msg = msg + QString("<font color='red'><strong>Python script failed.<br><br>%1<br>Returned code: %2").arg(proc->objectName()).arg(proc->exitCode()) + "</strong>";
         msg = msg + "<font face='consolas'>";
         msg = msg + "<br>" + QString(proc->readAllStandardError()).replace("\n", "<br>") + "</font></font>";
         msg = msg + "<br>" + QString(proc->readAllStandardOutput()).replace("\n", "<br>");
@@ -657,6 +659,29 @@ void AppLoader::onScriptFinished(){
 
     // Important! Delete the process
     proc->deleteLater();
+}
+
+// Triggered when a script finished executing
+void AppLoader::onScriptReadyRead(){
+    QProcess *proc = qobject_cast<QProcess*>(QObject::sender());
+    if (proc == nullptr){
+        qDebug() << "Warning: Unknown process output!";
+        return;
+    }
+
+    QString str_stdout(proc->readAllStandardOutput());
+    QString str_stderr(proc->readAllStandardError());
+
+    qDebug() << "---- App process output for: " + proc->objectName();
+    if (!str_stdout.isEmpty()){
+        qDebug() << "STDOUT: ";
+        qDebug().noquote() << str_stdout.toUtf8();
+    }
+    if (!str_stderr.isEmpty()){
+        qDebug() << "STDERROR: ";
+        qDebug().noquote() << str_stderr.toUtf8();
+    }
+    qDebug() << "----";
 }
 
 

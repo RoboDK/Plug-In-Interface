@@ -163,6 +163,9 @@ public slots:
     /// Called when the script completes
     void onScriptFinished();
 
+    /// Called on app output (eg: print to stdout/default)
+    void onScriptReadyRead();
+
 // define your actions: usually, one action per button
 private:
 
