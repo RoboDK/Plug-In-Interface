@@ -76,7 +76,7 @@ typedef double tConfig[RDK_SIZE_MAX_CONFIG];
     (inout)[1] = (inout)[1]/norm;\
     (inout)[2] = (inout)[2]/norm;}
 
-
+    
 
 /// The Color struct represents an RGBA color (each color component should be in the range [0-1])
 struct Color{
@@ -182,7 +182,7 @@ void Debug_Matrix2D(const tMatrix2D *mat);
 void Matrix2D_Save(QDataStream *st, tMatrix2D *emx);
 
 /// @brief Save a matrix as text
-void Matrix2D_Save(QTextStream *st, tMatrix2D *emx);
+void Matrix2D_Save(QTextStream *st, tMatrix2D *emx, bool csv=false);
 
 /// @brief Load a matrix
 void Matrix2D_Load(QDataStream *st, tMatrix2D **emx);
@@ -221,7 +221,7 @@ public:
     /// \brief Convert a string to joint values
     /// \param str Comma separated joint values (spaces or tabs are also accepted)
     tJoints(const QString &str);
-
+    
     /// To String operator (use with qDebug() << tJoints;
     operator QString() const { return ToString(); }
 
@@ -254,7 +254,7 @@ public:
     /// \brief Number of joint axes of the robot (or degrees of freedom)
     /// \return
     int Length() const;
-
+    
     /// Set the length of the array (only shrinking the array is allowed)
     void setLength(int new_length);
 
@@ -372,7 +372,7 @@ public:
     Mat(const float values[16]);
 
     ~Mat();
-
+    
     /// To String operator (use with qDebug() << tJoints;
     operator QString() const { return ToString(); }
 
@@ -410,8 +410,8 @@ public:
     void VZ(tXYZ xyz) const;
 
     /// Get the position (T position), in mm
-    void Pos(tXYZ xyz) const;
-
+    void Pos(tXYZ xyz) const;    
+    
     /// \brief Set a matrix value
     /// \param r row
     /// \param c column
@@ -426,7 +426,7 @@ public:
 
     /// Invert the pose (homogeneous matrix assumed)
     Mat inv() const;
-
+    
     /// Returns true if the matrix is homogeneous, otherwise it returns false
     bool isHomogeneous() const;
 

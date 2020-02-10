@@ -887,6 +887,9 @@ public:
     virtual bool DrawGeometry(int drawtype, float *vtx_pointer, int vtx_size, float color[4], float geo_size=2.0, float *vtx_normals=nullptr)=0;
 
 
+
+
+
 };
 
 

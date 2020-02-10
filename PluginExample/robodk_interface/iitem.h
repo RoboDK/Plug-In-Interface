@@ -56,7 +56,13 @@ public:
         ITEM_TYPE_CALIBPROJECT = 13,
 
         /// Robot path accuracy validation project.
-        ITEM_TYPE_VALID_ISO9283 = 14
+        ITEM_TYPE_VALID_ISO9283 = 14,
+
+        /// Folders
+        ITEM_TYPE_FOLDER=17,
+
+        /// Robot arms only
+        ITEM_TYPE_ROBOT_ARM=18
     };
 
 public:
@@ -724,6 +730,13 @@ public:
     /// Paste the copied item to this item (similar to Ctrl+V). For example, you can paste to a station, or coordinate system. Paste should be used after Copy(). It returns the newly created item.
     /// </summary>
     virtual Item Paste()=0;
+
+    // added with RoboDK 4.2.2 on 2020-02-07
+
+    /// <summary>
+    /// Set a specific parameter associated with an item (used for specific parameters, commands and internal use).
+    /// </summary>
+    virtual QString setParam(const QString &param, const QString &value="", QList<Item> *itemlist=nullptr, double *values=nullptr, tMatrix2D *matrix=nullptr)=0;
 
 };
 

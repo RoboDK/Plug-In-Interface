@@ -735,7 +735,7 @@ void Matrix2D_Save(QDataStream *st, tMatrix2D *emx){
         *st << emx->data[i];
     }
 }
-void Matrix2D_Save(QTextStream *st, tMatrix2D *emx){
+void Matrix2D_Save(QTextStream *st, tMatrix2D *emx, bool csv){
     int size1;
     int size2;
     int j;
@@ -744,14 +744,23 @@ void Matrix2D_Save(QTextStream *st, tMatrix2D *emx){
     size2 = Matrix2D_Get_ncols(emx);
     //*st << "% Matrix size = " << size1 << " x " << size2;
     if (size1*size2 == 0){ return; }
-    for (j = 0; j<size2; j++) {
-        column = Matrix2D_Get_col(emx, j);
-        *st << "[";
-        for (int i = 0; i < size1; i++) {
-            *st << QString::number(column[i], 'f', 8) << " ";
+    if (csv){
+        for (j = 0; j<size2; j++) {
+            column = Matrix2D_Get_col(emx, j);
+            for (int i = 0; i < size1; i++) {
+                *st << QString::number(column[i], 'f', 8) << ", ";
+            }
+            *st << "\n";
         }
-        *st << "];\n";
-
+    } else {
+        for (j = 0; j<size2; j++) {
+            column = Matrix2D_Get_col(emx, j);
+            *st << "[";
+            for (int i = 0; i < size1; i++) {
+                *st << QString::number(column[i], 'f', 8) << " ";
+            }
+            *st << "];\n";
+        }
     }
 }
 
@@ -765,7 +774,7 @@ void Matrix2D_Load(QDataStream *st, tMatrix2D **emx){
     }
     int i;
     qint32 ndim;
-    qint32 sizei;
+    qint32 sizei;    
     *st >> ndim;
     qDebug() << "Loading matrix of dimensions: " << ndim;
     emxInit_real_T(emx, ndim);
