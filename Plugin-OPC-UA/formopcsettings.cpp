@@ -22,6 +22,7 @@ FormOpcSettings::FormOpcSettings(RoboDK *rdk, QWidget *parent, PluginOPCUA *plug
 
     // Update the form (Status) when the log receives new messages
     connect(pPlugin, SIGNAL(LogUpdated()), this, SLOT(FormUpdate()));
+    connect(pPlugin, SIGNAL(UpdateForm()), this, SLOT(FormUpdate()), Qt::QueuedConnection);
 }
 
 FormOpcSettings::~FormOpcSettings(){
@@ -42,6 +43,10 @@ void FormOpcSettings::FormUpdate(){
     ui->chkServerAutoStart->blockSignals(false);
 
     // Client parameters:
+    ui->chkClientRealTime->blockSignals(true);
+    ui->chkClientRealTime->setChecked(pPlugin->Client->KeepConnected);
+    ui->chkClientRealTime->blockSignals(false);
+
     ui->txtClientEndpointURL->blockSignals(true);
     ui->txtClientEndpointURL->setText(pPlugin->Client->EndpointUrl);
     ui->txtClientEndpointURL->blockSignals(false);
@@ -83,4 +88,19 @@ void FormOpcSettings::on_btnClientListEndpoints_clicked(){
 
 void FormOpcSettings::on_btnLog_clicked(){
     pPlugin->LogShow();
+}
+
+void FormOpcSettings::on_btnClientConnect_clicked(){
+    pPlugin->Client->Start();
+}
+
+void FormOpcSettings::on_chkClientRealTime_clicked(bool checked){
+    pPlugin->Client->KeepConnected = checked;
+    if (checked){
+        pPlugin->Client->Start();
+    }
+}
+
+void FormOpcSettings::on_btnClientStop_clicked(){
+    pPlugin->Client->Stop();
 }

@@ -35,6 +35,9 @@ class PluginOPCUA : public QObject, IAppRoboDK
     Q_INTERFACES(IAppRoboDK)
 
 public:
+
+    PluginOPCUA();
+
     //------------------------------- RoboDK Plug-in Interface commands ------------------------------
 
     QString PluginName(void) override;    
@@ -46,6 +49,13 @@ public:
     virtual void PluginEvent(TypeEvent event_type) override;
 
     //----------------------------------------------------------------------------------
+
+    /// load settings from RDK station
+    bool LoadSettings();
+
+    /// Save settings from RDK station
+    void SaveSettings();
+
 
 // Recommended pointers to use in your plugin:
 public:
@@ -76,7 +86,7 @@ public slots:
     void callback_StartServer(bool checked=true);
 
     /// Called when we select to start the OPC UA client
-    void callback_StartClient();
+    void callback_StartClient(bool checked);
 
     /// Called when the user selects OPC UA settings
     void callback_OpcSettings();
@@ -87,11 +97,22 @@ public slots:
 // define your actions: usually, one action per button
 private:
     /// Pointer to the customized toolbar
-    QToolBar *toolbarOpc;
+    QToolBar *toolbarOpcServer;
+    QToolBar *toolbarOpcClient;
 
     /// Pointer to the customized menu
     QMenu *menuOpc;
 
+    /// Pointer to the docked window.
+    QDockWidget *dock_OpcSettings;
+
+    /// Pointer to the robot pilot form.
+    FormOpcSettings *form_OpcSettings;
+
+    /// OPC messages log
+    QStringList Log;
+
+public:
     /// Information action. callback_information is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
     QAction *action_StartServer;
 
@@ -104,17 +125,11 @@ private:
     /// Action to display the OPC-UA server/client logs
     QAction *action_OpcLog;
 
-    /// Pointer to the docked window.
-    QDockWidget *dock_OpcSettings;
-
-    /// Pointer to the robot pilot form.
-    FormOpcSettings *form_OpcSettings;
-
-    /// OPC messages log
-    QStringList Log;
-
 
 public slots:
+    /// Show a message in the status bar and the log
+    void ShowMessage(const QString &msg);
+
     /// Add a message to the log
     void LogAdd(const QString &msg);
 
@@ -127,6 +142,12 @@ public slots:
 signals:
     /// Signal emitted when the log changes (a new message is added)
     void LogUpdated();
+
+    /// Update the form
+    void UpdateForm();
+
+    /// Show message
+    void EmitShowMessage(const QString &msg);
 };
 //! [0]
 

@@ -27,6 +27,11 @@ public:
     /// Retrieve the status of the OPC-UA server
     QString Status();
 
+public slots:
+
+    /// Update status action
+    void CheckStatus();
+
 public:
     /// OPC-UA server port
     unsigned short Port;

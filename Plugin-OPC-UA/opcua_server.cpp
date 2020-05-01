@@ -15,7 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #include <QFile>
+#include <QTimer>
 
 
 #ifdef _MSC_VER
@@ -26,8 +28,10 @@
 //----------------------------
 #include <QDebug>
 #include <QString>
+#include <QAction>
 
 #include <QStatusBar>
+#include <QDateTime>
 
 
 #define nDOFs_MAX 12
@@ -45,14 +49,31 @@ UA_Boolean SERVER_RUNNING;
 /// True when the server stopped and we free memory
 int SERVER_RUNNING_PORT;
 
+QTimer TimerStatus;
+
 int opc_server_thread(PluginOPCUA *pPlugin, unsigned short port);
+
+
+// Important: We need to trigger messages as a Queued signal because we are running different threads!
+void ShowMessage(PluginOPCUA *pPlugin, const QString &msg){
+    qDebug() << msg;
+    if (pPlugin != nullptr){
+        pPlugin->EmitShowMessage(msg);
+    }
+}
+
 
 opcua_server::opcua_server(PluginOPCUA *plugin) : QObject(NULL){
     SERVER_RUNNING = UA_FALSE;
     SERVER_RUNNING_PORT = -1;
     Port = 4840;
-    AutoStart = true;
+    AutoStart = false;
     pPlugin = plugin;
+
+    // Keep an eye on the status flag to make sure we are running the server
+    connect(&TimerStatus, SIGNAL(timeout()), this, SLOT(CheckStatus()));
+    TimerStatus.setInterval(200); // in msec
+    TimerStatus.start();
 }
 opcua_server::~opcua_server(){
     pPlugin = nullptr; // prevent using the plugin interface when we are closing the plugin
@@ -62,13 +83,15 @@ opcua_server::~opcua_server(){
 void opcua_server::Start(){
     int port = pPlugin->Server->Port;
     if (SERVER_RUNNING == UA_TRUE){
-        pPlugin->StatusBar->showMessage(tr("The OPC UA server is already running"));
+        ShowMessage(pPlugin, tr("The OPC UA server is already running"));
         return;
     }
     if (SERVER_RUNNING_PORT >= 0){
-        pPlugin->StatusBar->showMessage(tr("The OPC UA server is shutting down. Try again"));
+        ShowMessage(pPlugin, tr("The OPC UA server is shutting down. Try again"));
         return;
     }
+
+    pPlugin->action_StartServer->setChecked(true);
 
     std::thread opc_thread(opc_server_thread, pPlugin, port);
     opc_thread.detach();
@@ -77,10 +100,11 @@ void opcua_server::Start(){
 void opcua_server::Stop(){
     if (pPlugin != nullptr){
         // Make sure that we don't use the plugin interface when we are closing the plugin (otherwise it crashes)
+        pPlugin->action_StartServer->setChecked(false);
+        ShowMessage(pPlugin, tr("Stopping OPC UA server..."));
         if (SERVER_RUNNING == UA_FALSE){
-            pPlugin->LogAdd("OPC Server already stopped");
-        }
-        pPlugin->LogAdd(tr("Stopping OPC UA server..."));
+            ShowMessage(pPlugin, tr("OPC Server already stopped"));
+        }        
     }
     SERVER_RUNNING = UA_FALSE;
 }
@@ -88,6 +112,12 @@ void opcua_server::Stop(){
 bool opcua_server::IsStopped(){
     return SERVER_RUNNING_PORT < 0 && SERVER_RUNNING == UA_FALSE;
 }
+
+void opcua_server::CheckStatus(){
+    pPlugin->action_StartServer->setChecked(SERVER_RUNNING);
+}
+
+
 
 QString opcua_server::Status(){
     if (SERVER_RUNNING == UA_TRUE){
@@ -171,7 +201,7 @@ UA_StatusCode write_SimRatio(void *h, const UA_NodeId nodeid, const UA_Variant *
     UA_Double simulation_ratio;
     simulation_ratio = ((UA_Double*) (data->data))[0];
     plugin->RDK->setSimulationSpeed(simulation_ratio);
-    plugin->LogAdd(QObject::tr("New RoboDK simulation speed set to %1").arg(simulation_ratio));
+    ShowMessage(plugin, QObject::tr("New RoboDK simulation speed set to %1").arg(simulation_ratio));
     return UA_STATUSCODE_GOOD;
 }
 
@@ -196,13 +226,14 @@ UA_StatusCode write_OpenStationName(void *h, const UA_NodeId nodeid, const UA_Va
     PluginOPCUA *plugin = (PluginOPCUA*)h;
     QString stationname;
     Var_2_Str(data+0, stationname);
-    plugin->LogAdd(QObject::tr("New station set to %1").arg(stationname));
+    ShowMessage(plugin, QObject::tr("New station set to %1").arg(stationname));
+
     bool problems = false;
     if (!stationname.endsWith(".rdk", Qt::CaseInsensitive)){
-        plugin->LogAdd(QObject::tr("File should end with '.rdk': %1").arg(stationname));
+        ShowMessage(plugin, QObject::tr("File should end with '.rdk': %1").arg(stationname));
         problems = true;
     } else if (!QFile(stationname).exists()){
-        plugin->LogAdd(QObject::tr("File not found: %1").arg(stationname));
+        ShowMessage(plugin, QObject::tr("File not found: %1").arg(stationname));
         problems = true;
     } else {
         Item station = plugin->RDK->AddFile(stationname);
@@ -211,8 +242,8 @@ UA_StatusCode write_OpenStationName(void *h, const UA_NodeId nodeid, const UA_Va
         }
     }
     if (problems){
-        plugin->LogAdd(QObject::tr("File not valid or not found: %1").arg(stationname));
-        plugin->LogAdd(QObject::tr("Current station: %1").arg(plugin->RDK->getActiveStation()->Name()));
+        ShowMessage(plugin, QObject::tr("File not valid or not found: %1").arg(stationname));
+        ShowMessage(plugin, QObject::tr("Current station: %1").arg(plugin->RDK->getActiveStation()->Name()));
     }
     return UA_STATUSCODE_GOOD;
 }
@@ -235,7 +266,7 @@ static UA_StatusCode read_StationParameter(void *h, const UA_NodeId nodeid, UA_B
 UA_StatusCode write_StationParameter(void *h, const UA_NodeId nodeid, const UA_Variant *data, const UA_NumericRange *range) {
     PluginOPCUA *plugin = (PluginOPCUA*)h;
     Var_2_Str(data+0, ActiveStationParameter);
-    plugin->LogAdd(QObject::tr("Active Station parameter set to %1").arg(ActiveStationParameter));
+    ShowMessage(plugin, QObject::tr("Active Station parameter set to %1").arg(ActiveStationParameter));
     return UA_STATUSCODE_GOOD;
 }
 static UA_StatusCode read_StationValue(void *h, const UA_NodeId nodeid, UA_Boolean sourceTimeStamp, const UA_NumericRange *range, UA_DataValue *value) {
@@ -259,7 +290,7 @@ UA_StatusCode write_StationValue(void *h, const UA_NodeId nodeid, const UA_Varia
     PluginOPCUA *plugin = (PluginOPCUA*)h;
     QString stationvalue;
     Var_2_Str(data+0, stationvalue);
-    plugin->LogAdd(QObject::tr("Active Station value set to %1").arg(stationvalue));
+    ShowMessage(plugin, QObject::tr("Active Station value set to %1").arg(stationvalue));
     plugin->RDK->setParam(ActiveStationParameter, stationvalue);
     return UA_STATUSCODE_GOOD;
 }
@@ -299,7 +330,7 @@ static UA_StatusCode setJointsStr(void *h, const UA_NodeId objectId, size_t inpu
     }
     Item item = plugin->RDK->getItem(str_item);
     if (!plugin->RDK->Valid(item)){ //if (!ItemValid(robot)){
-        plugin->LogAdd(QObject::tr("setJointsStr: RoboDK Item provided is not valid"));
+        ShowMessage(plugin, QObject::tr("setJointsStr: RoboDK Item provided is not valid"));
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
     double joints[nDOFs_MAX];
@@ -307,7 +338,7 @@ static UA_StatusCode setJointsStr(void *h, const UA_NodeId objectId, size_t inpu
     int numel = nDOFs_MAX;
     string_2_doubles(str_joints, joints, &numel);
     if (numel <= 0){
-        plugin->LogAdd(QObject::tr("setJointsStr: Invalid joints string"));
+        ShowMessage(plugin, QObject::tr("setJointsStr: Invalid joints string"));
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
     item->setJoints(joints);
@@ -326,7 +357,7 @@ static UA_StatusCode getJoints(void *h, const UA_NodeId objectId, size_t inputSi
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
     if (!plugin->RDK->Valid(item)){
-        plugin->LogAdd(QObject::tr("getJoints: RoboDK Item provided is not valid"));
+        ShowMessage(plugin, QObject::tr("getJoints: RoboDK Item provided is not valid"));
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
     double joints[nDOFs_MAX];
@@ -350,7 +381,7 @@ static UA_StatusCode getJointsStr(void *h, const UA_NodeId objectId, size_t inpu
     }
     Item item = plugin->RDK->getItem(str_item);
     if (!plugin->RDK->Valid(item)){ //if (!ItemValid(item)){
-        plugin->LogAdd(QObject::tr("getJointsStr: RoboDK Item name provided is not valid"));
+        ShowMessage(plugin, QObject::tr("getJointsStr: RoboDK Item name provided is not valid"));
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
     tJoints joints = item->Joints();
@@ -370,7 +401,7 @@ static UA_StatusCode getItem(void *h, const UA_NodeId objectId, size_t inputSize
     // Retrieve the RoboDK item as a pointer
     Item item = plugin->RDK->getItem(name);
     if (!plugin->RDK->Valid(item)){ //if (item == nullptr){
-        plugin->LogAdd(QObject::tr("getItem: RoboDK Item name provided does not exist"));
+        ShowMessage(plugin, QObject::tr("getItem: RoboDK Item name provided does not exist"));
     }
     UA_UInt64 item_id = (UA_UInt64)item;
     Item_2_Var(item_id, output+0);
@@ -674,24 +705,36 @@ int opc_server_thread(PluginOPCUA *pPlugin, unsigned short port) {
 
     // Run server until we stop the flag
     SERVER_RUNNING = UA_TRUE;
-    pPlugin->LogAdd(QObject::tr("RoboDK's OPC UA server running (port=%1)").arg(port));
-    UA_StatusCode retval2 = UA_Server_run(server, &SERVER_RUNNING);
+    ShowMessage(pPlugin, QObject::tr("RoboDK's OPC UA server running on port %1").arg(port));
+
+    // start server and time the duration
+    qint64 t_start_ms = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+    UA_StatusCode statusCode = UA_Server_run(server, &SERVER_RUNNING);
+    qint64 t_duration_ms = QDateTime::currentDateTime().currentMSecsSinceEpoch() - t_start_ms;
+
+    const UA_StatusCodeDescription *statusDesc = UA_StatusCode_description(statusCode);
+    //qDebug() << "Server ended. Reason: " << statusDesc << " - " << statusDesc->explanation;
+
+    QString hint_stop;
+    if (t_duration_ms < 250){
+        hint_stop = QObject::tr("Is the port being used by another application? ");
+    }
+    // Notify about server stop
+    ShowMessage(pPlugin, QObject::tr("OPC-UA server stopped. %1%2").arg(hint_stop).arg(statusDesc->explanation));
 
     // deallocate certificate's memory
     UA_ByteString_deleteMembers(&config.serverCertificate);
 
+    // cleanup
     UA_Server_delete(server);
     nl.deleteMembers(&nl);
-    if (pPlugin != nullptr){
-        QString msg(QObject::tr("OPC-UA server stopped"));
-        pPlugin->StatusBar->showMessage(msg);
-        pPlugin->LogAdd(msg);
-    }
+
     SERVER_RUNNING_PORT = -1;
     SERVER_RUNNING = UA_FALSE;
-    return (int)retval2;
+    return (int)statusCode;
 
 }
+
 
 
 

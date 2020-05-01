@@ -31,6 +31,11 @@ void Sleep(unsigned int milliseconds) {
 
 //------------------------------- RoboDK Plug-in commands ------------------------------
 
+PluginOPCUA::PluginOPCUA()
+{
+    /// workaround to trigger messages from non QObject class like the server thread.
+    connect(this, SIGNAL(EmitShowMessage(QString)), this, SLOT(ShowMessage(QString)), Qt::QueuedConnection);
+}
 
 QString PluginOPCUA::PluginName(){
     return "OPC-UA";
@@ -62,23 +67,27 @@ QString PluginOPCUA::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *
     Q_INIT_RESOURCE(resources1);
 
     // Set the icon for the checkable action (Active/Inactive server)
-    QIcon iconOnOff;
-    iconOnOff.addPixmap(QPixmap(":/resources/on.png"), QIcon::Normal, QIcon::On);
-    iconOnOff.addPixmap(QPixmap(":/resources/off.png"), QIcon::Normal, QIcon::Off);
+    QIcon serverIconOnOff;
+    serverIconOnOff.addPixmap(QPixmap(":/resources/ServerOn.svg"), QIcon::Normal, QIcon::On);
+    serverIconOnOff.addPixmap(QPixmap(":/resources/ServerOff.svg"), QIcon::Normal, QIcon::Off);
+
+    QIcon clientIconOnOff;
+    clientIconOnOff.addPixmap(QPixmap(":/resources/ClientOn.svg"), QIcon::Normal, QIcon::On);
+    clientIconOnOff.addPixmap(QPixmap(":/resources/ClientOff.svg"), QIcon::Normal, QIcon::Off);
 
     // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
-    action_StartServer = new QAction(iconOnOff, tr("Start OPC-UA Server"));
+    action_StartServer = new QAction(serverIconOnOff, tr("Start OPC-UA Server"));
     //action_StartClient = new QAction(iconOnOff, tr("Start OPC-UA Client"));
-    action_StartClient = new QAction(tr("Start OPC-UA Client"));
+    action_StartClient = new QAction(clientIconOnOff, tr("Start OPC-UA Client"));
     action_OpcSettings = new QAction(QIcon(":/resources/settings.png"), tr("OPC-UA Settings"));
-    action_OpcLog = new QAction(QIcon(":/resources/settings.png"), tr("OPC-UA Log"));
+    action_OpcLog = new QAction(tr("OPC-UA Log"));
     action_StartServer->setCheckable(true);
-    //action_StartClient->setCheckable(true);
+    action_StartClient->setCheckable(true);
 
 
     // Make sure to connect the action to your callback (slot)
     connect(action_StartServer, SIGNAL(triggered(bool)), this, SLOT(callback_StartServer(bool)));
-    connect(action_StartClient, SIGNAL(triggered()), this, SLOT(callback_StartClient()));
+    connect(action_StartClient, SIGNAL(triggered(bool)), this, SLOT(callback_StartClient(bool)));
     connect(action_OpcSettings, SIGNAL(triggered()), this, SLOT(callback_OpcSettings()));
     connect(action_OpcLog, SIGNAL(triggered()), this, SLOT(LogShow()));
 
@@ -87,7 +96,9 @@ QString PluginOPCUA::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *
     qDebug() << "Setting up the OPC menu bar";
     menuOpc->addAction(action_StartServer);
     menuOpc->addAction(action_StartClient);
+    menuOpc->addSeparator();
     menuOpc->addAction(action_OpcSettings);
+    menuOpc->addSeparator();
     menuOpc->addAction(action_OpcLog);
 
     // Important: reset the robot pilot dock/form pointer so that it is created the first time
@@ -103,8 +114,9 @@ QString PluginOPCUA::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *
     Client = new opcua_client(this);
 
     // Load INI settings
-    QSettings params(QSettings::IniFormat, QSettings::UserScope, "RoboDK-PluginsS", PluginName());
-    // Retrieve server related settings
+    /*
+    QSettings params(QSettings::IniFormat, QSettings::UserScope, "RoboDK-Plugins", PluginName());
+    // Retrieve server related settings    
     Server->Port = params.value("ServerPort", Server->Port).toInt();
     Server->AutoStart = params.value("ServerAutoStart", Server->AutoStart).toBool();
     if (Server->AutoStart){
@@ -118,7 +130,7 @@ QString PluginOPCUA::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *
     if (Client->AutoStart){
         // This will emit the server callback start signal
         action_StartClient->trigger();
-    }
+    }*/
 
     // return string is reserverd for future compatibility
     return "";
@@ -130,18 +142,26 @@ void PluginOPCUA::PluginUnload(){
     qDebug() << "Unloading plugin " << PluginName();
 
     // Save the settings
-    QSettings params(QSettings::IniFormat, QSettings::UserScope, "RoboDK-Plugins", PluginName());
+    /*QSettings params(QSettings::IniFormat, QSettings::UserScope, "RoboDK-Plugins", PluginName());
     params.setValue("ServerPort", Server->Port);
     params.setValue("ServerAutoStart", Server->AutoStart);
     params.setValue("ClientEndpoint", Client->EndpointUrl);
     params.setValue("ClientAutoStart", Client->AutoStart);
+    */
 
     // remove the menu
     menuOpc->deleteLater();
     menuOpc = nullptr;
-    // remove the toolbar
-    toolbarOpc->deleteLater();
-    toolbarOpc = nullptr;
+
+
+    // remove the toolbars
+    toolbarOpcServer->deleteLater();
+    toolbarOpcServer = nullptr;
+
+    toolbarOpcClient->deleteLater();
+    toolbarOpcClient = nullptr;
+
+
 
     if (dock_OpcSettings != nullptr){
         dock_OpcSettings->close();
@@ -167,17 +187,29 @@ void PluginOPCUA::PluginUnload(){
 }
 
 void PluginOPCUA::PluginLoadToolbar(QMainWindow *mw, int icon_size){
-    // Create a new toolbar:
-    toolbarOpc = mw->addToolBar("OPC-UA");
-    toolbarOpc->setIconSize(QSize(icon_size, icon_size));
+    // Create a new toolbar for server connection:
+    toolbarOpcServer = mw->addToolBar("OPC-UA Server");
+    toolbarOpcServer->setIconSize(QSize(icon_size, icon_size));
 
     // Important: It is highly recommended to set an object name on toolbars. This allows saving the preferred location of the toolbar by the user
-    toolbarOpc->setObjectName(PluginName() + "-MainToolbar");
+    toolbarOpcServer->setObjectName(PluginName() + "-Server");
 
     // Add a new button to the toolbar
-    toolbarOpc->addAction(action_StartServer);
-    //toolbarOpc->addAction(action_StartClient);
-    toolbarOpc->addAction(action_OpcSettings);
+    toolbarOpcServer->addAction(action_StartServer);
+
+
+    //-------------------
+    // Create a new toolbar for client
+    toolbarOpcClient = mw->addToolBar("OPC-UA Client");
+    toolbarOpcClient->setIconSize(QSize(icon_size, icon_size));
+
+    // Important: It is highly recommended to set an object name on toolbars. This allows saving the preferred location of the toolbar by the user
+    toolbarOpcClient->setObjectName(PluginName() + "-Client");
+
+    // Add a new button to the toolbar
+    toolbarOpcClient->addAction(action_StartClient);
+
+    //toolbarOpc->addAction(action_OpcSettings);
 }
 
 
@@ -216,10 +248,17 @@ QString PluginOPCUA::PluginCommand(const QString &command, const QString &value)
             pause(0.1)
 
         */
+
         if (!value.isEmpty()){
+            // connect/disconnect if we provide the endpoint
+            Client->Stop(); // close connection
             Client->EndpointUrl = value;
+            Client->Browse(true);
+            emit UpdateForm();
+        } else {
+            // use the connection URL provided by the user or the RDK file and keep connected
+            Client->Browse(false);
         }
-        Client->QuickBrowse();
         return "Done";
     }
     return "";
@@ -228,20 +267,101 @@ QString PluginOPCUA::PluginCommand(const QString &command, const QString &value)
 // Render your own graphics here. This function is called every time the OpenGL window is displayed. The RoboDK OpenGL context is active at this moment.
 // Make sure to make this code as fast as possible to not provoke render lags
 void PluginOPCUA::PluginEvent(TypeEvent event_type){
-    /*switch (event_type) {
-    case EventChanged:
-        qDebug() << "An item has been added or deleted. Current station: " << RDK->getActiveStation()->Name();
-        break;
-    case EventMoved:
-        qDebug() << "Something has moved, such as a robot, reference frame, object or tool (usually, a render event follows)";
-        break;
-    case EventRender:
-        //qDebug() << "Render event";
-        break;
-    default:
-        qDebug() << "Unknown/future event: " << event_type;
-    }*/
+    switch (event_type) {
+        case EventRender:
+            /// Display/Render the 3D scene.
+            /// At this moment we can call RDK->DrawGeometry to customize the displayed scene
+            break;
+        case EventMoved:
+            /// qDebug() << "Something has moved, such as a robot, reference frame, object or tool.
+            /// It is very likely that an EventRender will be triggered immediately after this event
+            break;
+        case EventChanged:
+            /// qDebug() << "An item has been added or deleted. Current station: " << RDK->getActiveStation()->Name();
+            /// If we added a new item (for example, a reference frame) it is very likely that an EventMoved will follow with the updated position of the newly added item(s)
+            /// This event is also triggered when we change the active station and a new station gains focus.
+            // qDebug() << "==== EventChanged ====" << RDK->getActiveStation()->Name();
+            break;
+        case EventChangedStation:
+            // we changed the station so load the new settings
+            //qDebug() << "==== EventChangedStation ====" << RDK->getActiveStation()->Name();
+            LoadSettings();
+            break;
+        case EventAbout2Save:
+            // qDebug() << "==== EventAbout2Save ====" << RDK->getActiveStation()->Name();
+            /// The user requested to save the project and the RDK file will be saved to disk. It is recommended to save all station-specific settings at this moment.
+            /// For example, you can use RDK.setParam("ParameterName", "ParameterValue") or RDK.setData("ParameterName", bytearray)
+            SaveSettings();
+            break;
+        case EventAbout2ChangeStation:
+            /// The user requested to open a new RoboDK station (RDK file) or the user is navigating among different stations. This event is triggered before the current station looses focus.
+            // qDebug() << "==== EventAbout2ChangeStation ====" << RDK->getActiveStation()->Name();
+            SaveSettings();
+            break;
+        case EventAbout2CloseStation:
+            /// The user requested to close the currently open RoboDK station (RDK file). The RDK file may be saved if the user and the corresponding event will be triggered.
+            // qDebug() << "==== EventAbout2CloseStation ====" << RDK->getActiveStation()->Name();
+            //SaveSettings();
+            //ROBOT = nullptr;
+            break;
+        //default:
+            // qDebug() << "Unknown/future event: " << event_type;
+
+    }
 }
+
+
+
+
+bool PluginOPCUA::LoadSettings(){
+    //SaveRequired = false;
+
+    QByteArray data;
+    data = RDK->getData(PluginName());
+
+    if (data.length() == 0){ return false; }
+
+
+    qint64 version = -1;
+
+    QDataStream ds(data);
+    qDebug() << "Loading OPC-UA plugin settings...";
+    ds >> version;
+    //qDebug() << N_Samples;
+    if (version < 0){
+        qDebug() << "Invalid version!";
+        return false;
+    }
+    ds >> Server->Port;
+    ds >> Server->AutoStart;
+    ds >> Client->EndpointUrl;
+    ds >> Client->AutoStart;
+    ds >> Client->KeepConnected;
+    emit UpdateForm();
+    qDebug() << "Done";
+    return true;
+}
+void PluginOPCUA::SaveSettings(){
+    //if (!SaveRequired) { return; }
+
+    qDebug() << "Saving OPC-UA plugin settings...";
+    QByteArray data;
+    QDataStream ds(&data, QIODevice::WriteOnly);
+    qint64 version = 2;
+    ds << version;
+    ds << Server->Port;
+    ds << Server->AutoStart;
+    ds << Client->EndpointUrl;
+    ds << Client->AutoStart;
+    ds << Client->KeepConnected;
+
+    RDK->setData(PluginName(), data);
+
+    //SaveRequired = false;
+    qDebug() << "Done";
+}
+//----------------------
+
 
 //----------------------------------------------------------------------------------
 // Define your own button callbacks here
@@ -254,8 +374,18 @@ void PluginOPCUA::callback_StartServer(bool start){
     }
 }
 
-void PluginOPCUA::callback_StartClient(){
-    Client->QuickBrowse();
+void PluginOPCUA::callback_StartClient(bool start){
+    if (start){
+        Client->Start();
+        if (!Client->KeepConnected){
+            action_StartClient->setChecked(false);
+        }
+    } else {
+        Client->Stop();
+    }
+
+
+
 }
 
 void PluginOPCUA::callback_OpcSettings(){
@@ -278,6 +408,12 @@ void PluginOPCUA::callback_OpcSettingsClosed(){
 
 //--------------------------------------------------------------
 // Operating with the log
+void PluginOPCUA::ShowMessage(const QString &msg){
+    // show message in the status bar + add message to log
+    StatusBar->showMessage(msg);
+    LogAdd(msg);
+}
+
 void PluginOPCUA::LogAdd(const QString &msgin){
     //QString strtime(QDateTime::currentDateTime().toString(Qt::DateFormat::ISODateWithMs));
     QString strtime(QDateTime::currentDateTime().toString(Qt::DateFormat::ISODate));
@@ -304,6 +440,8 @@ void PluginOPCUA::LogAdd(const QString &msgin){
     emit LogUpdated();
 }
 
+
+
 void PluginOPCUA::LogShow(){
     if (LogWindow != nullptr){
         return;
@@ -313,7 +451,7 @@ void PluginOPCUA::LogShow(){
     LogWindow->setAttribute(Qt::WA_DeleteOnClose);
     LogWindow->setWindowFlags(LogWindow->windowFlags() | Qt::Window);
     LogWindow->setReadOnly(true);
-    LogWindow->setWindowTitle(tr("OPC-UA log"));
+    LogWindow->setWindowTitle(tr("OPC-UA Server log"));
     LogWindow->setHtml("");
     for (int i=0; i<Log.size(); i++){
         LogWindow->append(Log.at(i));

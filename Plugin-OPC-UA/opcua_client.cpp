@@ -10,15 +10,25 @@
 #include "opcua_tools.h"
 
 #include <QObject>
+#include <QTimer>
+#include <QAction>
 
 // Hold the pointer to the last client connection
 UA_Client *client = nullptr;
 
+
 opcua_client::opcua_client(PluginOPCUA *plugin) : QObject(NULL){
     pPlugin = plugin;
 
+    // Set default endpoint URL
     EndpointUrl = "opc.tcp://localhost:4840";
-    AutoStart = false;
+    AutoStart = false;    
+    KeepConnected = true;
+
+    // set interval to retrieve nodes (in milliseconds)
+    BrowseServer.setInterval(100);
+    connect(&BrowseServer, SIGNAL(timeout()), this, SLOT(Browse()));
+
 }
 opcua_client::~opcua_client(){
     pPlugin = nullptr; // prevent using the plugin interface when we are closing the plugin
@@ -26,10 +36,34 @@ opcua_client::~opcua_client(){
 }
 
 void opcua_client::Start(){
-    QuickBrowse();
+    if (KeepConnected){
+        // start timer if we want to remain connected
+        BrowseServer.start();
+
+        // change button status
+        pPlugin->action_StartClient->setChecked(true);
+    } else {
+        // Run a quick browse and close connection
+        BrowseServer.stop();
+        int status = Browse(true);
+        bool success = status == 0;
+
+        // change button status
+        pPlugin->action_StartClient->setChecked(false);
+    }
 }
 void opcua_client::Stop(){
+    // disconnect and delete client
+    pPlugin->action_StartClient->setChecked(false);
 
+    BrowseServer.stop();
+
+    // clear data
+    if (client != nullptr) {
+        UA_Client_disconnect(client);
+        UA_Client_delete(client);
+        client = nullptr;
+    }
 }
 
 QString opcua_client::Status(){
@@ -114,14 +148,18 @@ static UA_StatusCode callbackNodeIter(UA_NodeId childId, UA_Boolean isInverse, U
             strvalue = QObject::tr("Unknown value type %1").arg(nodeValue->type->typeId.identifier.numeric);
         }
         QString displayname = QString::fromUtf8((const char*)nodeDisplayName.text.data, nodeDisplayName.text.length);
-        plugin->LogAdd(QString("  %1 (%2): %3").arg(displayname).arg(str_identifier).arg(strvalue));
 
-        QString stationparam(displayname);
-        if (stationparam.isEmpty()){
-            stationparam = str_identifier;
-        }
-        if (!str_identifier.isEmpty()){
-            plugin->RDK->setParam(displayname, strvalue);
+        // important: skip reserved variables used by the server to update other parameters
+        if (displayname != "StationParameter" && displayname != "StationValue"){
+            plugin->LogAdd(QString("  %1 (%2): %3").arg(displayname).arg(str_identifier).arg(strvalue));
+
+            QString stationparam(displayname);
+            if (stationparam.isEmpty()){
+                stationparam = str_identifier;
+            }
+            if (!str_identifier.isEmpty()){
+                plugin->RDK->setParam(displayname, strvalue);
+            }
         }
     } else {
         plugin->LogAdd(QObject::tr("  node %1 is not a variable").arg(str_identifier));
@@ -134,30 +172,53 @@ static UA_StatusCode callbackNodeIter(UA_NodeId childId, UA_Boolean isInverse, U
     return UA_STATUSCODE_GOOD;
 }
 
-int opcua_client::QuickBrowse(){
-    client = UA_Client_new(UA_ClientConfig_standard);
-    UA_StatusCode retval;
+int opcua_client::Browse(bool close_connection){
+    UA_StatusCode statusCode;
+    bool just_connected = false;
+    if (client == nullptr){
+        client = UA_Client_new(UA_ClientConfig_standard);
+        // Connect to a server
+        // anonymous connect would be: retval = UA_Client_connect(client, "opc.tcp://localhost:4840");
+        // retval = UA_Client_connect_username(client, "opc.tcp://localhost:4840", "user1", "password");
+        pPlugin->ShowMessage(tr("Connecting to OPC-UA server %1").arg(EndpointUrl));
+        statusCode = UA_Client_connect(client, EndpointUrl.toUtf8().constData());
+        if(statusCode != UA_STATUSCODE_GOOD) {
+            UA_Client_delete(client);
+            client = nullptr;
+            const UA_StatusCodeDescription *statusDesc = UA_StatusCode_description(statusCode);
+            pPlugin->ShowMessage(tr("Connecting to OPC-UA server failed. Reason: %1").arg(statusDesc->explanation));
 
-    // Connect to a server
-    // anonymous connect would be: retval = UA_Client_connect(client, "opc.tcp://localhost:4840");
-    // retval = UA_Client_connect_username(client, "opc.tcp://localhost:4840", "user1", "password");
-    pPlugin->LogAdd(tr("Connecting to OPC-UA server %1").arg(EndpointUrl));
-    retval = UA_Client_connect(client, EndpointUrl.toUtf8().constData());
-    if(retval != UA_STATUSCODE_GOOD) {
-        UA_Client_delete(client);
-        return (int)retval;
+            // stop timer to prevent reconnection attempt
+            Stop();
+            return (int)statusCode;
+        }
+        just_connected = true;
     }
 
     // Browse objects using the node iterator
     //UA_NodeId *parent = UA_NodeId_new();
     //*parent = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
-    UA_Client_forEachChildNodeCall(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), callbackNodeIter, (void *) pPlugin);
+    statusCode = UA_Client_forEachChildNodeCall(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), callbackNodeIter, (void *) pPlugin);
+    if(statusCode != UA_STATUSCODE_GOOD) {
+        UA_Client_disconnect(client);
+        UA_Client_delete(client);
+        client = nullptr;
+        const UA_StatusCodeDescription *statusDesc = UA_StatusCode_description(statusCode);
+        pPlugin->ShowMessage(tr("Unable to retrieve server nodes. Reason: %1").arg(statusDesc->explanation));
+        return (int)statusCode;
+    }
 
-    pPlugin->RDK->ShowMessage(tr("Server variables retrieved. Right click the station item and select 'Station parameters' to see the variables"), false);
-    // Disconnect from server and free memory
-    UA_Client_disconnect(client);
-    UA_Client_delete(client);
-    client = nullptr;
+    if (just_connected){
+        pPlugin->RDK->ShowMessage(tr("Server variables retrieved. Right click the station item and select 'Station parameters' to see the variables"), false);
+    }
+
+    if (close_connection){
+        pPlugin->RDK->ShowMessage(tr("OPC-UA nodes updated as station variables. Connection closed."), false);
+        // Disconnect from server and free memory
+        UA_Client_disconnect(client);
+        UA_Client_delete(client);
+        client = nullptr;
+    }
     return 0;
 }
 

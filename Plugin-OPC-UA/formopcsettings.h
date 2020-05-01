@@ -48,6 +48,12 @@ private slots:
     /// Display an OPC-UA log window
     void on_btnLog_clicked();
 
+    void on_btnClientConnect_clicked();
+
+    void on_chkClientRealTime_clicked(bool checked);
+
+    void on_btnClientStop_clicked();
+
 private:
     /// Pointer to the user interface form
     Ui::FormOpcSettings *ui;

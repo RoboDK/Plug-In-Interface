@@ -1,7 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/off.png</file>
-        <file>resources/on.png</file>
         <file>resources/settings.png</file>
+        <file>resources/ClientOff.svg</file>
+        <file>resources/ClientOn.svg</file>
+        <file>resources/ServerOff.svg</file>
+        <file>resources/ServerOn.svg</file>
     </qresource>
 </RCC>
