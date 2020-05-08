@@ -17,7 +17,7 @@ Important: Make sure you select **Tools-Options-Set default settings** when you 
 Notes
 ======
 
-* PluginEvent with event type DrawGeometry is triggered when we need to redraw the 3D videw: [pPlugin->PluginEvent](https://robodk.com/doc/en/PlugIns/class_i_app_robo_d_k.html#ab024375af071dcf8bdd7ce20672d00d0).
+* PluginEvent with event type DrawGeometry is triggered when we need to redraw the 3D view: [pPlugin->PluginEvent](https://robodk.com/doc/en/PlugIns/class_i_app_robo_d_k.html#ab024375af071dcf8bdd7ce20672d00d0).
 This function is called with the OpenGL context active.
 
 * Use [RDK->DrawGeometry](https://robodk.com/doc/en/PlugIns/class_i_robo_d_k.html#a9c3ff1fccdfcb71094e8403d9f6ee3f1) to display primitives such as triangles, lines or points when the context is active.
@@ -42,5 +42,5 @@ Run settings
 -----------
 
 You should enter the following information in the **Projects-Run settings** window:
-* Executable: **C:/RoboDK/bin/RoboDK.exe**
+* Executable: **C:/RoboDK/bin/RoboDK-GL2.exe**
 * Arguments: **-PLUGINSUNLOAD -PLUGINLOAD=%{CurrentProject:FileBaseName}**
