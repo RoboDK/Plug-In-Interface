@@ -7,7 +7,7 @@ RoboDK Plug-In interface documentation reference: https://robodk.com/doc/en/Plug
 
 The RoboDK Plug-In interface is available in the [robodk_interface](./robodk_interface/) folder. However, it is recommended to use one of the sample projects in this repository to get started (such as the [PluginExample](./PluginExample/)).
 
-**Important:** This Plug-In Interface and the [RoboDK API](https://github.com/RoboDK/RoboDK-API) are 2 different projects. This Plug-In Interface requires advanced programming skills in C++.
+**Important:** This Plug-In Interface and the [RoboDK API](https://github.com/RoboDK/RoboDK-API) are 2 different projects. This Plug-In Interface includes access to the RoboDK API and requires advanced programming skills in C++.
 
 ![](plugin-example.png)
 
@@ -38,6 +38,7 @@ The RoboDK Plug-In interface includes an interface to the RoboDK API.
 The main advantages of using the RoboDK API through a Plug-In Inteface are the following:
  * The RoboDK API is much faster because it is loaded as a library (a RoboDK Plug-In is actually a library loaded by RoboDK).
  * You can customize the appearance of RoboDK's main window (including the menu, toolbar, and add docked windows).
+ * You can customize the 3D view using OpenGL
 
 You should pay attention to the following when using the RoboDK API inside a Plug-In:
  * Items are pointers, not objects. You can check if an item is valid or not by checking if it is a null pointer (nullptr).
