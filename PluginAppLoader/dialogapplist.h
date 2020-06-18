@@ -26,6 +26,8 @@ private slots:
     void on_btnOk_clicked();
     void onCellDoubleClicked( int a, int b);
 
+    void on_btnStopAppActions_clicked();
+
 private:
     AppLoader *pAppLoader;
     Ui::DialogAppList *ui;

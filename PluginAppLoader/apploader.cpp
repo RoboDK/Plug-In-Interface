@@ -68,9 +68,12 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
     QMenu *menuTools = mw->findChild<QMenu *>("menu-Tools");
     QAction *actionPlugins = mw->findChild<QAction *>("action-Plugins");
 
-    if (menuTools != nullptr && actionPlugins != nullptr){
+    if (actionPlugins != nullptr){//menuTools != nullptr &&
         qDebug() << "Inserting App List menu action";
-        menuTools->insertAction(actionPlugins, action_Apps);
+        int id = menuTools->actions().indexOf(actionPlugins);
+        if (id >= 0 && (id+1) < menuTools->actions().length()){ // insert after action-Plugins
+            menuTools->insertAction(menuTools->actions()[id+1], action_Apps);
+        }
     } else {
         qDebug() << "Warning! Plugins action not found: App List action not added to the menu";
     }
@@ -82,6 +85,9 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
 void AppLoader::PluginUnload(){
     // Cleanup the plugin
     qDebug() << "Unloading plugin " << PluginName();
+
+    // force to stop all processes started by this plugin
+    emit stop_process();
 
     // removing action app list
     if (action_Apps != nullptr){
@@ -205,7 +211,12 @@ exit(0)
 }
 
 void AppLoader::PluginEvent(TypeEvent event_type){
-
+    if (event_type == TypeEvent::EventAbout2ChangeStation || event_type == TypeEvent::EventAbout2CloseStation){
+        // stop all processes when we are changing or closing the station
+        //qDebug() << "Stopping all processes";
+        showErrors = false;
+        emit stop_process();
+    }
 }
 
 //----------------------------------------------------------------------------------
@@ -611,6 +622,8 @@ void AppLoader::onRunScript(){
 
     connect(proc, SIGNAL(finished(int)), this, SLOT(onScriptFinished()));
     connect(proc, SIGNAL(readyRead()),this,SLOT(onScriptReadyRead()));
+    connect(this, SIGNAL(stop_process()), proc, SLOT(kill())); // kill is more aggressive, you can also use terminate
+    showErrors = true; // flag to show errors unless we willingly kill all processes
 
     // update environment to provide the same pythonpath used in RoboDK
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -654,7 +667,12 @@ void AppLoader::onScriptFinished(){
         msg = msg + "<font face='consolas'>";
         msg = msg + "<br>" + QString(proc->readAllStandardError()).replace("\n", "<br>") + "</font></font>";
         msg = msg + "<br>" + QString(proc->readAllStandardOutput()).replace("\n", "<br>");
-        RDK->ShowMessage(msg);
+        if (showErrors){
+            RDK->ShowMessage(msg);
+        } else {
+            // output through debug: this may happen when we close RoboDK (show_errors is set to false as we kill all subprocesses)
+            qDebug() << msg;
+        }
     }
 
     // Important! Delete the process

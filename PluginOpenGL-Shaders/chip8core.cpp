@@ -366,23 +366,24 @@ void chip8LoadFile(QByteArray inputData) {
 }
 
 /// Copy 2 triangles representing the square xyPixel in to the ptr buffer (triangles and normals)
-void CopyPixel2Buffer(int xPixel, int yPixel, double *ptr_vtx, double *ptr_normals) {
+void CopyPixel2Buffer(int xPixel, int yPixel, float *ptr_vtx, float *ptr_normals=nullptr) {
 
     // size per pixel in mm
-    double xSize = 5;
-    double ySize = 5;
+    float xSize = 5;
+    float ySize = 5;
 
 
-    double xPos = +xSize*xPixel;
-    double yPos = ySize*32 - ySize*yPixel;
-    double zPos = 0;
+    float xPos = +xSize*xPixel;
+    float yPos = ySize*32 - ySize*yPixel;
+    float zPos = 0;
 
 
-    double bottomHalf[] = {xPos,     yPos,zPos,
-                          xPos+xSize,yPos,zPos,
+    float bottomHalf[] = {xPos,     yPos,zPos,
+
                           xPos,yPos-ySize,zPos,
+                          xPos+xSize,yPos,zPos,
                           };
-    double topHalf[] = {xPos+xSize,yPos-ySize,zPos,
+    float topHalf[] = {xPos+xSize,yPos-ySize,zPos,
                           xPos+xSize,yPos,zPos,
                           xPos,yPos-ySize,zPos,
                           };
@@ -396,15 +397,17 @@ void CopyPixel2Buffer(int xPixel, int yPixel, double *ptr_vtx, double *ptr_norma
     COPY3(ptr_vtx+15, topHalf+6);
 
     // copy normals
-    double normals[] = {0.0,0.0,1.0};
-    for (int i=0; i<6; i++) {
-        COPY3(ptr_normals+i*3, normals);
+    if (ptr_normals != nullptr){
+        float normals[] = {0.0,0.0,1.0};
+        for (int i=0; i<6; i++) {
+            COPY3(ptr_normals+i*3, normals);
+        }
     }
 }
 
 
-///Function to Update the entire chip8 display in robodk
-void chip8Render(RoboDK *RDK,Item ScreenRef) {
+/// Function to Update the entire chip8 display in RoboDK
+void chip8Render(RoboDK *RDK, Item ScreenRef) {
     // one vertex has 3 coordinates (xyz)
     #define CoordsPerVertex 3
     // one trinagle has 3 coordinates (p1,p2,p3)
@@ -419,19 +422,23 @@ void chip8Render(RoboDK *RDK,Item ScreenRef) {
     // 2 triangles per pixel
     #define CoordsPerPixel CoordsPerTriangle*TrianglesPerPixel
 
-    fRender = true;
-    int debug = 0;
+    //fRender = true;
+    //int debug = 0;
 
     int count_triangles_On = 0;
     int count_triangles_Off = 0;
 
-
     // triangle count is 2*PIXEL_COUNT
     // each triangle has 3 points, each point has 3 coordinates
-    static double buffer_vertex_On[PIXEL_COUNT*CoordsPerPixel];
-    static double buffer_vertex_Off[PIXEL_COUNT*CoordsPerPixel];
-    static double buffer_normals_On[PIXEL_COUNT*CoordsPerPixel];
-    static double buffer_normals_Off[PIXEL_COUNT*CoordsPerPixel];
+    static float buffer_vertex_On[PIXEL_COUNT*CoordsPerPixel];
+    static float buffer_vertex_Off[PIXEL_COUNT*CoordsPerPixel];
+
+    // optionally, we can also provide the normals
+    // (starting with RoboDK v5.0.0 you can pass a null pointer for the normals and they'll be automatically calculated)
+    static float *buffer_normals_On = nullptr;
+    static float *buffer_normals_Off = nullptr;
+    //static float buffer_normals_On[PIXEL_COUNT*CoordsPerPixel];
+    //static float buffer_normals_Off[PIXEL_COUNT*CoordsPerPixel];
 
     float robodkColourOn[] = {1.0,0.0,0.0,1.0};
     float robodkColourOff[] = {0.0,0.0,1.0,1.0};
@@ -446,40 +453,46 @@ void chip8Render(RoboDK *RDK,Item ScreenRef) {
     }
     const double *pose_ptr16 = pose_ref.Values();
 
-    if (fRender == true) {
-        for (int i = 0; i < 32; i++) {
-            for (int j = 0; j < 64; j++) {
-                if (chip8VRAM[i*64+j] == true) {
-                    CopyPixel2Buffer(j,i, buffer_vertex_On + count_triangles_On*CoordsPerTriangle, buffer_normals_On+count_triangles_On*CoordsPerTriangle);
-                    count_triangles_On = count_triangles_On + TrianglesPerPixel;
-                } else {
-                    CopyPixel2Buffer(j,i, buffer_vertex_Off + count_triangles_Off*CoordsPerTriangle, buffer_normals_Off+count_triangles_Off*CoordsPerTriangle);
-                    count_triangles_Off = count_triangles_Off + TrianglesPerPixel;
-                }
+    //if (fRender == true) {
+    // iterate through each pixel and copy the 2 triangles to the screen buffer
+    for (int i = 0; i < 32; i++) {
+        for (int j = 0; j < 64; j++) {
+            if (chip8VRAM[i*64+j] == true) {
+                CopyPixel2Buffer(j,i, buffer_vertex_On + count_triangles_On*CoordsPerTriangle);//, buffer_normals_On+count_triangles_On*CoordsPerTriangle);
+                count_triangles_On = count_triangles_On + TrianglesPerPixel;
+            } else {
+                CopyPixel2Buffer(j,i, buffer_vertex_Off + count_triangles_Off*CoordsPerTriangle); //, buffer_normals_Off+count_triangles_Off*CoordsPerTriangle);
+                count_triangles_Off = count_triangles_Off + TrianglesPerPixel;
             }
         }
-        debug++;
     }
+    //debug++;
+    //}
 
+    // Apply point and normal transformation based on the reference location
     for (int i=0; i<count_triangles_On*CoordsPerTriangle; i=i+3){
-        double ptcpy[3];
-        double *pt = buffer_vertex_On + i;
+        float ptcpy[3];
+        float *pt = buffer_vertex_On + i;
         COPY3(ptcpy, pt);
         MULT_MAT_POINT(pt, pose_ptr16, ptcpy);
 
-        double *nrml = buffer_normals_On + i;
-        COPY3(ptcpy, nrml);
-        MULT_MAT_VECTOR(nrml, pose_ptr16, ptcpy);
+        if (buffer_normals_On != nullptr){
+            float *nrml = buffer_normals_On + i;
+            COPY3(ptcpy, nrml);
+            MULT_MAT_VECTOR(nrml, pose_ptr16, ptcpy);
+        }
     }
     for (int i=0; i<count_triangles_Off*CoordsPerTriangle; i=i+3){
-        double ptcpy[3];
-        double *pt = buffer_vertex_Off + i;
+        float ptcpy[3];
+        float *pt = buffer_vertex_Off + i;
         COPY3(ptcpy, pt);
         MULT_MAT_POINT(pt, pose_ptr16, ptcpy);
 
-        double *nrml = buffer_normals_Off + i;
-        COPY3(ptcpy, nrml);
-        MULT_MAT_VECTOR(nrml, pose_ptr16, ptcpy);
+        if (buffer_normals_Off != nullptr){
+            float *nrml = buffer_normals_Off + i;
+            COPY3(ptcpy, nrml);
+            MULT_MAT_VECTOR(nrml, pose_ptr16, ptcpy);
+        }
     }
 
     // Display geometry using RoboDK shaders.
@@ -487,11 +500,11 @@ void chip8Render(RoboDK *RDK,Item ScreenRef) {
     // https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginOpenGL
 
     // Display on pixels
-    RDK->DrawGeometry(RoboDK::DrawTriangles, buffer_vertex_On, count_triangles_On, robodkColourOn,2,buffer_normals_On); //-2,buffer_normals_On);
+    RDK->DrawGeometry(RoboDK::DrawTriangles, buffer_vertex_On, count_triangles_On, robodkColourOn);//, 2, buffer_normals_On); //-2,buffer_normals_On);
 
     // Display off pixels (if desired)
-    // this could be rendered as one plane behind the text (2 triangles)
-    RDK->DrawGeometry(RoboDK::DrawTriangles, buffer_vertex_Off, count_triangles_Off, robodkColourOff,2,buffer_normals_Off); //-2,buffer_normals_On);
+    // this could be rendered as one plane behind the rendered pixels to speed things up (2 triangles)
+    RDK->DrawGeometry(RoboDK::DrawTriangles, buffer_vertex_Off, count_triangles_Off, robodkColourOff); //, 2, buffer_normals_Off); //-2,buffer_normals_On);
 }
 
 

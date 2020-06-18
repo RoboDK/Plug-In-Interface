@@ -863,32 +863,27 @@ public:
     virtual int CollisionActive()=0;
 
     /// <summary>
-    /// Draw geometry to RoboDK's 3D view. This function must be called only inside a \ref PluginEvent of type \ref EventRender is triggered.
-    /// </summary>
-    /// <param name="drawtype">type of geometry (triangles, lines or points)</param>
-    /// <param name="vtx_pointer">Pointer to an array of vertexs in mm, with respect to the RoboDK station (absolute reference)</param>
-    /// <param name="vtx_size">Size of the geometry (number of trinagles, number of vertex lines or number of points)</param>
-    /// <param name="color">Color as RGBA [0,1]</param>
-    /// <param name="geo_size">Size of the lines or points (ignored for surfaces)</param>
-    /// <param name="geo_size">vertex normals as unitary vectors (only required to draw surfaces)</param>
-    /// <returns>true if successful, false if input is not correct or build does not support drawing in double or single precision floating point.</returns>
-    virtual bool DrawGeometry(int drawtype, double *vtx_pointer, int vtx_size, float color[4], float geo_size=2.0, double *vtx_normals=nullptr)=0;
-
-    /// <summary>
-    /// Draw geometry to RoboDK's 3D view. This function must be called only inside a \ref PluginEvent of type \ref EventRender is triggered. Important: In most RoboDK versions you should use the version with doubles.
+    /// Draw geometry in the RoboDK's 3D view. This function must be called only inside a \ref PluginEvent of type \ref EventRender is triggered.
     /// </summary>
     /// <param name="drawtype">type of geometry (triangles, lines, points or spheres)</param>
     /// <param name="vtx_pointer">Pointer to an array of vertexs in mm, with respect to the RoboDK station (absolute reference)</param>
     /// <param name="vtx_size">Size of the geometry (number of trinagles, number of vertex lines or number of points)</param>
     /// <param name="color">Color as RGBA [0,1]</param>
     /// <param name="geo_size">Size of the lines or points (ignored for surfaces)</param>
-    /// <param name="geo_size">vertex normals as unitary vectors (only required to draw surfaces)</param>
+    /// <param name="vtx_normals">vertex normals as unitary vectors (optional, only used to draw surfaces)</param>
     /// <returns>true if successful, false if input is not correct or build does not support drawing in double or single precision floating point</returns>
     virtual bool DrawGeometry(int drawtype, float *vtx_pointer, int vtx_size, float color[4], float geo_size=2.0, float *vtx_normals=nullptr)=0;
 
-
-
-
+    /// <summary>
+    /// Draw a texture in the RoboDK's 3D view. This function must be called only inside a \ref PluginEvent of type \ref EventRender is triggered.
+    /// </summary>
+    /// <param name="image">Pointer to an image in RGBA format (it is important to have it in RGBA)</param>
+    /// <param name="vtx_pointer">Pointer to an array of vertexs in mm, with respect to the RoboDK station (absolute reference)</param>
+    /// <param name="texture_coords">Texture coordinates (2D coordinates per vertex)</param>
+    /// <param name="num_triangles">Size of the geometry (number of trinagles)</param>
+    /// <param name="vtx_normals">vertex normals as unitary vectors (optional)</param>
+    /// <returns>true if successful, false if input is not correct or build does not support drawing in double or single precision floating point</returns>
+    virtual bool DrawTexture(const QImage *image, const float *vtx_pointer, const float *texture_coords, int num_triangles, float *vtx_normals=nullptr)=0;
 
 };
 

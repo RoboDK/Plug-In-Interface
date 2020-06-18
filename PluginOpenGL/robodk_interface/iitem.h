@@ -738,6 +738,16 @@ public:
     /// </summary>
     virtual QString setParam(const QString &param, const QString &value="", QList<Item> *itemlist=nullptr, double *values=nullptr, tMatrix2D *matrix=nullptr)=0;
 
+    /// <summary>
+    /// Set a custom parameter to store data with an item. If the parameter name does not exist it will create a new parameter. This function always returns true.
+    /// </summary>
+    virtual bool setParam(const QString &name, const QByteArray &value)=0;
+
+    /// <summary>
+    /// Get a custom parameter associated with an item. Returns False if the parameter name does not exist.
+    /// </summary>
+    virtual bool getParam(const QString &name, QByteArray &value)=0;
+
 };
 
 

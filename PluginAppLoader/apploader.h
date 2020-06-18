@@ -202,6 +202,11 @@ private:
     /// Pointer to Apps action to list current apps:
     QAction *action_Apps;
 
+    /// Show errors as a popup window (no errors are displayed when we are closing RoboDK as we trigger the stop_process signal)
+    bool showErrors;
+
+signals:
+    void stop_process();
 
 };
 //! [0]

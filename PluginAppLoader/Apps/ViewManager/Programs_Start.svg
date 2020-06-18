@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 128 128"
+   height="128mm"
+   width="128mm">
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient857">
+      <stop
+         id="stop853"
+         offset="0"
+         style="stop-color:#cccccc;stop-opacity:1;" />
+      <stop
+         id="stop855"
+         offset="1"
+         style="stop-color:#cccccc;stop-opacity:0;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient847">
+      <stop
+         id="stop843"
+         offset="0"
+         style="stop-color:#2abaf8;stop-opacity:1;" />
+      <stop
+         id="stop845"
+         offset="1"
+         style="stop-color:#2abaf8;stop-opacity:0;" />
+    </linearGradient>
+    <linearGradient
+       gradientTransform="matrix(0.71351119,0,0,0.71351119,-10.302462,-45.134251)"
+       gradientUnits="userSpaceOnUse"
+       y2="95.228889"
+       x2="70.001198"
+       y1="165.25351"
+       x1="70.11779"
+       id="linearGradient849"
+       xlink:href="#linearGradient847" />
+    <radialGradient
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.4163463,0,0,0.23535282,-26.595364,76.487469)"
+       r="28.245375"
+       fy="100.02977"
+       fx="63.877975"
+       cy="100.02977"
+       cx="63.877975"
+       id="radialGradient859"
+       xlink:href="#linearGradient857" />
+  </defs>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     style="fill:url(#linearGradient849);fill-opacity:1;stroke:#237dca;stroke-width:3.70416656;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.95952938"
+     id="path4"
+     d="m 47.613839,34.843988 36.850472,23.42799 c 5.288132,3.282287 5.293312,6.99901 0.264299,10.496342 L 47.878138,92.894819 c -6.507105,3.756879 -8.344213,1.523753 -8.344213,-5.15378 V 40.167673 c 0,-6.391661 2.205571,-8.715239 8.079914,-5.323685 z" />
+</svg>
