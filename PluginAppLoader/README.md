@@ -120,6 +120,7 @@ Each action will also have some settings to customize the appearance. For exampl
 * DisplayName=Record - Name displayed in the main menu
 * Description=Start/stop screen recording (3D view) - Description to display on hover
 * Checkable=true - Set to true if we want this to be checkable
+* CheckableGroup=-1 - Set a group id (>= 0) to make this button part of a group (only one action can be active among actions in the same group)
 * AddToToolbar=true - Set to false to not show this action in the toolbar
 * Priority=1 - Set the priority within the same app (lower shows first)
 * TypeOnContextMenu=-1 - Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API)

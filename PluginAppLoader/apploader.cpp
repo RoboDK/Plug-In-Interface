@@ -328,6 +328,10 @@ void AppLoader::AppsSearch(){
         // List of actions for the toolbar
         QList<tAppAction*> toolbarActions;
 
+        QList<QActionGroup*> actionGroups;
+        QList<int> actionGroupIds;
+
+
         // Get the list of files in the folder
         QDir dirAppi(dirAppComplete);
         QStringList filesApp(dirAppi.entryList(QDir::Files));
@@ -357,6 +361,7 @@ void AppLoader::AppsSearch(){
             bool visible = settings.value(keyName + "/Visible", true).toBool();
             QString shortcutstr = settings.value(keyName + "/Shortcut", "").toString();
             bool checkable = settings.value(keyName + "/Checkable", false).toBool();
+            int checkable_group = settings.value(keyName + "/CheckableGroup", -1).toInt();
             bool addToolBar = settings.value(keyName + "/AddToToolbar", true).toBool();
             double priority = settings.value(keyName + "/Priority", 50.0f).toDouble();
             int type_leftclick = settings.value(keyName + "/TypeOnContextMenu", -1).toInt();
@@ -372,6 +377,7 @@ void AppLoader::AppsSearch(){
             settings.setValue(keyName + "/Visible", visible);
             settings.setValue(keyName + "/Shortcut", shortcutstr);
             settings.setValue(keyName + "/Checkable", checkable);
+            settings.setValue(keyName + "/CheckableGroup", checkable_group);
             settings.setValue(keyName + "/AddToToolbar", addToolBar);
             settings.setValue(keyName + "/Priority", priority);
             settings.setValue(keyName + "/TypeOnContextMenu", type_leftclick);
@@ -427,6 +433,32 @@ void AppLoader::AppsSearch(){
             // set checkable
             if (checkable){
                 action->setCheckable(true);
+
+                // create a group for matching group if the group number is >= 0
+                if (checkable_group >= 0){
+                    int existing_group_id = actionGroupIds.indexOf(checkable_group);
+                    QActionGroup *actn_group = nullptr;
+                    if (existing_group_id < 0){
+                        actn_group = new QActionGroup(action); // the group will get deleted with the first action
+                        actionGroups.append(actn_group);
+                        actionGroupIds.append(checkable_group);
+
+                        // make the action group allowed to not have anything selected
+                        connect(actn_group, &QActionGroup::triggered, [lastAction = static_cast<QAction *>(nullptr)](QAction* action) mutable {
+                            if (action == lastAction)
+                            {
+                              action->setChecked(false);
+                              lastAction = nullptr;
+                            }
+                            else
+                              lastAction = action;
+                          });
+
+                    } else {
+                        actn_group = actionGroups.at(existing_group_id);
+                    }
+                    actn_group->addAction(action);
+                }
             }
 
             // Add the actions in the global list:
@@ -441,7 +473,12 @@ void AppLoader::AppsSearch(){
             // Create a slot connection to trigger the script, use the object name to remember the file script that we need to run
             QString fileScript(dirAppComplete + "/" + file);
             action->setObjectName(fileScript);
-            connect(action, &QAction::triggered, this, &AppLoader::onRunScript);
+            if (checkable){
+                // trigger on check and uncheck
+                connect(action, &QAction::toggled, this, &AppLoader::onRunScript);
+            } else {
+                connect(action, &QAction::triggered, this, &AppLoader::onRunScript);
+            }
 
             // keep the pointers to delete them when the plugin is unloaded
             AllActions.append(action);
