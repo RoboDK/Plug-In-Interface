@@ -21,6 +21,7 @@
 #include <QSettings>
 #include <QProcess>
 #include <QMessageBox>
+#include <QTimer>
 
 // Function to check and sort priority of apps
 struct CheckPriority {
@@ -447,11 +448,11 @@ void AppLoader::AppsSearch(){
                         connect(actn_group, &QActionGroup::triggered, [lastAction = static_cast<QAction *>(nullptr)](QAction* action) mutable {
                             if (action == lastAction)
                             {
-                              action->setChecked(false);
-                              lastAction = nullptr;
+                                action->setChecked(false);
+                                lastAction = nullptr;
+                            } else {
+                                lastAction = action;
                             }
-                            else
-                              lastAction = action;
                           });
 
                     } else {
@@ -657,6 +658,37 @@ void AppLoader::onRunScript(){
     QStringList args;
     proc->setObjectName("Process: " + filepath);
 
+    if (action->isCheckable()){
+        if (action->isChecked()){
+            // make sure we uncheck the action if the process ends or stops
+            connect(proc, static_cast<void(QProcess::*)(int)>(&QProcess::finished), proc, [action]() {
+                action->setChecked(false);
+                qDebug() << "Action stopped and unchecked";
+            });
+
+            // give 5 seconds at most for the process to stop when we uncheck, otherwise, we kill the process
+            // Note: all "checkable" apps should be listening to a getParam() with the same name
+            #define time_to_stop_ms 2000
+            connect(action, &QAction::toggled, proc, [proc, this](bool checked){
+                if (checked){
+                    // this means we unchecked and checked again (another process is starting). So delete the previous process
+                    qDebug() << "Sending kill signal";
+                    emit proc->kill();
+                    QObject::disconnect(proc);
+                } else {
+                    QObject::disconnect(proc, SIGNAL(finished(int)), nullptr, nullptr);   // make sure we don't notify about the process crash or finish due to this provoked stop
+                    qDebug() << "Sending terminate signal";
+                    emit proc->terminate();                                           // send the terminate signal
+                    connect(proc, SIGNAL(finished(int)), proc, SLOT(deleteLater()));  // make sure we delete the process object when it is done
+                    if (!this->Process_SkipKill_List.contains(proc)){
+                        QTimer::singleShot(time_to_stop_ms, proc, SLOT(kill()));          // schedule the stop in 2 seconds if the application does not stop
+                    } else {
+                        this->Process_SkipKill_List.removeAll(proc); // remove from list
+                    }
+                }
+            });
+        }
+    }
     connect(proc, SIGNAL(finished(int)), this, SLOT(onScriptFinished()));
     connect(proc, SIGNAL(readyRead()),this,SLOT(onScriptReadyRead()));
     connect(this, SIGNAL(stop_process()), proc, SLOT(kill())); // kill is more aggressive, you can also use terminate
@@ -728,7 +760,12 @@ void AppLoader::onScriptReadyRead(){
     QString str_stderr(proc->readAllStandardError());
 
     qDebug() << "---- App process output for: " + proc->objectName();
-    if (!str_stdout.isEmpty()){
+    if (!str_stdout.isEmpty()){        
+        if (str_stdout.contains("App Setting: Skip kill", Qt::CaseInsensitive)){
+            if (!Process_SkipKill_List.contains(proc)){
+                Process_SkipKill_List.append(proc);
+            }
+        }
         qDebug() << "STDOUT: ";
         qDebug().noquote() << str_stdout.toUtf8();
     }

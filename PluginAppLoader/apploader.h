@@ -11,6 +11,8 @@
 class QToolBar;
 class QMenu;
 class QAction;
+class QProcess;
+
 class IRoboDK;
 class IItem;
 
@@ -204,6 +206,9 @@ private:
 
     /// Show errors as a popup window (no errors are displayed when we are closing RoboDK as we trigger the stop_process signal)
     bool showErrors;
+
+    /// List of processes to not kill
+    QList<QProcess*> Process_SkipKill_List;
 
 signals:
     void stop_process();
