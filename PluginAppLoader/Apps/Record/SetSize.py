@@ -2,8 +2,12 @@
 
 from robolink import *    # RoboDK API
 
-RDK = Robolink()
+def runmain():
+    RDK = Robolink()
+    newsize = mbox("Set the screen size (size of the 3D window).\nSelect Cancel to set the window back to the default size.", entry="960x720")
+    RDK.Command("SetSize3D", newsize)
 
-newsize = mbox("Set the screen size (size of the 3D window).\nSelect Cancel to set the window back to the default size.", entry="960x720")
-
-RDK.Command("SetSize3D", newsize)
+# Function to run when this module is executed on its own or by selecting the action button in RoboDK
+if __name__ == "__main__":
+    runmain()
+    

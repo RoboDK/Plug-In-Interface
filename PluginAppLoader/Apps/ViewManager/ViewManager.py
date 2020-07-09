@@ -214,9 +214,12 @@ if __name__ == "__main__":
         for index in sel:
             print(index)
             vp = ListPoses[index]
-            RDK.setViewPose(vp)
-            RDK.Command("ViewPoseVR", str(Pose_2_TxyzRxyz(vp)))
+            
+            strpose = str(Pose_2_TxyzRxyz(transl(0,0,+2000)*vp))[1:-1]
+            result = RDK.Command("ViewPoseVR", strpose)
 
+            RDK.setViewPose(vp)
+            
             msg = "Selected view: " + ListNames[index]
             RDK.ShowMessage(msg, False)
 

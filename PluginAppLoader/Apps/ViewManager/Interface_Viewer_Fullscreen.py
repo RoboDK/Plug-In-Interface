@@ -2,7 +2,7 @@ from robolink import *
 RDK = Robolink()
 
 # Improve render speed for VR: Do not display objects smaller than 1% of the screen 
-RDK.Command("DisplayThreshold", 0.5)
+RDK.Command("DisplayThreshold", 2)
 RDK.Command("ToolbarLayout", "Viewer")
 
 

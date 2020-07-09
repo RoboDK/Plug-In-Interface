@@ -6,6 +6,10 @@ RDK = Robolink()
 
 RDK.Render(False)
 
+RDK.Command("SingularityTolerance", 0.5)
+#RDK.Command("TolerancePickCurve", -1)
+#RDK.Command("TolerancePickPoiny", -1)
+
 # List all programs and robots to stop
 programs = RDK.ItemList(ITEM_TYPE_PROGRAM)
 robots = RDK.ItemList(ITEM_TYPE_ROBOT_ARM)

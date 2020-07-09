@@ -1,3 +1,6 @@
+# This script will compile the PY files in your app to PYC files
+# The resulting package will be an rdkp file that will automatically be installed by RoboDK
+
 import os
 import sys
 import shutil
@@ -22,30 +25,32 @@ ROOT_PATH = os.path.dirname(__file__)
 
 # Define the python versions the app should be compatible with
 PYTHON_VERSION = {}
-#PYTHON_VERSION['343'] = 'C:/Python34/python.exe'
-#PYTHON_VERSION['353'] = 'C:/Python353/python.exe'
-PYTHON_VERSION['373'] = 'C:/RoboDK/Python37/python.exe'
+#PYTHON_VERSION['34'] = 'C:/Python34/python.exe'
+#PYTHON_VERSION['35'] = 'C:/Python353/python.exe'
+PYTHON_VERSION['37'] = 'C:/RoboDK/Python37/python.exe'
 
 # Module loader template
-LIBRARY_LOADER = """# Load library and run dedicated action
+LIBRARY_LOADER = """# Load Python library from your App folder and run the custom action
 
 import sys
 import os
 
+# Detect Python version and post processor
 print("Using Python version: " + str(sys.version_info))
-path_app = os.path.dirname(__file__).replace("\\\\","/")
-print("RoboDK App Path: " + path_app)
+path_app = os.path.dirname(__file__).replace(os.sep,"/")
+print("Running RoboDK App compiled action " + path_app)
 
-path_library = path_app + '/v' + str(sys.version_info[0]) + str(sys.version_info[1]) + str(sys.version_info[2])
+# Check if the post is compatible with the Python version
+version_str = str(sys.version_info[0]) + str(sys.version_info[1])
+path_library = path_app + '/v' + version_str
 if not os.path.isdir(path_library):
-    raise Exception("Folder not found (make sure you are using the default Python version): " + path_library)
+    raise Exception("Post Processor not found. Make sure you are using a supported Python version: " + path_library)
 
-sys.path.insert(0, path_library)
-
-import %s as thismodule
+# Load the post processor
+exec("from v" + version_str + ".%s import *")
 
 if __name__== "__main__":
-    thismodule.runmain()
+    runmain()
 
 """
 
@@ -64,7 +69,7 @@ CompileVersion = None
 path_compile_from = None
 path_compile_to = None
 
-#CompileVersion = "373"
+#CompileVersion = "37"
 #path_compile_from = "C:\RoboDK\Apps\CalibGage"
 #path_compile_to = "C:/Users/Albert/Desktop/RoboDK/Deploy/RoboDK_MSVC2017_Qt5.11.2x64/Apps/CalibGage-Comp"
 
@@ -151,7 +156,7 @@ if CompileVersion is None:
   
   
 
-if python_version[0] != int(CompileVersion[0]) or python_version[1] != int(CompileVersion[1]) or python_version[2] != int(CompileVersion[2]):
+if python_version[0] != int(CompileVersion[0]) or python_version[1] != int(CompileVersion[1]):# or python_version[2] != int(CompileVersion[2]):
     raise Exception("Targeting Python v%s but Python version is %s" % (CompileVersion, str(python_version)))
     
 
@@ -185,7 +190,7 @@ for root, dirnames, filenames in os.walk(path_compile_to_version):
         #    print("Skipping compilation of: " + filename)
         #    continue
 
-        fmove_to = os.path.dirname(fmove_from) + '/../' + os.path.basename(fmove_from).replace('cpython-34.','').replace('cpython-35.','').replace('cpython-36.','').replace('cpython-37.','')
+        fmove_to = os.path.dirname(fmove_from) + '/../' + os.path.basename(fmove_from).replace('cpython-34.','').replace('cpython-35.','').replace('cpython-36.','').replace('cpython-37.','').replace('cpython-38.','')
         
         # Autodesk needs the main file as a PY file
         #if root.lower().replace("/","").replace("\\","").endswith("robodk__pycache__") and os.path.basename(fmove_to.lower()) == "robodk.pyc":
