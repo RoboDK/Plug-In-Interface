@@ -824,6 +824,11 @@ public:
 
 //inline QDebug operator<<(QDebug dbg, const IItem *itm){ return dbg.noquote() << (itm == nullptr ? "Item(null)" : itm); }
 
+// Allows us to use Item as a QVariant. Example:
+// QVariant::fromValue<Item>(item)
+Q_DECLARE_METATYPE (Item);
+
 //Q_DECLARE_INTERFACE(IAppRoboDK, "RoboDK.IItem")
+
 
 #endif // IITEM_H
