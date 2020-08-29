@@ -455,6 +455,7 @@ void AppLoader::AppsSearch(){
                         actionGroups.append(actn_group);
                         actionGroupIds.append(checkable_group);
 
+                        // TODO: Not sure why but this is not allowed with MSVC2013!
                         // make the action group allowed to not have anything selected
                         connect(actn_group, &QActionGroup::triggered, [lastAction = static_cast<QAction *>(nullptr)](QAction* action) mutable {
                             if (action == lastAction)

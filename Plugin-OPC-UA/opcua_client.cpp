@@ -54,7 +54,9 @@ void opcua_client::Start(){
 }
 void opcua_client::Stop(){
     // disconnect and delete client
-    pPlugin->action_StartClient->setChecked(false);
+    if (pPlugin != nullptr){
+        pPlugin->action_StartClient->setChecked(false);
+    }
 
     BrowseServer.stop();
 

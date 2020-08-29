@@ -76,7 +76,44 @@ typedef double tConfig[RDK_SIZE_MAX_CONFIG];
     (inout)[1] = (inout)[1]/norm;\
     (inout)[2] = (inout)[2]/norm;}
 
-    
+
+/// Copy a 3D-array
+#define COPY3(out,in)\
+    (out)[0]=(in)[0];\
+    (out)[1]=(in)[1];\
+    (out)[2]=(in)[2];
+
+/// Multiply 2 4x4 matrices
+#define MULT_MAT(out,inA,inB)\
+    (out)[0] = (inA)[0]*(inB)[0] + (inA)[4]*(inB)[1] + (inA)[8]*(inB)[2];\
+    (out)[1] = (inA)[1]*(inB)[0] + (inA)[5]*(inB)[1] + (inA)[9]*(inB)[2];\
+    (out)[2] = (inA)[2]*(inB)[0] + (inA)[6]*(inB)[1] + (inA)[10]*(inB)[2];\
+    (out)[3] = 0;\
+    (out)[4] = (inA)[0]*(inB)[4] + (inA)[4]*(inB)[5] + (inA)[8]*(inB)[6];\
+    (out)[5] = (inA)[1]*(inB)[4] + (inA)[5]*(inB)[5] + (inA)[9]*(inB)[6];\
+    (out)[6] = (inA)[2]*(inB)[4] + (inA)[6]*(inB)[5] + (inA)[10]*(inB)[6];\
+    (out)[7] = 0;\
+    (out)[8] = (inA)[0]*(inB)[8] + (inA)[4]*(inB)[9] + (inA)[8]*(inB)[10];\
+    (out)[9] = (inA)[1]*(inB)[8] + (inA)[5]*(inB)[9] + (inA)[9]*(inB)[10];\
+    (out)[10] = (inA)[2]*(inB)[8] + (inA)[6]*(inB)[9] + (inA)[10]*(inB)[10];\
+    (out)[11] = 0;\
+    (out)[12] = (inA)[0]*(inB)[12] + (inA)[4]*(inB)[13] + (inA)[8]*(inB)[14] + (inA)[12];\
+    (out)[13] = (inA)[1]*(inB)[12] + (inA)[5]*(inB)[13] + (inA)[9]*(inB)[14] + (inA)[13];\
+    (out)[14] = (inA)[2]*(inB)[12] + (inA)[6]*(inB)[13] + (inA)[10]*(inB)[14] + (inA)[14];\
+    (out)[15] = 1;
+
+/// Rotate a 3D vector (Multiply a 4x4 pose x 3D vector)
+#define MULT_MAT_VECTOR(out,H,p)\
+    (out)[0] = (H)[0]*(p)[0] + (H)[4]*(p)[1] + (H)[8]*(p)[2];\
+    (out)[1] = (H)[1]*(p)[0] + (H)[5]*(p)[1] + (H)[9]*(p)[2];\
+    (out)[2] = (H)[2]*(p)[0] + (H)[6]*(p)[1] + (H)[10]*(p)[2];
+
+/// Translate a 3D point (Multiply a 4x4 pose x 3D point)
+#define MULT_MAT_POINT(out,H,p)\
+    (out)[0] = (H)[0]*(p)[0] + (H)[4]*(p)[1] + (H)[8]*(p)[2] + (H)[12];\
+    (out)[1] = (H)[1]*(p)[0] + (H)[5]*(p)[1] + (H)[9]*(p)[2] + (H)[13];\
+    (out)[2] = (H)[2]*(p)[0] + (H)[6]*(p)[1] + (H)[10]*(p)[2] + (H)[14];
+
 
 /// The Color struct represents an RGBA color (each color component should be in the range [0-1])
 struct tColor{

@@ -51,7 +51,10 @@ QT += concurrent
 #
 # The following is required to build with OpenGL libraries
 QT += opengl
+
+win32{
 LIBS += opengl32.lib
+}
 #-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
 

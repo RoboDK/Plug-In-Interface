@@ -2271,14 +2271,14 @@ public:
     /// Get a Digital Input (DI). This function is only useful when connected to a real robot using the robot driver. It returns a string related to the state of the Digital Input (1=True, 0=False). This function returns an empty string if the script is not executed on the robot.
     /// </summary>
     /// <param name="io_var">io_var -> digital input (string or number as a string)</param>
-    QString Item::getDI(const QString &io_var);
+    QString getDI(const QString &io_var);
 
 
     /// <summary>
     /// Get an Analog Input (AI). This function is only useful when connected to a real robot using the robot driver. It returns a string related to the state of the Digital Input (0-1 or other range depending on the robot driver). This function returns an empty string if the script is not executed on the robot.
     /// </summary>
     /// <param name="io_var">io_var -> analog input (string or number as a string)</param>
-    QString Item::getAI(const QString &io_var);
+    QString getAI(const QString &io_var);
 
     /// <summary>
     /// Waits for an input io_id to attain a given value io_value. Optionally, a timeout can be provided.
