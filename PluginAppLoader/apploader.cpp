@@ -88,7 +88,18 @@ void AppLoader::PluginUnload(){
     qDebug() << "Unloading plugin " << PluginName();
 
     // force to stop all processes started by this plugin
-    emit stop_process();
+    // emit stop_process(); // this provokes crash for checkable objects when they are checked
+    // use the following iterator instead:
+
+    // Important: disconnect signals related to processes (can cause crash for checkable actions)
+    QList<QProcess*> all_process = this->findChildren<QProcess *>();
+    for (int i=0; i<all_process.length(); i++){
+        QProcess *p = all_process.at(i);
+        qDebug() << "Force stopping process: " << p;
+        disconnect(p, nullptr, nullptr, nullptr);
+        p->kill();
+        p->deleteLater();
+    }
 
     // removing action app list
     if (action_Apps != nullptr){
@@ -588,7 +599,7 @@ void AppLoader::AppsLoadToolbars(){
 }
 
 bool AppLoader::RunPythonShell(const QString &python_exec, const QString &python_code){
-    QProcess *process = new QProcess();
+    QProcess *process = new QProcess(this);
     QStringList arguments;
     arguments.append("-i"); // use standard input as console input
     process->start(python_exec, arguments);//FilePythonExe);
@@ -658,6 +669,11 @@ void AppLoader::onRunScript(){
     QStringList args;
     proc->setObjectName("Process: " + filepath);
 
+    connect(proc, SIGNAL(finished(int)), this, SLOT(onScriptFinished()));
+    connect(proc, SIGNAL(readyRead()),this,SLOT(onScriptReadyRead()));
+    connect(this, SIGNAL(stop_process()), proc, SLOT(kill())); // kill is more aggressive, you can also use terminate
+    showErrors = true; // flag to show errors unless we willingly kill all processes
+
     if (action->isCheckable()){
         if (action->isChecked()){
             // make sure we uncheck the action if the process ends or stops
@@ -669,7 +685,7 @@ void AppLoader::onRunScript(){
             // give 5 seconds at most for the process to stop when we uncheck, otherwise, we kill the process
             // Note: all "checkable" apps should be listening to a getParam() with the same name
             #define time_to_stop_ms 2000
-            connect(action, &QAction::toggled, proc, [proc, this](bool checked){
+            connect(action, &QAction::toggled, proc, [action, proc, this](bool checked){
                 if (checked){
                     // this means we unchecked and checked again (another process is starting). So delete the previous process
                     qDebug() << "Sending kill signal";
@@ -686,29 +702,32 @@ void AppLoader::onRunScript(){
                         this->Process_SkipKill_List.removeAll(proc); // remove from list
                     }
                 }
+
+                // make sure we don't send more signals:
+                disconnect(action, nullptr, proc, nullptr);
+
             });
         }
     }
-    connect(proc, SIGNAL(finished(int)), this, SLOT(onScriptFinished()));
-    connect(proc, SIGNAL(readyRead()),this,SLOT(onScriptReadyRead()));
-    connect(this, SIGNAL(stop_process()), proc, SLOT(kill())); // kill is more aggressive, you can also use terminate
-    showErrors = true; // flag to show errors unless we willingly kill all processes
 
     // update environment to provide the same pythonpath used in RoboDK
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QStringList envlist = env.toStringList();
     envlist.append("PYTHONPATH=" + RDK->getParam("PYTHONPATH"));
+    envlist.append("ROBODK_API_PORT=" + RDK->Command("PORT",""));
     proc->setEnvironment(envlist);
 
     // run the script
-    qDebug() << "Running script: " << filepath;
+
     if (filepath.endsWith(".py", Qt::CaseInsensitive)){
         args.append(filepath);
         if (action->isCheckable()){ // pass an argument if the option is checkable
             args.append(action->isChecked() ? "Checked" : "Unchecked");
         }
+        qDebug() << "Running script: " << filepath << " " << args;
         proc->start(RDK->getParam("PYTHON_EXEC"), args);
     } else {
+        qDebug() << "Running custom executable: " << filepath;
         proc->start(filepath);
     }
 
@@ -746,6 +765,11 @@ void AppLoader::onScriptFinished(){
 
     // Important! Delete the process
     proc->deleteLater();
+
+    // remove from list of items to kill
+    if (Process_SkipKill_List.contains(proc)){
+        this->Process_SkipKill_List.removeAll(proc); // remove from list
+    }
 }
 
 // Triggered when a script finished executing
@@ -761,11 +785,17 @@ void AppLoader::onScriptReadyRead(){
 
     qDebug() << "---- App process output for: " + proc->objectName();
     if (!str_stdout.isEmpty()){        
+        // This flag makes sure we don't kill the process when we uncheck it
         if (str_stdout.contains("App Setting: Skip kill", Qt::CaseInsensitive)){
             if (!Process_SkipKill_List.contains(proc)){
                 Process_SkipKill_List.append(proc);
             }
         }
+        // This flag makes sure we keep the action checked even if the execution of an action finished (useful for checkable actions)
+        if (str_stdout.contains("App Setting: Keep checked", Qt::CaseInsensitive)){
+            disconnect(proc, nullptr, nullptr, nullptr);
+        }
+
         qDebug() << "STDOUT: ";
         qDebug().noquote() << str_stdout.toUtf8();
     }

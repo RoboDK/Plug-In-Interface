@@ -150,7 +150,7 @@ public:
     /// If a robot is provided, it will set the pose of the end efector.
     /// </summary>
     /// <param name="pose">4x4 homogeneous matrix</param>
-    virtual bool setPose(Mat pose)=0;
+    virtual bool setPose(const Mat pose)=0;
 
     /// <summary>
     /// Returns the local position (pose) of an object, target or reference frame. For example, the position of an object/frame/target with respect to its parent.
@@ -189,35 +189,35 @@ public:
     /// If "frame" is an item, it links the robot to the frame item. If frame is a pose, it updates the linked pose of the robot frame (with respect to the robot reference frame).
     /// </summary>
     /// <param name="frame_pose">4x4 homogeneous matrix (pose)</param>
-    virtual void setPoseFrame(Mat frame_pose)=0;
+    virtual void setPoseFrame(const Mat frame_pose)=0;
 
     /// <summary>
     /// Sets the tool of a robot or a tool object (Tool Center Point, or TCP). The tool pose can be either an item or a 4x4 Matrix.
     /// If the item is a tool, it links the robot to the tool item.If tool is a pose, it updates the current robot TCP.
     /// </summary>
     /// <param name="pose">4x4 homogeneous matrix (pose)</param>
-    virtual void setPoseFrame(Item frame_item)=0;
+    virtual void setPoseFrame(const Item frame_item)=0;
 
     /// <summary>
     /// Sets the tool of a robot or a tool object (Tool Center Point, or TCP). The tool pose can be either an item or a 4x4 Matrix.
     /// If the item is a tool, it links the robot to the tool item.If tool is a pose, it updates the current robot TCP.
     /// </summary>
     /// <param name="tool_pose">4x4 homogeneous matrix (pose)</param>
-    virtual void setPoseTool(Mat tool_pose)=0;
+    virtual void setPoseTool(const Mat tool_pose)=0;
 
     /// <summary>
     /// Sets the tool of a robot or a tool object (Tool Center Point, or TCP). The tool pose can be either an item or a 4x4 Matrix.
     /// If the item is a tool, it links the robot to the tool item.If tool is a pose, it updates the current robot TCP.
     /// </summary>
     /// <param name="tool_item">Tool item</param>
-    virtual void setPoseTool(Item tool_item)=0;
+    virtual void setPoseTool(const Item tool_item)=0;
 
 
     /// <summary>
     /// Sets the global position (pose) of an item. For example, the position of an object/frame/target with respect to the station origin.
     /// </summary>
     /// <param name="pose">4x4 homogeneous matrix (pose)</param>
-    virtual void setPoseAbs(Mat pose)=0;
+    virtual void setPoseAbs(const Mat pose)=0;
 
     /// <summary>
     /// Returns the global position (pose) of an item. For example, the position of an object/frame/target with respect to the station origin.
@@ -229,8 +229,8 @@ public:
     /// Set the color of an object, tool or robot. A color must in the format COLOR=[R, G, B,(A = 1)] where all values range from 0 to 1.
     /// Optionally set the RBG to -1 to modify the Alpha channel (transparency)
     /// </summary>
-    /// <param name="tocolor">color to set</param>
-    virtual void setColor(Color clr)=0;
+    /// <param name="clr">color to set</param>
+    virtual void setColor(const tColor &clr)=0;
 
 //---------- add more
 
@@ -646,7 +646,7 @@ public:
     /// <param name="part_obj">object holding curves or points to automatically set up a curve/point follow project (optional)</param>
     /// <param name="options">Additional options (optional)</param>
     /// <returns>Program (can be null it has not been updated). Use Update() to retrieve the result</returns>
-    virtual Item setMachiningParameters(QString ncfile="", Item part_obj=nullptr, QString options="")=0;
+    virtual Item setMachiningParameters(const QString &ncfile="", Item part_obj=nullptr, const QString &options="")=0;
 
     /// \brief Retrieve the robot connection status.
     /// \param msg pass a non null pointer to retrieve a readable message (same message seen in the roboto connection status bar)
@@ -747,6 +747,77 @@ public:
     /// Get a custom parameter associated with an item. Returns False if the parameter name does not exist.
     /// </summary>
     virtual bool getParam(const QString &name, QByteArray &value)=0;
+
+
+    //-----------------------------------------------------
+    // added after 2020-08-21 with version RoboDK 5.1.0
+
+    /// <summary>
+    /// Sets the accuracy of the robot active or inactive. A robot must have been calibrated to properly use this option.
+    /// </summary>
+    virtual void setAccuracyActive(bool accurate=true)=0;
+
+    /// <summary>
+    /// Return the current joint position of a robot (only from the simulator, never from the real robot).
+    //// This should be used only when RoboDK is connected to the real robot and only the simulated robot needs to be retrieved (for example, if we want to move the robot using a spacemouse).
+    /// </summary>
+    /// <returns>double x n: joints matrix</returns>
+    virtual tJoints SimulatorJoints()=0;
+
+    /// <summary>
+    /// Select an instruction in the program as a reference to add new instructions. New instructions will be added after the selected instruction. If no instruction ID is specified, the active instruction will be selected and returned.
+    /// </summary>
+    virtual int InstructionSelect(int ins_id=-1)=0;
+
+    /// <summary>
+    /// Delete an instruction of a program
+    /// </summary>
+    virtual int InstructionDelete(int ins_id=0)=0;
+
+    /// <summary>
+    /// Set an Analog Output (AO).
+    /// </summary>
+    /// <param name="io_var">analog output (string or number)</param>
+    /// <param name="io_value">value (string or number)</param>
+    virtual void setAO(const QString &io_var, const QString &io_value)=0;
+
+    /// <summary>
+    /// Get a Digital Input (DI). This function is only useful when connected to a real robot using the robot driver. It returns a string related to the state of the Digital Input (1=True, 0=False). This function returns an empty string if the script is not executed on the robot.
+    /// </summary>
+    /// <param name="io_var">Digital Input (string or number)</param>
+    virtual QString getDI(const QString &io_var)=0;
+
+    /// <summary>
+    /// Returns the robot connection parameters
+    /// </summary>
+    /// <param name="robotIP">Robot IP</param>
+    /// <param name="port">Communication port</param>
+    /// <param name="remote_path">Remote path to place sent programs</param>
+    /// <param name="FTP_user">FTP User</param>
+    /// <param name="FTP_pass">FTP Password</param>
+    virtual void ConnectionParams(QString &robotIP, int &port, QString &remote_path, QString &FTP_user, QString &FTP_pass)=0;
+
+    /// <summary>
+    /// Set the robot connection parameters
+    /// </summary>
+    /// <param name="robotIP">Robot IP</param>
+    /// <param name="port">Communication port</param>
+    /// <param name="remote_path">Remote path to place sent programs</param>
+    /// <param name="FTP_user">FTP User</param>
+    /// <param name="FTP_pass">FTP Password</param>
+    virtual void setConnectionParams(const QString &robotIP, const int &port=2000, const QString &remote_path="/", const QString &FTP_user="", const QString &FTP_pass="")=0;
+
+    /// <summary>
+    /// Return the color of an :class:`.Item` (object, tool or robot). If the item has multiple colors it returns the first color available).
+    /// </summary>
+    virtual void Color(tColor &clr_out)=0;
+
+    /// <summary>
+    /// Retrieve the currently selected feature for this object.
+    /// </summary>
+    virtual void SelectedFeature(bool &is_selected, int feature_type, int &feature_id)=0;
+
+
 
 };
 

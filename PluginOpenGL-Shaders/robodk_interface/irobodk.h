@@ -482,7 +482,7 @@ public:
     /// <param name="shapeOverride">Set to true to replace any other existing geometry</param>
     /// <param name="color">Optionally specify the color as RGBA [0-1]</param>
     /// <returns>Added or modified item</returns>
-    virtual Item AddShape(const tMatrix2D *trianglePoints, Item addTo = nullptr, bool shapeOverride = false, Color *color = nullptr)=0;
+    virtual Item AddShape(const tMatrix2D *trianglePoints, Item addTo = nullptr, bool shapeOverride = false, tColor *color = nullptr)=0;
 
 
     /// <summary>
@@ -739,7 +739,7 @@ public:
     /// <param name="estimate"></param>
     /// <param name="search">True to search near the estimated value.</param>
     /// <returns>True if successful.</returns>
-    virtual bool LaserTrackerMeasure(tXYZ xyz, tXYZ estimate, bool search = false)=0;
+    virtual bool LaserTrackerMeasure(tXYZ xyz, const tXYZ estimate, bool search = false)=0;
 
     /// <summary>
     /// Checks the collision between a line and any objects in the station. The line is composed by 2 points.
@@ -749,7 +749,7 @@ public:
     /// <param name="p2">End point of the line (absolute coordinates).</param>
     /// <param name="xyz_collision">Collided point.</param>
     /// <returns>True if collision found.</returns>
-    virtual bool CollisionLine(tXYZ p1, tXYZ p2)=0;
+    virtual bool CollisionLine(const tXYZ p1, const tXYZ p2)=0;
 
     /// <summary>
     /// Calibrate a tool (TCP) given a number of points or calibration joints. Important: If the robot is calibrated, provide joint values to maximize accuracy.
@@ -760,7 +760,7 @@ public:
     /// <param name="algorithm">type of algorithm (by point, plane, ...)</param>
     /// <param name="robot">Robot used for the identification (if using joint values).</param>
     /// <returns>TCP as [x, y, z] - calculated TCP</returns>
-    virtual void CalibrateTool(tMatrix2D *poses_joints, tXYZ tcp_xyz, int format=EULER_RX_RY_RZ, int algorithm=CALIBRATE_TCP_BY_POINT, Item robot=nullptr, double *error_stats=nullptr)=0;
+    virtual void CalibrateTool(const tMatrix2D *poses_joints, tXYZ tcp_xyz, int format=EULER_RX_RY_RZ, int algorithm=CALIBRATE_TCP_BY_POINT, Item robot=nullptr, double *error_stats=nullptr)=0;
 
     /// <summary>
     /// Calibrate a Reference Frame given a list of points or joint values. Important: If the robot is calibrated, provide joint values to maximize accuracy.
@@ -770,7 +770,7 @@ public:
     /// <param name="use_joints">use points or joint values. The robot item must be provided if joint values is used.</param>
     /// <param name="robot">Robot used for the identification (if using joint values).</param>
     /// <returns></returns>
-    virtual Mat CalibrateReference(tMatrix2D *poses_joints, int method = CALIBRATE_FRAME_3P_P1_ON_X, bool use_joints = false, Item robot = nullptr)=0;
+    virtual Mat CalibrateReference(const tMatrix2D *poses_joints, int method = CALIBRATE_FRAME_3P_P1_ON_X, bool use_joints = false, Item robot = nullptr)=0;
 
     /// <summary>
     /// Defines the name of the program when the program is generated. It is also possible to specify the name of the post processor as well as the folder to save the program.
@@ -867,7 +867,7 @@ public:
     /// </summary>
     /// <param name="drawtype">type of geometry (triangles, lines, points or spheres)</param>
     /// <param name="vtx_pointer">Pointer to an array of vertexs in mm, with respect to the RoboDK station (absolute reference)</param>
-    /// <param name="vtx_size">Size of the geometry (number of trinagles, number of vertex lines or number of points)</param>
+    /// <param name="vtx_size">Size of the geometry (number of triangles, number of vertex lines or number of points)</param>
     /// <param name="color">Color as RGBA [0,1]</param>
     /// <param name="geo_size">Size of the lines or points (ignored for surfaces)</param>
     /// <param name="vtx_normals">vertex normals as unitary vectors (optional, only used to draw surfaces)</param>
@@ -880,10 +880,99 @@ public:
     /// <param name="image">Pointer to an image in RGBA format (it is important to have it in RGBA)</param>
     /// <param name="vtx_pointer">Pointer to an array of vertexs in mm, with respect to the RoboDK station (absolute reference)</param>
     /// <param name="texture_coords">Texture coordinates (2D coordinates per vertex)</param>
-    /// <param name="num_triangles">Size of the geometry (number of trinagles)</param>
+    /// <param name="num_triangles">Size of the geometry (number of triangles)</param>
     /// <param name="vtx_normals">vertex normals as unitary vectors (optional)</param>
     /// <returns>true if successful, false if input is not correct or build does not support drawing in double or single precision floating point</returns>
     virtual bool DrawTexture(const QImage *image, const float *vtx_pointer, const float *texture_coords, int num_triangles, float *vtx_normals=nullptr)=0;
+
+
+    //-----------------------------------------------------
+    // added after 2020-08-21 with version RoboDK 5.1.0
+
+    /// <summary>
+    /// Set the selection in the tree
+    /// </summary>
+    virtual void setSelection(const QList<Item> &listitems)=0;
+
+    /// <summary>
+    /// Set the interactive mode to define the behavior when navigating and selecting items in RoboDK's 3D view.
+    /// </summary>
+    /// <param name="mode_type">The mode type defines what accion occurs when the 3D view is selected (Select object, Pan, Rotate, Zoom, Move Objects, ...)</param>
+    /// <param name="default_ref_flags">When a movement is specified, we can provide what motion we allow by default with respect to the coordinate system (set apropriate flags)</param>
+    /// <param name="custom_object">Provide a list of optional items to customize the move behavior for these specific items (important: the lenght of custom_ref_flags must match)</param>
+    /// <param name="custom_ref_flags">Provide a matching list of flags to customize the movement behavior for specific items</param>
+    virtual void setInteractiveMode(int mode_type, int default_ref_flags, const QList<Item> *custom_object=nullptr, int custom_ref_flags=0)=0;
+
+    /// <summary>
+    /// Load or unload the specified plugin (path to DLL, dylib or SO file). If the plugin is already loaded it will unload the plugin and reload it. Pass an empty plugin_name to reload all plugins.
+    /// </summary>
+    /// <param name="plugin_name">Name of the plugin or path (if it is not in the default directory.</param>
+    /// <param name="load">load the plugin (1/default) or unload (0)</param>
+    virtual void PluginLoad(const QString &plugin_name="", int load=1)=0;
+
+    /// <summary>
+    /// Send a specific command to a RoboDK plugin. The command and value (optional) must be handled by your plugin. It returns the result as a string.
+    /// </summary>
+    /// <param name="plugin_name">The plugin name must match the PluginName() implementation in the RoboDK plugin.</param>
+    /// <param name="plugin_command">Specific command handled by your plugin.</param>
+    /// <param name="value">Specific value (optional) handled by your plugin.</param>
+    virtual QString PluginCommand(const QString &plugin_name="", const QString &plugin_command="", const QString &value="")=0;
+
+    /// <summary>
+    /// Gets a user parameter from the open RoboDK station (Bytes type).
+    /// Special QByteArray parameters can be added or modified by plugins and scripts (not by the user).
+    /// </summary>
+    /// <param name="param">RoboDK parameter</param>
+    /// <returns>Parameter data.</returns>
+    virtual QByteArray getParamBytes(const QString &param)=0;
+
+
+    /// <summary>
+    /// Gets a user parameter from the open RoboDK station (Bytes type).
+    /// Special QByteArray parameters can be added or modified by plugins and scripts (not by the user).
+    /// </summary>
+    /// <param name="param">RoboDK parameter</param>
+    /// <param name="value">Data value</param>
+    virtual void setParamBytes(const QString &param, const QByteArray &value)=0;
+
+    /// <summary>
+    /// Takes a measurement with a 6D measurement device. It returns two poses, the base reference frame and the measured object reference frame. Status is negative if the measurement failed. extra data is [error_avg, error_max] in mm, if we are averaging a pose.
+    /// </summary>
+    /// <param name="pose1">Pose of the main object</param>
+    /// <param name="pose2">Pose of the reference object</param>
+    /// <param name="npoints1">Number of points visible for object 1</param>
+    /// <param name="npoints2">Number of points visible for object 2t</param>
+    /// <param name="status">Status flag</param>
+    /// <param name="data">Additional data from the device</param>
+    /// <param name="time_avg">Take the measurement for a period of time and average the result.</param>
+    /// <param name="tip_xyz">Offet the measurement to the tip.</param>
+    /// <returns>Status flags.</returns>
+    virtual int StereoCamera_Measure(Mat pose1, Mat pose2, int &npoints1, int &npoints2, double *data=nullptr, float time_avg=0, const tXYZ tip_xyz=nullptr)=0;
+
+    /// <summary>
+    /// Takes a measurement with a 6D measurement device. It returns two poses, the base reference frame and the measured object reference frame. Status is negative if the measurement failed. extra data is [error_avg, error_max] in mm, if we are averaging a pose.
+    /// </summary>
+    /// <param name="type">Type of the mechanism</param>
+    /// <param name="list_obj">list of object items that build the robot</param>
+    /// <param name="parameters">robot parameters in the same order as shown in the RoboDK menu: Utilities-Build Mechanism or robot</param>
+    /// <param name="joints_build">Current state of the robot (joint axes) to build the robot</param>
+    /// <param name="joints_home">joints for the home position (it can be changed later)</param>
+    /// <param name="joints_senses">Sense of rotation of each axis (+1 or -1)</param>
+    /// <param name="joints_lim_low">Lower joint limits</param>
+    /// <param name="joints_lim_high">Upper joint limits</param>
+    /// <param name="base">Base pose offset (robot pose)</param>
+    /// <param name="tool">Tool flange pose offset</param>
+    /// <param name="name">Robot name</param>
+    /// <param name="robot">Modify existing robot</param>
+    /// <returns>New robot or mechanism created.</returns>
+    virtual Item BuildMechanism(int type, const QList<Item> &list_obj, const double *parameters, const tJoints &joints_build, const tJoints &joints_home, const tJoints &joints_senses, const tJoints &joints_lim_low, const tJoints &joints_lim_high, const Mat base, const Mat tool, const QString &name, Item robot=nullptr)=0;
+
+
+    /*
+
+    SprayAdd
+    Camera
+    */
 
 };
 

@@ -79,7 +79,7 @@ typedef double tConfig[RDK_SIZE_MAX_CONFIG];
     
 
 /// The Color struct represents an RGBA color (each color component should be in the range [0-1])
-struct Color{
+struct tColor{
     /// Red color
     float r;
 
