@@ -233,6 +233,9 @@ void AppLoader::PluginEvent(TypeEvent event_type){
 
 //----------------------------------------------------------------------------------
 void AppLoader::AppsReload(){
+    // Navigate files
+    AppsSearch();
+
     // force reload of apps
     AppsLoadMenus();
 

@@ -107,3 +107,10 @@ void DialogAppList::on_btnOk_clicked(){
 void DialogAppList::on_btnStopAppActions_clicked(){
     emit pAppLoader->stop_process();
 }
+
+void DialogAppList::on_btnReload_clicked(){
+    pAppLoader->AppsReload();
+
+    // update the list of apps
+    UpdateForm();
+}
