@@ -424,6 +424,16 @@ public:
     virtual Item ItemUserPick(const QString &message = "Pick one item", int itemtype = -1)=0;
 
     /// <summary>
+    /// Shows a RoboDK popup to select one object from the open RoboDK station.
+    /// You can provide a few items to choose from and, optionally, a selected index.
+    /// </summary>
+    /// <param name="message">Message to show in the pop up</param>
+    /// <param name="list_choices">Items to choose from</param>
+    /// <param name="id_selected">Selected id from list_choices if we want to select an item</param>
+    /// <returns>Picked item or nullptr if the user selected Cancel</returns>
+    virtual Item ItemUserPick(const QString &message, const QList<Item> &list_choices, int id_selected=-1)=0;
+
+    /// <summary>
     /// Shows or raises the RoboDK window.
     /// </summary>
     virtual void ShowRoboDK()=0;

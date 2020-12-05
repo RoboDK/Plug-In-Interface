@@ -16,53 +16,62 @@ public:
 
     /// Tree item types
     enum {
-        /// Any item type.
+        /// Any item type
         ITEM_TYPE_ANY = -1,
 
-        /// Item of type station (RDK file).
+        /// Item of type station (RDK file)
         ITEM_TYPE_STATION = 1,
 
-        /// Item of type robot (.robot file).
+        /// Item of type robot (.robot file)
         ITEM_TYPE_ROBOT = 2,
 
-        /// Item of type reference frame.
+        /// Item of type reference frame
         ITEM_TYPE_FRAME = 3,
 
-        /// Item of type tool (.tool).
+        /// Item of type tool (.tool)
         ITEM_TYPE_TOOL = 4,
 
-        /// Item of type object (.stl, .step or .iges for example).
+        /// Item of type object (.stl, .step or .iges for example)
         ITEM_TYPE_OBJECT = 5,
 
-        /// Target item.
+        /// Target item
         ITEM_TYPE_TARGET = 6,
 
-        /// Program item.
+        /// Program item
         ITEM_TYPE_PROGRAM = 8,
 
-        /// Instruction.
+        /// Instruction
         ITEM_TYPE_INSTRUCTION = 9,
 
-        /// Python macro.
+        /// Python script
         ITEM_TYPE_PROGRAM_PYTHON = 10,
 
-        /// Robot machining project, curve follow, point follow or 3D printing project.
+        /// Robot machining project, curve follow, point follow or 3D printing project
         ITEM_TYPE_MACHINING = 11,
 
-        /// Ballbar validation project.
+        /// Ballbar validation project
         ITEM_TYPE_BALLBARVALIDATION = 12,
 
-        /// Robot calibration project.
+        /// Robot calibration project
         ITEM_TYPE_CALIBPROJECT = 13,
 
-        /// Robot path accuracy validation project.
+        /// Robot path accuracy validation project
         ITEM_TYPE_VALID_ISO9283 = 14,
 
         /// Folders
         ITEM_TYPE_FOLDER=17,
 
         /// Robot arms only
-        ITEM_TYPE_ROBOT_ARM=18
+        ITEM_TYPE_ROBOT_ARM=18,
+
+        /// Camera
+        ITEM_TYPE_CAMERA=19,
+
+        /// Generic custom items (customizable)
+        ITEM_TYPE_GENERIC=20,
+
+        /// Mechanisms and axes of up to 3 degrees of freedom
+        ITEM_TYPE_ROBOT_AXES=21
     };
 
 public:
@@ -824,6 +833,11 @@ public:
 
 //inline QDebug operator<<(QDebug dbg, const IItem *itm){ return dbg.noquote() << (itm == nullptr ? "Item(null)" : itm); }
 
+// Allows us to use Item as a QVariant. Example:
+// QVariant::fromValue<Item>(item)
+Q_DECLARE_METATYPE (Item);
+
 //Q_DECLARE_INTERFACE(IAppRoboDK, "RoboDK.IItem")
+
 
 #endif // IITEM_H

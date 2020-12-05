@@ -67,7 +67,10 @@ public:
         MOVE_TYPE_LINEAR = 2,
 
         /// Circular movement (MoveC).
-        MOVE_TYPE_CIRCULAR = 3
+        MOVE_TYPE_CIRCULAR = 3,
+
+        /// Linear search function
+        MOVE_TYPE_LINEARSEARCH = 4
     };
 
     /// Script execution types used by IRoboDK.setRunMode and IRoboDK.RunMode
@@ -112,17 +115,20 @@ public:
 
     /// Reference frame calibration types
     enum {
-        ///Calibrate by 3 points: [X, X+, Y+] (p1 on X axis).
+        /// Calibrate by 3 points: [X, X+, Y+] (p1 on X axis).
         CALIBRATE_FRAME_3P_P1_ON_X = 0,
 
-        ///Calibrate by 3 points: [Origin, X+, XY+] (p1 is origin).
+        /// Calibrate by 3 points: [Origin, X+, XY+] (p1 is origin).
         CALIBRATE_FRAME_3P_P1_ORIGIN = 1,
 
-        ///Calibrate by 6 points.
+        /// Calibrate by 6 points.
         CALIBRATE_FRAME_6P = 2,
 
-        ///Calibrate turntable.
-        CALIBRATE_TURNTABLE = 3
+        /// Calibrate turntable.
+        CALIBRATE_TURNTABLE = 3,
+
+        /// Calibrate a 2 axis turntable
+        CALIBRATE_TURNTABLE_2X = 4
     };
 
     /// projection types (for AddCurve)
@@ -199,7 +205,10 @@ public:
         WINDOWSTATE_CINEMA = 5,
 
         /// Display RoboDK in cinema mode and fullscreen.
-        WINDOWSTATE_FULLSCREEN_CINEMA = 6
+        WINDOWSTATE_FULLSCREEN_CINEMA = 6,
+
+        /// Display RoboDK in video mode
+        WINDOWSTATE_VIDEO = 7
     };
 
     /// Instruction program call type:
@@ -291,6 +300,15 @@ public:
 
         /// Allow using keyboard shortcuts.
         FLAG_ROBODK_WINDOWKEYS_ACTIVE = 4096,
+
+        /// Make the tree visible
+        FLAG_ROBODK_TREE_VISIBLE = 8192,
+
+        /// Make the reference frames visible
+        FLAG_ROBODK_REFERENCES_VISIBLE = 16384,
+
+        /// Make the statusbar visible
+        FLAG_ROBODK_STATUSBAR_VISIBLE = 32768,
 
         /// Disallow everything.
         FLAG_ROBODK_NONE = 0,
@@ -404,6 +422,16 @@ public:
     /// <param name="itemtype">optionally filter by RoboDK.ITEM_TYPE_*</param>
     /// <returns>Picked item or nullptr if the user selected Cancel</returns>
     virtual Item ItemUserPick(const QString &message = "Pick one item", int itemtype = -1)=0;
+
+    /// <summary>
+    /// Shows a RoboDK popup to select one object from the open RoboDK station.
+    /// You can provide a few items to choose from and, optionally, a selected index.
+    /// </summary>
+    /// <param name="message">Message to show in the pop up</param>
+    /// <param name="list_choices">Items to choose from</param>
+    /// <param name="id_selected">Selected id from list_choices if we want to select an item</param>
+    /// <returns>Picked item or nullptr if the user selected Cancel</returns>
+    virtual Item ItemUserPick(const QString &message, const QList<Item> &list_choices, int id_selected=-1)=0;
 
     /// <summary>
     /// Shows or raises the RoboDK window.

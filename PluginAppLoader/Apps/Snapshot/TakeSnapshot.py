@@ -10,7 +10,8 @@ from tkinter import filedialog
 
 RDK = Robolink()
 
-date_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+#date_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+date_str = datetime.datetime.now().strftime("%H-%M-%S")
 path_rdk = RDK.getParam('PATH_OPENSTATION')
 file_name = "RoboDK-Screenshot-" + date_str + ".png"
 
