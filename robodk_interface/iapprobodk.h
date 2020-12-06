@@ -29,7 +29,7 @@
 *
 * You can load one of the sample plug-ins by selecting:
 * - Tools - Plug-Ins
-* 
+*
 * \image html plugin-load.png width=600
 *
 * \subsection LinkPluginRoboDKAPI RoboDK API inside a Plug-In
@@ -234,7 +234,11 @@ public:
 
         /// The current RoboDK station (RDK file) is about to be closed. Items in the tree will be deleted and become invalid pointers shortly after this event.
         /// The RDK file may be saved if the user accepted to save changes and the corresponding EventAbout2Save event will be triggered.
-        EventAbout2CloseStation=7
+        EventAbout2CloseStation=7,
+
+        /// A new simulation move event completed for one or more robots or mechanisms. This event is usually triggered after one or more EventMoved to signal the completition of moves. This event is usually followed by a Render event after a few ms.
+        /// Tip: Use the command TrajectoryTime to retrieve accurate timing according to moving objects (time_sec = RDK->Command("TrajectoryTime").toDouble())
+        EventTrajectoryStep=8
     };
 
 
