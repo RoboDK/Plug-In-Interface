@@ -189,6 +189,11 @@ Mat::Mat(const float v[16]) :
     _valid = true;
 }
 
+Mat::Mat(double x, double y, double z):
+    QMatrix4x4(1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0,0.0,0.0,1.0)
+{
+    _valid = true;
+}
 
 
 Mat::~Mat(){
@@ -640,7 +645,7 @@ int Matrix2D_Get_nrows(const tMatrix2D *var) {
 double Matrix2D_Get_ij(const tMatrix2D *var, int i, int j) { // ZERO BASED!!
     return var->data[var->size[0] * j + i];
 }
-void Matrix2D_SET_ij(const tMatrix2D *var, int i, int j, double value) { // ZERO BASED!!
+void Matrix2D_Set_ij(const tMatrix2D *var, int i, int j, double value) { // ZERO BASED!!
     var->data[var->size[0] * j + i] = value;
 }
 

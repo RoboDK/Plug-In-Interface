@@ -3,7 +3,7 @@
 
 #include "pluginchip8.h"
 #include "robotplayer.h"
-#include "robodk_interface/iitem.h"
+#include "iitem.h"
 
 // In this module we use the RoboDK API instead of the Plugin Interface
 // The naming of the RoboDK API/interface is almost the same but the main difference is that the RoboDK API is executed on

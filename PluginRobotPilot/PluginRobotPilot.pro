@@ -97,18 +97,18 @@ FORMS += \
 
 
 #--------------------------
-# Header and source files required by any Qt application as a RoboDK plugin
-# Do not change this section
+# Header and source files required by any RoboDK plugin
+# Do not change this section, make sure to have the robodk_interface folder up one folder
 HEADERS += \
-    robodk_interface/iitem.h \
-    robodk_interface/irobodk.h\
-    robodk_interface/iapprobodk.h \
-    robodk_interface/robodktypes.h \
-    robodk_interface/robodktools.h \
+    ../robodk_interface/iitem.h \
+    ../robodk_interface/irobodk.h\
+    ../robodk_interface/iapprobodk.h \
+    ../robodk_interface/robodktypes.h \
+    ../robodk_interface/robodktools.h \
 
 SOURCES += \
-    robodk_interface/robodktools.cpp \
-    robodk_interface/robodktypes.cpp
+    ../robodk_interface/robodktools.cpp \
+    ../robodk_interface/robodktypes.cpp
 
-INCLUDEPATH += robodk_interface
+INCLUDEPATH += ../robodk_interface
 #--------------------------
