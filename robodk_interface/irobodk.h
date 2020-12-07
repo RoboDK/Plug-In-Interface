@@ -778,7 +778,7 @@ public:
     /// <param name="time_avg_ms">Average the pose from the buffer</param>
     /// <param name="tool_tip">XYZ position of the tool tip for average calculation</param>
     /// <returns>True if successful, false if unable to measure.</returns>
-    bool MeasurePose(Mat *pose, double data[10], int target=-1, int time_avg_ms=0, const tXYZ tool_tip=nullptr)=0;
+    virtual bool MeasurePose(Mat *pose, double data[10], int target=-1, int time_avg_ms=0, const tXYZ tool_tip=nullptr)=0;
 
     /// <summary>
     /// Checks the collision between a line and any objects in the station. The line is composed by 2 points.
