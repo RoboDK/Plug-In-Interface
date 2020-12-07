@@ -770,6 +770,17 @@ public:
     virtual bool LaserTrackerMeasure(tXYZ xyz, const tXYZ estimate, bool search = false)=0;
 
     /// <summary>
+    /// Takes a pose measurement (requires a supported measurement system).
+    /// </summary>
+    /// <param name="pose">Measured pose</param>
+    /// <param name="pose">Additional returned data [visible targets, button state, average error, max error]</param>
+    /// <param name="target">Target type</param>
+    /// <param name="time_avg_ms">Average the pose from the buffer</param>
+    /// <param name="tool_tip">XYZ position of the tool tip for average calculation</param>
+    /// <returns>True if successful, false if unable to measure.</returns>
+    bool MeasurePose(Mat *pose, double data[10], int target=-1, int time_avg_ms=0, const tXYZ tool_tip=nullptr)=0;
+
+    /// <summary>
     /// Checks the collision between a line and any objects in the station. The line is composed by 2 points.
     /// Returns the collided item. Use Item.Valid() to check if there was a valid collision.
     /// </summary>

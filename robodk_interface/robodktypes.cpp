@@ -284,8 +284,6 @@ void Mat::setValues(double pose[16]){
     Set(1,3, pose[13]);
     Set(2,3, pose[14]);
     Set(3,3, pose[15]);
-
-
 }
 
 
