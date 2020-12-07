@@ -460,6 +460,9 @@ public:
     /// Set the position (T position) in mm
     void setPos(double xyz[3]);
 
+    /// Set the pose values
+    void setValues(double pose[16]);
+
     /// Get the X vector (N vector)
     void VX(tXYZ xyz) const;
 

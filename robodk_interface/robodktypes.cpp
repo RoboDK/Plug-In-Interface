@@ -264,7 +264,29 @@ void Mat::setPos(double xyz[3]){
 }
 
 
+void Mat::setValues(double pose[16]){
+    Set(0,0, pose[0]);
+    Set(1,0, pose[1]);
+    Set(2,0, pose[2]);
+    Set(3,0, pose[3]);
 
+    Set(0,1, pose[4]);
+    Set(1,1, pose[5]);
+    Set(2,1, pose[6]);
+    Set(3,1, pose[7]);
+
+    Set(0,2, pose[8]);
+    Set(1,2, pose[9]);
+    Set(2,2, pose[10]);
+    Set(3,2, pose[11]);
+
+    Set(0,3, pose[12]);
+    Set(1,3, pose[13]);
+    Set(2,3, pose[14]);
+    Set(3,3, pose[15]);
+
+
+}
 
 
 void Mat::Set(int i, int j, double value){
