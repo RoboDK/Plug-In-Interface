@@ -115,7 +115,7 @@ void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
     IconSize = icon_size;
 
     // this function is called when RoboDK clears all toolbars, so all previously allocated toolbars have been deleted
-    AllToolbars.clear();    
+    AllToolbars.clear();
 
     // Create a new toolbar
     AppsLoadToolbars();
@@ -137,7 +137,10 @@ bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
 
 QString AppLoader::PluginCommand(const QString &command, const QString &value){
     qDebug() << "Received command: " << command << "    With value: " << value;
-    if (command.startsWith("OpenFile", Qt::CaseInsensitive)){
+    if (command.startsWith("Reload", Qt::CaseInsensitive)){
+        AppsReload();
+        return "Apps reloaded";
+    } else if (command.startsWith("OpenFile", Qt::CaseInsensitive)){
         // Execute the openfile command (provided by RoboDK when a file with the pattern *.apploader.rdkp is opened in RoboDK)
         // Since Qt doesn't have great tools for unzipping files we can run Python code to do so
         const char * python_code_c = R"""(
@@ -184,6 +187,7 @@ def UnZipDir(path_zip, path_extract):
 def DoOverride(display_message):
     root = tkinter.Tk()
     root.overrideredirect(1)
+    root.attributes("-topmost", True)
     root.withdraw()
     result = messagebox.askquestion('Override?', display_message, icon='warning')#, parent=texto)
     if result == 'yes':
@@ -205,19 +209,33 @@ if exists:
 
 UnZipDir(file_path, apps_path)
 printFlush('Done')
+
+from robolink import Robolink
+RDK = Robolink()
+RDK.PluginCommand("App Loader", "Reload")
 exit(0)
 )""";
 
         QString python_code;
+        QFileInfo apps_dir(PathApps);
+        if (!apps_dir.isWritable()){
+            // special flag that tells RoboDK to run as administrator
+            qDebug() << "Installing App requires administrator privileges...";
+            python_code.append(QString("#runasadmin\n"));
+        }
         python_code.append(QString("file_path = r'''" + value + "'''\n"));
         python_code.append(QString("apps_path = r'''" + PathApps + "'''\n"));
         python_code.append(python_code_c);
 
+        RDK->Command("PythonRunCode", python_code);
+
+        /*
         if (RunPythonShell(RDK->getParam("PYTHON_EXEC"), python_code)){
             AppsReload();
         } else {
             qDebug() << "Something went wrong executing Python code";
-        }
+        }*/
+        return "OK";
     }
     return "";
 }
@@ -276,6 +294,7 @@ void AppLoader::AppsSearch(){
     QString dir_apps_path = PathApps;
     QDir dir_apps(dir_apps_path);
     QStringList AppsDirList(dir_apps.entryList(QDir::Dirs));
+    int appsenabled_count = 0;
     foreach (QString dirApp, AppsDirList) {
         // Ignore folders that start with an underscore
         if (dirApp.startsWith("_") || dirApp.startsWith(".")){
@@ -286,10 +305,15 @@ void AppLoader::AppsSearch(){
         // Retrieve and/or create the INI file related to this app
         QString dirAppComplete = dir_apps_path + "/" + dirApp;
         QString fileSettings = dirAppComplete + "/Settings.ini";
-        qDebug() << "Checking if file does not exist and is not writtable: " + fileSettings;
+
+        // Check if the ini file exists, otherwise, try with the older Settings.ini file
+        if (!QFile::exists(fileSettings)){
+            fileSettings = dirAppComplete + "/AppConfig.ini";
+        }
 
         // Make sure we can write to the same location if the file does not exist, otherwise, save to app data location
         if (false && !QFile::exists(fileSettings)){
+            qDebug() << "Checking if file does not exist and is not writtable: " + fileSettings;
             QFileInfo fileInfo(fileSettings);
             fileInfo.dir().path();
 
@@ -305,6 +329,7 @@ void AppLoader::AppsSearch(){
         // Load settings and save them (default settings will be set)
         QSettings settings(fileSettings, QSettings::IniFormat);
         QString menuName = settings.value("MenuName", dirApp).toString();
+        QString menuParent = settings.value("MenuParent", "").toString();
         bool appEnabled = settings.value("Enabled", true).toBool();
         double menuPriority = settings.value("MenuPriority", 50.0).toDouble();
         int toolbarArea = settings.value("ToolbarArea", 2).toInt();
@@ -312,6 +337,7 @@ void AppLoader::AppsSearch(){
         QStringList RunCommands = settings.value("RunCommands", QStringList()).toStringList();
 
         settings.setValue("MenuName", menuName);
+        settings.setValue("MenuParent", menuParent);
         settings.setValue("Enabled", appEnabled);
         settings.setValue("MenuPriority", menuPriority);
         settings.setValue("ToolbarArea", toolbarArea);
@@ -321,7 +347,7 @@ void AppLoader::AppsSearch(){
 
         // Create a new list for menus and toolbars
         tAppToolbar *appToolbar = new tAppToolbar(menuName, menuPriority, toolbarArea, toolbarSize, appEnabled);
-        tAppMenu *appMenu = new tAppMenu(menuName, menuPriority, appEnabled, dirApp, fileSettings);
+        tAppMenu *appMenu = new tAppMenu(menuName, menuParent, menuPriority, appEnabled, dirApp, fileSettings);
         appMenu->Toolbar = appToolbar;
         ListMenus.append(appMenu);
         ListToolbars.append(appToolbar);
@@ -333,6 +359,7 @@ void AppLoader::AppsSearch(){
 
         // Run commands specified by each app (there could be conflicts/contradictions)
         if (appEnabled){
+            appsenabled_count = appsenabled_count + 1;
             foreach (QString command, RunCommands){
                 RDK->Command(command);
             }
@@ -458,17 +485,24 @@ void AppLoader::AppsSearch(){
                         actionGroups.append(actn_group);
                         actionGroupIds.append(checkable_group);
 
-                        // TODO: Not sure why but this is not allowed with MSVC2013!
+                        // this is not allowed with MSVC2013!
                         // make the action group allowed to not have anything selected
+#if _MSC_VER > 1800
                         connect(actn_group, &QActionGroup::triggered, [lastAction = static_cast<QAction *>(nullptr)](QAction* action) mutable {
+                            //if (action == lastAction){// && !action->isChecked())
                             if (action == lastAction)
                             {
+                                qDebug() << "Unchecking checked action";
+                                //action->blockSignals(true); // prevents the process from stopping
                                 action->setChecked(false);
+                                //action->blockSignals(false);
                                 lastAction = nullptr;
                             } else {
+                                //qDebug() << "Last action checked";
                                 lastAction = action;
                             }
                           });
+#endif
 
                     } else {
                         actn_group = actionGroups.at(existing_group_id);
@@ -529,6 +563,12 @@ void AppLoader::AppsSearch(){
     if (ListToolbars.length() > 1){
         qSort(ListToolbars.begin(), ListToolbars.end(), CheckPriority());
     }
+    QString msg(tr("Done loading Apps"));
+    if (appsenabled_count > 0){
+        msg.append(": " + QString("%1 RoboDK Apps active.").arg(appsenabled_count));
+    }
+    RDK->ShowMessage(msg, false);
+
 }
 
 void AppLoader::AppsLoadMenus(){
@@ -542,12 +582,35 @@ void AppLoader::AppsLoadMenus(){
         if (!appmenu->Active){
             continue;
         }
-        QMenu *menui = MenuBar->addMenu(appmenu->Name);
+        // add menu to another submenu
+        QMenu *menui = nullptr;
+        if (!appmenu->ParentMenu.isEmpty()){
+            QMenu *menu_attach = MenuBar->findChild<QMenu *>(appmenu->ParentMenu);
+            if (menu_attach != nullptr){
+                /*if (menuTools->actions().length() > id_action){
+                    qDebug() << "Inserting menu action at location " << id_action;
+                    menuTools->insertAction(menuTools->actions()[id_action], action_robotpilot);
+                } else {
+                */
+                qDebug() << "Inserting menu action at the end of the utilities menu";
+                menu_attach->addSeparator();
+                //menuUtilities->addMenu(menu1);
+                menui = menu_attach->addMenu(appmenu->Name);
+                //}
+            } else {
+                // named menu not found: adding action in the main menu
+                qDebug() << "Adding menu in the main menu";
+                menui = MenuBar->addMenu(appmenu->Name);
+            }
+        } else {
+            menui = MenuBar->addMenu(appmenu->Name);
+        }
         menui->addActions(appmenu->Actions);
         AllMenus.append(menui);
     }
 
     // If we didn't find anything: add a help section
+    /*
     if (AllMenus.length() <= 0 || AllActions.length() <= 0){
         // actions are callbacks from buttons selected from the menu or the toolbar
         QAction *action_information = new QAction(tr("Help (no RoboDK Apps loaded)"));
@@ -561,7 +624,7 @@ void AppLoader::AppsLoadMenus(){
         menu_help->addAction(action_information);
         AllMenus.append(menu_help);
         qDebug() << "Done";
-    }
+    }*/
 }
 
 void AppLoader::AppsUnloadMenus(){
@@ -602,6 +665,7 @@ void AppLoader::AppsLoadToolbars(){
     }
 }
 
+/*
 bool AppLoader::RunPythonShell(const QString &python_exec, const QString &python_code){
     QProcess *process = new QProcess(this);
     QStringList arguments;
@@ -646,7 +710,7 @@ bool AppLoader::RunPythonShell(const QString &python_exec, const QString &python
     process->deleteLater();
     return true;
 }
-
+*/
 void AppLoader::onRunScript(){
     // retrieve the sender action/button
     QAction *action = qobject_cast<QAction*>(QObject::sender());
@@ -665,16 +729,18 @@ void AppLoader::onRunScript(){
     // If the action is checkable, save a station parameter with the name of the file (1= checked, 0= unchecked)
     if (action->isCheckable()){
         QFileInfo fileInfo(filepath);
-        RDK->setParam(fileInfo.baseName(), action->isChecked() ? "1" : "0");
+        QString param_name(fileInfo.baseName() + "_" + fileInfo.path().replace("\\","/").split("/").last());
+        RDK->setParam(param_name, action->isChecked() ? "1" : "0");
     }
 
     // start the process
     QProcess *proc = new QProcess();
-    QStringList args;
     proc->setObjectName("Process: " + filepath);
 
     connect(proc, SIGNAL(finished(int)), this, SLOT(onScriptFinished()));
-    connect(proc, SIGNAL(readyRead()),this,SLOT(onScriptReadyRead()));
+    connect(proc, SIGNAL(readyReadStandardOutput()),this,SLOT(onScriptReadyRead()));
+    //connect(proc, SIGNAL(readyReadStandardError()),this,SLOT(onScriptReadyRead()));
+
     connect(this, SIGNAL(stop_process()), proc, SLOT(kill())); // kill is more aggressive, you can also use terminate
     showErrors = true; // flag to show errors unless we willingly kill all processes
 
@@ -682,7 +748,16 @@ void AppLoader::onRunScript(){
         if (action->isChecked()){
             // make sure we uncheck the action if the process ends or stops
             connect(proc, static_cast<void(QProcess::*)(int)>(&QProcess::finished), proc, [action]() {
-                action->setChecked(false);
+
+                QActionGroup *grp = action->actionGroup();
+                if (grp != nullptr && grp->checkedAction() == action){
+                    grp->triggered(action); // important to reset the group lastaction static variable
+                } else {
+                    action->blockSignals(true); // the process stopped naturally: do not trigger a process
+                    action->setChecked(false);
+                    action->blockSignals(false);
+                }
+
                 qDebug() << "Action stopped and unchecked";
             });
 
@@ -692,9 +767,9 @@ void AppLoader::onRunScript(){
             connect(action, &QAction::toggled, proc, [action, proc, this](bool checked){
                 if (checked){
                     // this means we unchecked and checked again (another process is starting). So delete the previous process
-                    qDebug() << "Sending kill signal";
+                    qDebug() << "Action selected but process didn't stop. Sending kill signal";
                     emit proc->kill();
-                    QObject::disconnect(proc);
+                    //QObject::disconnect(proc);
                 } else {
                     QObject::disconnect(proc, SIGNAL(finished(int)), nullptr, nullptr);   // make sure we don't notify about the process crash or finish due to this provoked stop
                     qDebug() << "Sending terminate signal";
@@ -706,10 +781,8 @@ void AppLoader::onRunScript(){
                         this->Process_SkipKill_List.removeAll(proc); // remove from list
                     }
                 }
-
                 // make sure we don't send more signals:
                 disconnect(action, nullptr, proc, nullptr);
-
             });
         }
     }
@@ -722,18 +795,19 @@ void AppLoader::onRunScript(){
     proc->setEnvironment(envlist);
 
     // run the script
-
+    QStringList args;
+    if (action->isCheckable()){ // pass an argument if the option is checkable
+        args.append(action->isChecked() ? "Checked" : "Unchecked");
+    }
     if (filepath.endsWith(".py", Qt::CaseInsensitive)){
-        args.append(filepath);
-        if (action->isCheckable()){ // pass an argument if the option is checkable
-            args.append(action->isChecked() ? "Checked" : "Unchecked");
-        }
-        qDebug() << "Running script: " << filepath << " " << args;
+        args.prepend(filepath);
+        qDebug() << "Running script: " << filepath;
         proc->start(RDK->getParam("PYTHON_EXEC"), args);
     } else {
         qDebug() << "Running custom executable: " << filepath;
         proc->start(filepath);
     }
+    qDebug() << "Arguments: " << args;
 
 }
 
@@ -745,8 +819,9 @@ void AppLoader::onScriptFinished(){
         return;
     }
 
-    qDebug() << "Script finished";
+    QObject::disconnect(proc);
 
+    qDebug().noquote() << "Script finished with exit code: " << proc->exitCode() << "->" << proc->objectName();
     // Display warning message when there is an error
     if (proc->exitCode() != 0){
         /*QString script_path("unknown");
@@ -772,7 +847,7 @@ void AppLoader::onScriptFinished(){
 
     // remove from list of items to kill
     if (Process_SkipKill_List.contains(proc)){
-        this->Process_SkipKill_List.removeAll(proc); // remove from list
+        Process_SkipKill_List.removeAll(proc); // remove from list
     }
 }
 
@@ -787,8 +862,8 @@ void AppLoader::onScriptReadyRead(){
     QString str_stdout(proc->readAllStandardOutput());
     QString str_stderr(proc->readAllStandardError());
 
-    qDebug() << "---- App process output for: " + proc->objectName();
-    if (!str_stdout.isEmpty()){        
+    qDebug().noquote() << "\n---- App process output for: " << proc->objectName();
+    if (!str_stdout.isEmpty()){
         // This flag makes sure we don't kill the process when we uncheck it
         if (str_stdout.contains("App Setting: Skip kill", Qt::CaseInsensitive)){
             if (!Process_SkipKill_List.contains(proc)){
@@ -800,14 +875,14 @@ void AppLoader::onScriptReadyRead(){
             disconnect(proc, nullptr, nullptr, nullptr);
         }
 
-        qDebug() << "STDOUT: ";
-        qDebug().noquote() << str_stdout.toUtf8();
+        //qDebug() << "(STDOUT)";
+        qDebug().noquote() << str_stdout.toUtf8().trimmed();
     }
     if (!str_stderr.isEmpty()){
-        qDebug() << "STDERROR: ";
-        qDebug().noquote() << str_stderr.toUtf8();
+        qDebug() << "(STDERROR)";
+        qDebug().noquote() << str_stderr.toUtf8().trimmed();
     }
-    qDebug() << "----";
+    qDebug() << "---- done ----";
 }
 
 

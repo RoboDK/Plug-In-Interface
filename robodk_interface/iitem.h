@@ -314,6 +314,11 @@ public:
     virtual int JointLimits(tJoints *lower_limits, tJoints *upper_limits)=0;
 
     /// <summary>
+    /// Set the joint limits of a robot
+    /// </summary>
+    virtual int setJointLimits(const tJoints &lower_limits, const tJoints &upper_limits)=0;
+
+    /// <summary>
     /// Sets the robot of a program or a target. You must set the robot linked to a program or a target every time you copy paste these objects.
     /// If the robot is not provided, the first available robot will be chosen automatically.
     /// </summary>
