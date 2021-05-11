@@ -307,11 +307,25 @@ static UA_StatusCode setJoints(void *h, const UA_NodeId objectId, size_t inputSi
     if (!Var_2_Item(input + 0, &item, plugin->RDK)){
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
-    double joints[nDOFs_MAX];
-    if (!Var_2_DoubleArray(input+1, joints, nDOFs_MAX)){
+    //if (!plugin->RDK->Valid(item)){
+    //        ShowMessage(plugin, QObject::tr("setJoints: RoboDK Item provided is not valid"));
+    //        return UA_STATUSCODE_BADARGUMENTSMISSING;
+    //}
+
+    double joint_values[nDOFs_MAX];
+
+    // Retrieve current robot joints and number of axes
+    tJoints current_joints = item->Joints();
+    current_joints.GetValues(joint_values);
+    int joints_ndofs = current_joints.Length();
+
+
+    //Var_2_DoubleArray(input+1, joints, nDOFs_MAX);
+    if (!Var_2_DoubleArray(input+1, joint_values, nDOFs_MAX)){
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
-    item->setJoints(joints);
+    tJoints new_joints(joint_values, joints_ndofs);
+    item->setJoints(new_joints);
     return UA_STATUSCODE_GOOD;
 }
 static UA_StatusCode setJointsStr(void *h, const UA_NodeId objectId, size_t inputSize, const UA_Variant *input, size_t outputSize, UA_Variant *output) {
@@ -333,15 +347,18 @@ static UA_StatusCode setJointsStr(void *h, const UA_NodeId objectId, size_t inpu
         ShowMessage(plugin, QObject::tr("setJointsStr: RoboDK Item provided is not valid"));
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
-    double joints[nDOFs_MAX];
-    item->Joints().GetValues(joints);
+    double joint_values[nDOFs_MAX];
+    tJoints current_joints = item->Joints();
+    current_joints.GetValues(joint_values);
+    int joints_ndofs = current_joints.Length();
     int numel = nDOFs_MAX;
-    string_2_doubles(str_joints, joints, &numel);
+    string_2_doubles(str_joints, joint_values, &numel);
     if (numel <= 0){
         ShowMessage(plugin, QObject::tr("setJointsStr: Invalid joints string"));
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
-    item->setJoints(joints);
+    tJoints new_joints(joint_values, joints_ndofs);
+    item->setJoints(new_joints);
     plugin->RDK->Render();
     return UA_STATUSCODE_GOOD;
 }
