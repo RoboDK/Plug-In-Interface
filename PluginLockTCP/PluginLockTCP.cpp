@@ -94,16 +94,16 @@ bool PluginLockTCP::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
 
 QString PluginLockTCP::PluginCommand(const QString &command, const QString &value){
     // Get the item by it's name
-    Item tool_item = RDK->getItem(value, IItem::ITEM_TYPE_TOOL);
-    if ((tool_item == nullptr) || (tool_item->Name() != value)){
+    Item robot_item = RDK->getItem(value, IItem::ITEM_TYPE_ROBOT);
+    if ((robot_item == nullptr) || (robot_item->Name() != value)){
         qDebug() << "Invalid tool item name: " << value;
-        return "INVALID_NAME";
+        return "Invalid robot name";
     }
 
     // Update the status
-    last_clicked_item = tool_item;
+    last_clicked_item = robot_item;
     callback_tcp_lock(command.compare("Lock", Qt::CaseInsensitive) == 0);
-    return "Done";
+    return "OK";
 }
 
 
@@ -162,7 +162,7 @@ void PluginLockTCP::callback_tcp_lock(bool lock){
     }
 
     for (auto& l_item : locked_items){
-        if (l_item.tool == last_clicked_item){
+        if (l_item.robot == last_clicked_item){
             l_item.locked = lock;
             l_item.pose = l_item.robot->Parent()->PoseAbs() * l_item.robot->SolveFK(l_item.robot->Joints());
         }
