@@ -4,6 +4,8 @@
 
 #include "iapprobodk.h"
 
+class QAction;
+
 ///
 /// \brief The PluginLockTCP allows locking the TCP pose of a 6 axis robot mounted on an synchronized external axis.
 ///
@@ -97,7 +99,6 @@ private:
     {
         bool locked { false };
         Item robot { nullptr };
-        Item tool { nullptr };
         QMatrix4x4 pose;
     };
 
@@ -108,7 +109,6 @@ private:
     Item last_clicked_item { nullptr };
 
 };
-//! [0]
 
 
 #endif // PLUGINLOCKTCP_H

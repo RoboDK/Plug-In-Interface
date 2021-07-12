@@ -8,7 +8,7 @@
 //------------------------------- RoboDK Plug-in commands ------------------------------
 
 QString PluginLockTCP::PluginName(){
-    return "Lock TCP Plugin";
+    return "Lock TCP";
 }
 
 
@@ -46,45 +46,53 @@ void PluginLockTCP::PluginUnload(){
 
 
 bool PluginLockTCP::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
-
-    // Ensure this is a tool attached to a 6 dof robot, mounted on a synchronized external axis
+    if (click_type != ClickRight){
+        return false;
+    }
+    // Check if we right clicked a tool and get the robot pointer instead
     if (item->Type() == IItem::ITEM_TYPE_TOOL){
-        Item robot_item = item->Parent();
+        item = item->Parent();
+    }
+    // Check if we selected a robot or an item attached to a robot
+    if (item->Type() == IItem::ITEM_TYPE_ROBOT){
 
-        if (RDK->Valid(robot_item) && (robot_item->Type() == IItem::ITEM_TYPE_ROBOT)){
-            if (robot_item->Joints().Length() == 7){ // 6 axis + 1 external axis.
+        // Get the parent robot, this will always return the pointer to the 6 axis robot, or the robot itself
+        Item robot_item = item->getLink(IItem::ITEM_TYPE_ROBOT);
 
-                this->last_clicked_item = item;
-                menu->addSeparator();
-                menu->addAction(action_lock);
-
-                // Add this combination to the list of possible locked TCPs
-                bool exist = false;
-                for (const auto& locked_item : locked_items){
-                    if ((locked_item.robot == robot_item) && (locked_item.tool == item)){
-                        exist = true;
-                        break;
-                    }
+        //if (RDK->Valid(robot_item) && (robot_item->Type() == IItem::ITEM_TYPE_ROBOT)){
+        if (robot_item->Joints().Length() >= 7){ // 6 axis + 1 external axis or more
+            // Add this combination to the list of possible locked TCPs
+            bool exist = false;
+            bool locked = false;
+            for (const auto& locked_item : locked_items){
+                if (locked_item.robot == robot_item){
+                    exist = true;
+                    locked = locked_item.locked;
+                    break;
                 }
-
-                if (!exist){
-                    locked_item_t new_item;
-                    new_item.robot = robot_item;
-                    new_item.tool = item;
-                    new_item.pose = item->PoseAbs();
-                    new_item.locked = false;
-                    locked_items.append(new_item);
-                }
-
-                return true;
             }
+            if (!exist){
+                locked_item_t new_item;
+                new_item.robot = robot_item;
+                new_item.pose = item->PoseAbs();
+                new_item.locked = false;
+                locked_items.append(new_item);
+            }
+
+            // create the menu option
+            this->last_clicked_item = robot_item;
+            menu->addSeparator();
+            action_lock->blockSignals(true);
+            action_lock->setChecked(locked);
+            action_lock->blockSignals(false);
+            menu->addAction(action_lock);
+            return true;
         }
     }
     return false;
 }
 
 QString PluginLockTCP::PluginCommand(const QString &command, const QString &value){
-
     // Get the item by it's name
     Item tool_item = RDK->getItem(value, IItem::ITEM_TYPE_TOOL);
     if ((tool_item == nullptr) || (tool_item->Name() != value)){
@@ -106,8 +114,9 @@ void PluginLockTCP::PluginEvent(TypeEvent event_type){
         // Check if any locked TCPs were removed
         for (auto it = locked_items.begin(); it != locked_items.end(); it++){
             locked_item_t l_item = *it;
-            if (!RDK->Valid(l_item.robot) || !RDK->Valid(l_item.tool)){
-                qDebug() << "Deleting TCP lock: " << l_item.tool->Name();
+            if (!RDK->Valid(l_item.robot)){
+                // here, l_item.robot is not accessible anymore
+                qDebug() << "Deleting TCP lock for robot";
                 locked_items.erase(it--);
             }
         }
