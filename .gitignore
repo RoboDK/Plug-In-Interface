@@ -39,6 +39,8 @@ ui_*.h
 wrapper.bat
 wrapper.sh
 
+**/build/**
+
 # qtcreator generated files
 *.creator.user*
 *.pro.user*
