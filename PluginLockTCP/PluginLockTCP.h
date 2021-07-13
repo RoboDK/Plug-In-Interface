@@ -105,7 +105,7 @@ private:
     /// Vector of all available locked items
     QVector<locked_item_t> locked_items;
 
-    /// Last clicked item --or item to lock
+    /// Last clicked item --or item to lock/unlock
     Item last_clicked_item { nullptr };
 
 };

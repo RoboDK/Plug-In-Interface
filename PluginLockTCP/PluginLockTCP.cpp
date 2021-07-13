@@ -37,11 +37,15 @@ QString PluginLockTCP::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar
 
 
 void PluginLockTCP::PluginUnload(){
+    last_clicked_item = nullptr;
     locked_items.clear();
 
-    disconnect(action_lock, SIGNAL(triggered(bool)), this, SLOT(callback_tcp_lock(bool)));
-    delete action_lock;
-    action_lock = nullptr;
+    if (nullptr != action_lock)
+    {
+        disconnect(action_lock, SIGNAL(triggered(bool)), this, SLOT(callback_tcp_lock(bool)));
+        delete action_lock;
+        action_lock = nullptr;
+    }
 }
 
 
@@ -59,7 +63,6 @@ bool PluginLockTCP::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
         // Get the parent robot, this will always return the pointer to the 6 axis robot, or the robot itself
         Item robot_item = item->getLink(IItem::ITEM_TYPE_ROBOT);
 
-        //if (RDK->Valid(robot_item) && (robot_item->Type() == IItem::ITEM_TYPE_ROBOT)){
         if (robot_item->Joints().Length() >= 7){ // 6 axis + 1 external axis or more
             // Add this combination to the list of possible locked TCPs
             bool exist = false;
@@ -74,18 +77,19 @@ bool PluginLockTCP::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
             if (!exist){
                 locked_item_t new_item;
                 new_item.robot = robot_item;
-                new_item.pose = item->PoseAbs();
+                new_item.pose = QMatrix4x4();
                 new_item.locked = false;
                 locked_items.append(new_item);
             }
 
-            // create the menu option
-            this->last_clicked_item = robot_item;
+            // Create the menu option, or update if it already exist
             menu->addSeparator();
             action_lock->blockSignals(true);
             action_lock->setChecked(locked);
             action_lock->blockSignals(false);
             menu->addAction(action_lock);
+
+            last_clicked_item = robot_item;
             return true;
         }
     }
