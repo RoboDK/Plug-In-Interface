@@ -45,7 +45,7 @@ C:/RoboDK/
 ├───Apps
 │   │
 │   ├───Record
-│   │       Settings.ini
+│   │       AppConfig.ini
 │   │       AttachCamera.py
 │   │       AttachCamera.svg
 │   │       AttachCameraChecked.svg
@@ -56,7 +56,7 @@ C:/RoboDK/
 │   │       SetSize.svg
 │   │
 │   ├───SetStyle
-│   │      Settings.ini
+│   │      AppConfig.ini
 │   │      Default_Appearance.py
 │   │      Points_RedPointCloud.py
 │   │      Points_RedPointCloud.svg
@@ -88,7 +88,7 @@ Package
 
 RoboDK software treats rdkp files as RoboDK packaged apps. These file consists on the Apps tree structure Zipped in one folder using the RDKP extension. 
 
-Double clicking an rdkp file provokes RoboDK to load the AppLoader plugin automatically (for example: Package.apploader.rdkp). Furthermore, the full path of the file is passed to the apploader plugin (or the corresponding plugin) as an "OpenFile" command (PluginCommand) if the plugin name is added before the extension.
+Double clicking an rdkp file provokes RoboDK to load the AppLoader plugin automatically (for example: Package.rdkp). Furthermore, the full path of the file is passed to the apploader plugin (or the corresponding plugin) as an "OpenFile" command (PluginCommand) if the plugin name is added before the extension.
 
 The script PackageCreate.py will pack the contents in the Apps folder and save it as Package.apploader.rdkp automatically. This file is then ready to distribute.
 
@@ -100,11 +100,11 @@ Icons
 Having an image with the same name as the script will automatically load the image as the action. Supported image types include SVG, PNG, JPG and ICO (in this order of preference).
 
 
-Settings.ini
+AppConfig.ini
 ============
 
-Once a new app or script is loaded for the first time, an Settings.ini is created. 
-The Settings.ini file allows you to customize the priority of the App, the size of the toolbar and the look of each action. 
+Once a new app or script is loaded for the first time, an AppConfig.ini is created. 
+The AppConfig.ini file allows you to customize the priority of the App, the size of the toolbar and the size and look of each action. 
 
 The top section (General) of the INI file allows you to customize the look. For example, the Recorder general App settings look like this:
 [General]
@@ -120,11 +120,25 @@ Each action will also have some settings to customize the appearance. For exampl
 * DisplayName=Record - Name displayed in the main menu
 * Description=Start/stop screen recording (3D view) - Description to display on hover
 * Checkable=true - Set to true if we want this to be checkable
+* CheckableGroup=1 - Set to a number greater than zero if you want to group this action with other actions having the same group index
 * AddToToolbar=true - Set to false to not show this action in the toolbar
 * Priority=1 - Set the priority within the same app (lower shows first)
 * TypeOnContextMenu=-1 - Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API)
 * Visible=true - Set to false to disable this action (not show it)
 * Shortcut= - Set a keyboard shortcut to trigger this action
+
+
+AppLink.ini
+============
+
+You can optionally create an AppLink.ini file to link the app to another folder. You should set the path to the app folder Path variable. For example, the contents of an AppLink.ini file should look like this:
+
+``` bash
+[General]
+Path="D:/GitHub/Record"
+```
+
+The AppConfig.ini file (or Settings.ini in older versions) has priority over the AppLink.ini file, so the AppLink.ini file is ignored if one of the first 2 ini files are found.
 
  
 Checkable actions
