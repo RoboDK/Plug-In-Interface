@@ -135,6 +135,20 @@ bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
     return false;
 }
 
+bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeClick click_type){
+    if (item_list.isEmpty()){
+        return false;
+    }
+
+    int common_type = item_list.front()->Type();
+    for (const auto& item : item_list){
+        if (item->Type() != common_type){
+            return false;
+        }
+    }
+    return PluginItemClick(item_list.front(), menu, click_type);
+}
+
 QString AppLoader::PluginCommand(const QString &command, const QString &value){
     qDebug() << "Received command: " << command << "    With value: " << value;
     if (command.startsWith("Reload", Qt::CaseInsensitive)){
@@ -302,13 +316,31 @@ void AppLoader::AppsSearch(){
         }
         qDebug() << "Loading App dir: " << dirApp;
 
-        // Retrieve and/or create the INI file related to this app
         QString dirAppComplete = dir_apps_path + "/" + dirApp;
-        QString fileSettings = dirAppComplete + "/Settings.ini";
+
+        // Retrieve and/or create the INI file related to this app
+        QString fileSettings = dirAppComplete + "/AppConfig.ini";
 
         // Check if the ini file exists, otherwise, try with the older Settings.ini file
         if (!QFile::exists(fileSettings)){
-            fileSettings = dirAppComplete + "/AppConfig.ini";
+            fileSettings = dirAppComplete + "/Settings.ini";
+            if (!QFile::exists(fileSettings)){
+                // Check if we want to forward the app location to another folder (useful if we use GitHub)
+                QString fileLinkTo = dirAppComplete + "/AppLink.ini";
+                if (QFile::exists(fileLinkTo)){
+                    QSettings linksettings(fileLinkTo, QSettings::IniFormat);
+                    QString pathLink = linksettings.value("Path", "").toString();
+                    if (!pathLink.isEmpty()){
+                        QDir pathLinkDir(pathLink);
+                        if (pathLinkDir.exists()){
+                            dirAppComplete = pathLink;
+                            fileSettings = dirAppComplete + "/AppConfig.ini";
+                            qDebug() << "Linking app dir to: " << dirAppComplete;
+                        }
+                    }
+                }
+                //--------------------------------------------------------------
+            }
         }
 
         // Make sure we can write to the same location if the file does not exist, otherwise, save to app data location

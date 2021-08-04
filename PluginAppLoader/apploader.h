@@ -61,8 +61,9 @@ public:
 /// Hold the information related to an App (menu) for sorting purposes
 class tAppMenu {
 public:
-    tAppMenu(const QString &name, double priority, bool active, const QString &apppath, const QString &inipath):
+    tAppMenu(const QString &name, const QString &parentMenu, double priority, bool active, const QString &apppath, const QString &inipath):
         Name(name),
+        ParentMenu(parentMenu),
         Priority(priority),
         Active(active),
         NamePath(apppath),
@@ -73,6 +74,7 @@ public:
     }
     bool Active;
     QString Name;
+    QString ParentMenu;
     QString NamePath;
     QString IniPath;
     double Priority;
@@ -103,6 +105,7 @@ public:
     virtual void PluginUnload() override;
     virtual void PluginLoadToolbar(QMainWindow *mw, int icon_size) override;
     virtual bool PluginItemClick(Item item, QMenu *menu, TypeClick click_type) override;
+    virtual bool PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeClick click_type) override;
     virtual QString PluginCommand(const QString &command, const QString &value) override;
     virtual void PluginEvent(TypeEvent event_type) override;
 
@@ -132,7 +135,7 @@ public:
     void AppsUnloadToolbars();
 
     /// Run Python code from Qt
-    bool RunPythonShell(const QString &python_exec, const QString &python_code);
+    //bool RunPythonShell(const QString &python_exec, const QString &python_code);
 
 // Recommended pointers to use in your plugin:
 public:
