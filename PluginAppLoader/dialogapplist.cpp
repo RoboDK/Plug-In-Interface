@@ -103,7 +103,6 @@ void DialogAppList::on_btnOk_clicked(){
     deleteLater();
 }
 
-
 void DialogAppList::on_btnStopAppActions_clicked(){
     emit pAppLoader->stop_process();
 }

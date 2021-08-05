@@ -322,25 +322,37 @@ void AppLoader::AppsSearch(){
         QString fileSettings = dirAppComplete + "/AppConfig.ini";
 
         // Check if the ini file exists, otherwise, try with the older Settings.ini file
-        if (!QFile::exists(fileSettings)){
+        bool fileExist = QFile::exists(fileSettings);
+        if (!fileExist){
             fileSettings = dirAppComplete + "/Settings.ini";
-            if (!QFile::exists(fileSettings)){
+            fileExist = QFile::exists(fileSettings);
+            if (!fileExist){
                 // Check if we want to forward the app location to another folder (useful if we use GitHub)
                 QString fileLinkTo = dirAppComplete + "/AppLink.ini";
                 if (QFile::exists(fileLinkTo)){
                     QSettings linksettings(fileLinkTo, QSettings::IniFormat);
                     QString pathLink = linksettings.value("Path", "").toString();
+                    pathLink.replace("\\","/"); // Qt Docs: QSettings always treats backslash as a special character and provides no API for reading or writing such entries.
                     if (!pathLink.isEmpty()){
                         QDir pathLinkDir(pathLink);
                         if (pathLinkDir.exists()){
                             dirAppComplete = pathLink;
                             fileSettings = dirAppComplete + "/AppConfig.ini";
                             qDebug() << "Linking app dir to: " << dirAppComplete;
+                            fileExist = QFile::exists(fileSettings);
+                            if (!fileExist){
+                                // Try with the older Settings.ini file
+                                fileSettings = dirAppComplete + "/Settings.ini";
+                                fileExist = QFile::exists(fileSettings);
+                            }
                         }
                     }
                 }
-                //--------------------------------------------------------------
             }
+        }
+
+        if (!fileExist){
+             fileSettings = dirAppComplete + "/AppConfig.ini"; // Use default INI file name
         }
 
         // Make sure we can write to the same location if the file does not exist, otherwise, save to app data location

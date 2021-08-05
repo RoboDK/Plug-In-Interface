@@ -131,11 +131,12 @@ Each action will also have some settings to customize the appearance. For exampl
 AppLink.ini
 ============
 
-You can optionally create an AppLink.ini file to link the app to another folder. You should set the path to the app folder Path variable. For example, the contents of an AppLink.ini file should look like this:
+You can optionally create an AppLink.ini file to link the app to another folder. You should set the path to the app folder Path variable. Note: single backslashes (\\) are treated as special character. For example, the contents of an AppLink.ini file should look like this:
 
 ``` bash
 [General]
-Path="D:/GitHub/Record"
+Path="D:/GitHub/Record" 
+# or Path="D:\\GitHub\\Record"
 ```
 
 The AppConfig.ini file (or Settings.ini in older versions) has priority over the AppLink.ini file, so the AppLink.ini file is ignored if one of the first 2 ini files are found.
