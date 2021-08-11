@@ -127,9 +127,12 @@ bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
         if (ListActions[i]->AppMenu != nullptr && !ListActions[i]->AppMenu->Active){
             continue;
         }
-        int type_show = ListActions[i]->TypeShowOnContextMenu;
-        if (item->Type() == type_show){
-            menu->addAction(ListActions[i]->Action); // add action at the end
+        const QList<int>& types_show = ListActions[i]->TypesShowOnContextMenu;
+        for (int type_show : types_show){
+            if (item->Type() == type_show){
+                menu->addAction(ListActions[i]->Action); // add action at the end
+                break;
+            }
         }
     }
     return false;
@@ -450,7 +453,12 @@ void AppLoader::AppsSearch(){
             int checkable_group = settings.value(keyName + "/CheckableGroup", -1).toInt();
             bool addToolBar = settings.value(keyName + "/AddToToolbar", true).toBool();
             double priority = settings.value(keyName + "/Priority", 50.0f).toDouble();
-            int type_leftclick = settings.value(keyName + "/TypeOnContextMenu", -1).toInt();
+            QStringList types_leftclick_str = settings.value(keyName + "/TypeOnContextMenu", {}).toStringList(); // Multiple item support. Format can be "TypeOnContextMenu=int" or "TypeOnContextMenu=int, int, .."
+
+            QList<int> types_leftclick; // it's much more readable to use string list than int list, as they get binarized
+            for (QString string : types_leftclick_str){
+                types_leftclick.append(string.toInt());
+            }
 
             // Prevent empty names
             if (displayName.isEmpty()){
@@ -466,7 +474,7 @@ void AppLoader::AppsSearch(){
             settings.setValue(keyName + "/CheckableGroup", checkable_group);
             settings.setValue(keyName + "/AddToToolbar", addToolBar);
             settings.setValue(keyName + "/Priority", priority);
-            settings.setValue(keyName + "/TypeOnContextMenu", type_leftclick);
+            settings.setValue(keyName + "/TypeOnContextMenu",  types_leftclick_str);
 
             // Forget about this action if it is set to non visible
             if (!visible){
@@ -556,7 +564,7 @@ void AppLoader::AppsSearch(){
             }
 
             // Add the actions in the global list:
-            ListActions.append(new tAppAction(action, priority, appMenu, type_leftclick));
+            ListActions.append(new tAppAction(action, priority, appMenu, types_leftclick));
 
             // Add the actions to the menu and toolbar
             menuActions.append(new tAppAction(action, priority, appMenu));

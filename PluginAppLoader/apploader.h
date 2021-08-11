@@ -25,16 +25,16 @@ class tAppMenu;
 /// Hold information related to an action for sorting purposes
 class tAppAction {
 public:
-    tAppAction(QAction *action, double priority, tAppMenu *app, int type=-1):
+    tAppAction(QAction *action, double priority, tAppMenu *app, QList<int> types={}):
         Priority(priority),
-        TypeShowOnContextMenu(type),
+        TypesShowOnContextMenu(types),
         AppMenu(app)
     {
         Action = action;
     }
     QAction *Action;
     double Priority;
-    int TypeShowOnContextMenu;
+    QList<int> TypesShowOnContextMenu;
     tAppMenu *AppMenu;
 };
 
