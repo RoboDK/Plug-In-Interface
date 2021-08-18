@@ -122,6 +122,10 @@ void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 }
 
 bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
+    if (menu == nullptr){
+        return false; // Generic types will send null menus
+    }
+
     qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
     for (int i=0; i<ListActions.length(); i++){
         if (ListActions[i]->AppMenu != nullptr && !ListActions[i]->AppMenu->Active){
@@ -141,6 +145,10 @@ bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
 bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeClick click_type){
     if (item_list.isEmpty()){
         return false;
+    }
+
+    if (menu == nullptr){
+        return false; // Generic types will send null menus
     }
 
     int common_type = item_list.front()->Type();
