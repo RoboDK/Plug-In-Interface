@@ -11,7 +11,7 @@ Then, make sure the AppLoader is enabled (Shift+I) and this app is enabled (Shif
 Press the Controller icon in the toolbar to start the app, and click again to stop it.
 
 By default, this app moves the simulated robot. You can also move the real robot if you are connected using the RoboDK driver for your robot controller:
-* In RoboDK, Select Connect->Connect robot
+* Select Connect-Connect robot
 * Enter the IP of the robot
 * Select Connect
 
