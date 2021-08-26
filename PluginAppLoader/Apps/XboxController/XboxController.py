@@ -31,12 +31,12 @@ def MainAction():
     print('Press both bumpers to Home.')
     print('Use the right trigger to engage the safeguard.')
     print('To run on the real robot: RoboDK->Connect->Connect robot->Connect.')
-    print('Ensure the robot speed is adequate: RoboDK->Right-click your robot->Options->Parameters.')
+    print('Ensure the robot speeds are adequate: RoboDK->Right-click your robot->Options->Parameters.')
 
     # Global flag for debugging. Setting this to false will never run on robot.
     RUN_ON_ROBOT = True
 
-    # You might want to change this parameters based on your needs.
+    # You might want to change the parameters below based on your needs.
 
     # Robot speeds
     MAX_LINEAR_SPEED = 25.0  # mm/s
