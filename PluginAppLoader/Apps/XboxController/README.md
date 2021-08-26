@@ -3,9 +3,11 @@ Xbox Controller App for RoboDK
 
 The Xbox Controller App allows you to control your robot arm using an Xbox One Controller.
 
-To use this app you can load the XboxController.rdkp file in this folder or manually copy the contents of this folder in your RoboDK Apps folder:
+To use this app, you can load the XboxController.apploader.rdkp file in this folder or manually copy the contents of this folder in your RoboDK Apps folder:
 
+``` bash
 C:/RoboDK/Apps/XboxController
+```
 
 Then, make sure the AppLoader is enabled (Shift+I) and this app is enabled (Shift+A).
 Press the Controller icon in the toolbar to start the app, and click again to stop it.
@@ -15,7 +17,7 @@ By default, this app moves the simulated robot. You can also move the real robot
 * Enter the IP of the robot
 * Select Connect
 
-Some robot controllers require you to follow additional steps on the robot side. More information about RoboDK drivers here:
+Some robot controllers will require you to follow additional steps on the robot side. More information about RoboDK drivers here:
 * https://robodk.com/doc/en/Robot-Drivers.html#UseDriver
 
 More information about the RoboDK API for Python here:
