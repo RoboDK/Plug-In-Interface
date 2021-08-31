@@ -55,10 +55,20 @@ if __name__== "__main__":
 """
 
 
+def handle_remove_readonly(func, path, exc):
+    # https://stackoverflow.com/questions/1213706/what-user-do-python-scripts-run-as-in-windows
+    import stat, errno
+    excvalue = exc[1]
+    if func in (os.rmdir, os.remove, os.unlink) and excvalue.errno == errno.EACCES:
+        os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
+        func(path)
+    else:
+        raise
+
 
 def copy_and_overwrite(from_path, to_path):
     if os.path.exists(to_path):
-        shutil.rmtree(to_path)
+        shutil.rmtree(to_path, ignore_errors=False, onerror=handle_remove_readonly)
     shutil.copytree(from_path, to_path)
 
 # Current Python version
@@ -113,7 +123,7 @@ if CompileVersion is None:
 
     # Reset final compile to folder
     if os.path.exists(path_compile_to):
-        shutil.rmtree(path_compile_to)
+        shutil.rmtree(path_compile_to, ignore_errors=False, onerror=handle_remove_readonly)
 
     copy_and_overwrite(path_compile_from, path_compile_to)
 
@@ -121,7 +131,15 @@ if CompileVersion is None:
     delete_pycache = path_compile_to + '/__pycache__'
     if os.path.exists(delete_pycache):
         shutil.rmtree(delete_pycache)
-    
+
+    # Delete GIT and gitignore
+    delete_git = path_compile_to + '/.git'
+    if os.path.exists(delete_git):
+        shutil.rmtree(delete_git, ignore_errors=False, onerror=handle_remove_readonly)
+    delete_gitignore = path_compile_to + '/.gitignore'
+    if os.path.exists(delete_gitignore):
+       os.remove(delete_gitignore)
+
     # Convert each Python module as a library loader
     for filename in os.listdir(path_compile_to):
         if filename.endswith(".py"): 

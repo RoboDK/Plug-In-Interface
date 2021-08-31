@@ -18,13 +18,20 @@ def zipdir(path, ziph):
         apps.append(path)
     
     for app_folder in apps:
-        if app_folder.startswith("_") or "__pycache__" in app_folder:
+        if app_folder.startswith("_"):
+            continue
+        if "__pycache__" in app_folder:
+            continue
+        if ".git" in app_folder.lower():
             continue
             
-        path_settings = app_folder + '/Settings.ini'
+             
+        path_settings = app_folder + '/AppConfig.ini'
         if not os.path.isfile(path_settings):
-            print("Settings.ini file not found for: " + app_folder)
-            continue
+            path_settings = app_folder + '/Settings.ini'   
+            if not os.path.isfile(path_settings):
+                print("Settings.ini file not found for: " + app_folder)
+                continue
         
         config = configparser.ConfigParser()
         config.read(path_settings)
@@ -35,6 +42,11 @@ def zipdir(path, ziph):
         print("App found and packed: " + config["General"]["MenuName"])
             
         for root, dirs, files in os.walk(app_folder):            
+            if "__pycache__" in root:
+                continue
+            if ".git" in root.lower():
+                continue
+                
             for file in files:
                 if len(root) < 3:
                     continue
@@ -44,7 +56,7 @@ def zipdir(path, ziph):
 
 if __name__ == '__main__':
     # Default package name for all apps
-    package_name = 'RoboDK-App-Package.apploader.rdkp'
+    package_name = 'RoboDK-App-Package.rdkp'
     app_folder = "."
     
     # Command line option: Specify the full path of the app (usually inside the Apps folder) 
@@ -54,7 +66,7 @@ if __name__ == '__main__':
         app_folder = os.path.basename(full_path)
         os.chdir(full_path + '/../')
         print("Creating package for: " + app_folder)
-        package_name = app_folder + '.apploader.rdkp'        
+        package_name = app_folder + '.rdkp'        
     
     # Delete existing package
     print("Creating package: " + package_name)

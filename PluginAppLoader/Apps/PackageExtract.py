@@ -54,8 +54,29 @@ def DoOverride(display_message):
         return True
     else:
         return False
+        
+def RunAsAdmin():
+    import ctypes, sys
+    def is_admin():
+        try:
+            return ctypes.windll.shell32.IsUserAnAdmin()
+        except:
+            return False
+
+    if not is_admin():
+        # Re-run the program with admin rights
+        if sys.version_info[0] >= 3:
+            # Python 3
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        else:
+            # Python 2
+            ctypes.windll.shell32.ShellExecuteW(None, u"runas", unicode(sys.executable), unicode(" ".join(sys.argv)), None, 1)
+
+        quit()
 
 if __name__ == '__main__':
+    RunAsAdmin()
+
     #package_file = 'Package.apploader.rdkp'    
     file_path = getFileOpen()
             
