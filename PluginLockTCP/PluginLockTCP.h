@@ -85,6 +85,8 @@ public slots:
     void callback_tcp_lock(bool lock);
 
 public:
+    /// Process an item. Returns true if it succeeds, else false.
+    bool process_item(Item item);
 
     /// Update the tcp pose with the locked pose
     void update_tcp_pose();
@@ -99,7 +101,8 @@ private:
     {
         bool locked { false };
         Item robot { nullptr };
-        QMatrix4x4 pose;
+        Mat pose; // initial TCP pose when locked
+        tJoints last_jnts; // last accepted joints
     };
 
     /// Vector of all available locked items
