@@ -181,20 +181,33 @@ void PluginLockTCP::update_tcp_pose(){
                 continue;
             }
 
+            // No change
+            if (jnew.Compare(locked_item.last_jnts) < 10e-10){
+                qDebug() << locked_item.robot->Name() << " hasn't move, skipping.";
+                continue;
+            }
+
             // Joints config changed
             tConfig new_config;
             locked_item.robot->JointsConfig(jnew, new_config);
             tConfig prev_config;
             locked_item.robot->JointsConfig(locked_item.last_jnts, prev_config);
+            bool joints_changed = false;
             for (int i = 0; i < RDK_SIZE_MAX_CONFIG; ++i){
-                if (std::abs(new_config[i] - prev_config[i]) > 10e-10){
-                    locked_item.robot->setJoints(locked_item.last_jnts);
-                    renderUpdate = true;
-                    qDebug() << locked_item.robot->Name() << " joints configuration changed, skipping";
-                    continue;
+                if (static_cast<short>(new_config[i]) !=  static_cast<short>(prev_config[i])){
+                    joints_changed = true;
+                    break;
                 }
             }
 
+            if (joints_changed){
+                locked_item.robot->setJoints(locked_item.last_jnts);
+                renderUpdate = true;
+                qDebug() << locked_item.robot->Name() << " joints configuration changed, skipping";
+                continue;
+            }
+
+            // New valid pose
             locked_item.robot->setJoints(jnew);
             locked_item.robot->setPoseAbs(locked_item.pose);
             locked_item.last_jnts = locked_item.robot->Joints();
