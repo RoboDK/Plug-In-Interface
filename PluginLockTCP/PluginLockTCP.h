@@ -91,6 +91,11 @@ public:
     /// Update the tcp pose with the locked pose
     void update_tcp_pose();
 
+    /// Retrieve the absolute pose of to the item mounted on a rail. Handle intermediary frames.
+    /// \param item item to start with, usually the robot
+    /// \return The absolute pose
+    Mat retrieve_pose_to_rail(Item item);
+
 private:
 
     /// Lock/unlock action. callback_tcp_lock is triggered with this action.  Actions are required to populate toolbars and menus and allows getting callbacks.

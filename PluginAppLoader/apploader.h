@@ -184,7 +184,7 @@ private:
     //QString PathPythonPath;
 
     /// List of scripts that can be executed
-    QList<QString*> AllScripts;
+    //QList<QString*> AllScripts;
 
     /// List of all actions that need to be deleted
     QList<QAction*> AllActions;

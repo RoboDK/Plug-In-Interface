@@ -80,14 +80,17 @@ bool PluginLockTCP::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
 QString PluginLockTCP::PluginCommand(const QString &command, const QString &item_name){
     Item item = RDK->getItem(item_name);
     if (item == nullptr){
+        qDebug() << "Item not found";
         return "ITEM NOT FOUND";
     }
 
      if (!process_item(item)){
+         qDebug() << item->Name() << " is invalid";
          return "ITEM INVALID";
      }
 
     callback_tcp_lock(command.compare("Lock", Qt::CaseInsensitive) == 0);
+    qDebug() << "Locked/Unlocked " << item->Name();
     return "OK";
 }
 
@@ -134,6 +137,7 @@ bool PluginLockTCP::process_item(Item item){
         Item robot_item = item->getLink(IItem::ITEM_TYPE_ROBOT);
 
         if (robot_item->Joints().Length() >= 7){ // 6 axis + 1 external axis or more
+            qDebug() << "Found valid robot: " << robot_item->Name();
 
             // Add this combination to the list of possible locked TCPs
             bool exist = false;
@@ -164,13 +168,16 @@ void PluginLockTCP::update_tcp_pose(){
     bool renderUpdate = false;
     for (auto& locked_item : locked_items){
         if (locked_item.locked){
-            Mat robot_pose = locked_item.robot->Parent()->PoseAbs().inv() * locked_item.pose;
+            // There is not guarrantee that the robot parent is the rail.. find it!
+            Mat pose = retrieve_pose_to_rail(locked_item.robot);
+            Mat robot_pose = pose.inv() * locked_item.pose;
             tJoints jnew = locked_item.robot->SolveIK(robot_pose);
 
             // Out of reach, fully extended
             if (jnew.Length() == 0){
                 locked_item.robot->setJoints(locked_item.last_jnts);
                 renderUpdate = true;
+                qDebug() << locked_item.robot->Name() << " is out of reach, fully extended, skipping.";
                 continue;
             }
 
@@ -183,6 +190,7 @@ void PluginLockTCP::update_tcp_pose(){
                 if (std::abs(new_config[i] - prev_config[i]) > 10e-10){
                     locked_item.robot->setJoints(locked_item.last_jnts);
                     renderUpdate = true;
+                    qDebug() << locked_item.robot->Name() << " joints configuration changed, skipping";
                     continue;
                 }
             }
@@ -204,12 +212,35 @@ void PluginLockTCP::callback_tcp_lock(bool lock){
         return;
     }
 
-    for (auto& l_item : locked_items){
-        if (l_item.robot == last_clicked_item){
-            l_item.locked = lock;
-            l_item.pose = l_item.robot->Parent()->PoseAbs() * l_item.robot->SolveFK(l_item.robot->Joints());
-            l_item.last_jnts = l_item.robot->Joints();
+    for (auto& locked_item : locked_items){
+        if (locked_item.robot == last_clicked_item){
+            // There is not guarrantee that the robot parent is the rail.. find it!
+            Mat pose = retrieve_pose_to_rail(locked_item.robot);
+            locked_item.pose = pose * locked_item.robot->SolveFK(locked_item.robot->Joints());
+            locked_item.last_jnts = locked_item.robot->Joints();
+            locked_item.locked = lock;
         }
     }
+}
+
+Mat PluginLockTCP::retrieve_pose_to_rail(Item item){
+    IItem* parent = item;
+    Mat pose = Mat();
+    bool found = false;
+    while (parent != nullptr && parent->Type() != IItem::ITEM_TYPE_STATION && parent->Type() != IItem::ITEM_TYPE_ANY) {
+        parent = parent->Parent();
+        if (parent->Type() == IItem::ITEM_TYPE_ROBOT){
+            found = true;
+            pose *= parent->PoseAbs();
+            break;
+        }
+        pose *= parent->Pose();
+    }
+
+    if (!found){
+        pose = item->Parent()->PoseAbs(); // robot not attached to a rail
+    }
+
+    return pose;
 }
 
