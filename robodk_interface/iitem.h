@@ -832,6 +832,16 @@ public:
     virtual void SelectedFeature(bool &is_selected, int feature_type, int &feature_id)=0;
 
 
+    //-----------------------------------------------------
+    // added after 2021-09-17 with version RoboDK 5.3.0
+
+    /// <summary>
+    /// Returns the positions of the joint links for a provided robot configuration (joints). If no joints are provided it will return the poses for the current robot position. Out 1 : 4x4 x n -> array of 4x4 homogeneous matrices. Index 0 is the base frame reference (it never moves when the joints move).
+    /// </summary>
+    /// <returns>List of poses</returns>
+    virtual QList<Mat> JointPoses(const tJoints &jnts)=0;
+
+
 
 };
 

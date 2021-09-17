@@ -559,8 +559,7 @@ Mat Mat::rotz(double rz){
 /////////////////////////////////////
 // 2D matrix functions
 /////////////////////////////////////
-void emxInit_real_T(tMatrix2D **pEmxArray, int numDimensions)
-{
+void emxInit_real_T(tMatrix2D **pEmxArray, int numDimensions){
     tMatrix2D *emxArray;
     int i;
     *pEmxArray = (tMatrix2D *)malloc(sizeof(tMatrix2D));

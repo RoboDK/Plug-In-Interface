@@ -390,7 +390,7 @@ public:
     /// <param name="name">Item name</param>
     /// <param name="itemtype">Filter by item type RoboDK.ITEM_TYPE_...</param>
     /// <returns>Item or nullptr if no item was found</returns>
-    virtual Item getItem(QString name, int itemtype = -1)=0;
+    virtual Item getItem(const QString &name, int itemtype = -1)=0;
 
     /// <summary>
     /// Returns a list of items (list of names or Items) of all available items in the currently open station in RoboDK.
@@ -412,7 +412,7 @@ public:
     /// \brief Check if an item is valid (not null and available in the open station)
     /// \param item_check Item to check
     /// \return True if the item exists, false otherwise
-    virtual bool Valid(Item item_check)=0;
+    virtual bool Valid(const Item item_check)=0;
 
     /// <summary>
     /// Shows a RoboDK popup to select one object from the open RoboDK station.
@@ -1007,10 +1007,32 @@ public:
     virtual Item BuildMechanism(int type, const QList<Item> &list_obj, const double *parameters, const tJoints &joints_build, const tJoints &joints_home, const tJoints &joints_senses, const tJoints &joints_lim_low, const tJoints &joints_lim_high, const Mat base, const Mat tool, const QString &name, Item robot=nullptr)=0;
 
 
+    //-----------------------------------------------------
+    // added after 2021-09-17 with version RoboDK 5.3.0
+
+
+    /// <summary>
+    /// Open a simulated 2D camera view. Returns a handle pointer that can be used in case more than one simulated view is used.
+    /// </summary>
+    /// <returns>Camera item</returns>
+    virtual Item Cam2D_Add(const Item attach_to, const QString &params="")=0;
+
+    /// <summary>
+    /// Take a snapshot from a simulated camera view and save it to a file. Returns 1 if success, 0 otherwise.
+    /// </summary>
+    /// <returns>Valid QImage if a file was not provided or an invalid/empty QImage if we are saving the file to disk</returns>
+    virtual QImage Cam2D_Snapshot(const QString &file, const Item camera=nullptr, const QString &params="")=0;
+
+
+
+    /// <summary>
+    /// Merge multiple object items as one. Source objects are not deleted and a new object is created.
+    /// </summary>
+    virtual Item MergeItems(const QList<Item> &listitems)=0;
+
     /*
 
     SprayAdd
-    Camera
     */
 
 };
