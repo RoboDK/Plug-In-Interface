@@ -61,3 +61,10 @@ phony.c
 # qbs builds
 /*-debug/
 /*-release/
+PluginLockTCP/release/moc_predefs.h
+PluginRobotPilot/release/moc_predefs.h
+PluginOpenGL-Shaders/release/moc_predefs.h
+PluginAppLoader/release/moc_predefs.h
+Plugin-OPC-UA/release/moc_predefs.h
+build-AppLoader-Desktop_Qt_5_15_5_MSVC2019_32bit-Profile/release/moc_predefs.h
+build-AppLoader-Desktop_Qt_5_15_5_MSVC2019_32bit-Profile/release/AppLoader.vc.pdb
