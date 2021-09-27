@@ -20,6 +20,8 @@ import_install('inputs')
 from inputs import get_gamepad
 from inputs import devices
 
+from numpy import allclose
+
 
 def MainAction():
 
@@ -68,8 +70,8 @@ def MainAction():
     }
 
     robot_move_type = {
-        "MoveJ": False,
-        "MoveL": True,
+        "MoveJ": True,
+        "MoveL": False,
     }
 
     # Controller buttons, as defined here: https://support.xbox.com/en-CA/help/hardware-network/controller/xbox-one-wireless-controller
@@ -144,6 +146,7 @@ def MainAction():
         status, status_msg = robot.ConnectedState()
         if (status == ROBOTCOM_READY) and not ShowMessageYesNo("You are about to control the connected robot using the controller.\n\nWould you like to run in simulation mode instead?", ""):
             RDK.setRunMode(RUNMODE_RUN_ROBOT)
+            print('Controlling connected robot: %s' % robot.Name())
 
     # Retrieve the degrees of freedom or axes (num_dofs = 6 for a 6 axis robot)
     num_dofs = len(robot.JointsHome().list())
@@ -266,7 +269,6 @@ def MainAction():
                 RDK.ShowMessage('Switched to translation mode', False)
             else:
                 RDK.ShowMessage('Switched to rotation mode', False)
-        print(move_type)
 
         # Robot move type
         if robot_move_type["MoveJ"] == robot_move_type["MoveL"]:  # In case someone breaks the initial settings
@@ -279,7 +281,6 @@ def MainAction():
                 RDK.ShowMessage('Switched to MoveJ mode', False)
             else:
                 RDK.ShowMessage('Switched to MoveL mode', False)
-        print(robot_move_type)
 
         # Move steps
         dpad_sign = 0
@@ -295,7 +296,6 @@ def MainAction():
             else:
                 move_steps["Translate"] = min(LINEAR_STEPS_MAX, max(LINEAR_STEPS_MIN, move_steps["Translate"] * dpad_sign))
                 RDK.ShowMessage('Translation steps (mm): %.2f' % move_steps["Translate"], False)
-        print(move_steps)
 
         # Translation / Rotation
         dpad_move = 0
@@ -315,7 +315,6 @@ def MainAction():
         # Make sure that a movement command is specified
         if norm(move_mtx) <= 0:
             continue
-        print(move_mtx)
 
         # Calculate the new robot position
         x, y, z, rx, ry, rz = 0, 0, 0, 0, 0, 0
@@ -323,24 +322,29 @@ def MainAction():
             x, y, z = mult3(move_mtx, move_steps["Translate"])
         elif move_type["Rotate"]:
             rx, ry, rz = mult3(move_mtx, move_steps["Rotate"] * DEG_TO_RAD)
-        new_pose = robot.Pose() * transl(x, y, z) * rotx(rx) * roty(ry) * rotz(rz)
+
+        # Get the current robot joints
+        robot_joints = robot.Joints()
+
+        # Get the robot position from the joints (calculate forward kinematics)
+        robot_position = robot.SolveFK(robot_joints)
+
+        # Get the robot configuration (robot joint state)
+        robot_config = robot.JointsConfig(robot_joints)
+
+        # Calculate the new robot position
+        new_robot_position = transl(x, y, z) * rotx(rx) * roty(ry) * rotz(rz) * robot_position
 
         # Calculate the new robot joints
-        new_robot_joints = robot.SolveIK(new_pose)
+        new_robot_joints = robot.SolveIK(new_robot_position)
         if len(new_robot_joints.tolist()) < num_dofs:
             RDK.ShowMessage('No robot solution! The new position is too far, out of reach or close to a singularity.', False)
             continue
 
-        # Get the robot joints
-        robot_joints = robot.Joints()
-
-        # Get the robot configuration (robot joint state)
-        robot_config = robot.JointsConfig(robot_joints).list()
-
         # Calculate the robot configuration for the new joints
         new_robot_config = robot.JointsConfig(new_robot_joints).list()
-
-        if robot_config != new_robot_config:
+        if not allclose(robot_config[0:2], new_robot_config[0:2]):
+            # Comment below only if YOU KNOW WHAT YOU ARE DOING!
             RDK.ShowMessage("Warning!\n\nRobot configuration changed. This can lead to unexpected movements! Please move the robot through RoboDK or try another command.")
             print(robot_config)
             print(new_robot_config)
@@ -354,9 +358,9 @@ def MainAction():
         # Move the robot joints to the new position
         try:
             if robot_move_type["MoveJ"]:
-                robot.MoveJ(new_pose)
+                robot.MoveJ(new_robot_joints)
             elif robot_move_type["MoveL"]:
-                robot.MoveL(new_pose)
+                robot.MoveL(new_robot_joints)
         except TargetReachError as e:
             RDK.ShowMessage('Warning!\n\nTarget unreachable. Try using MoveJ or another command.', True)
             print(e)
