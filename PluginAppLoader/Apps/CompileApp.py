@@ -11,11 +11,11 @@ from robodk import *
 # Prevent compiling the following files (Important: name in filename will be used as a check)
 SKIP_COMPILE = ['_config']
 
-# Delete PNG files from the main app directory
-DELETE_ROOT_FILES = ['*.png']
+# Delete these files from the main app directory
+DELETE_ROOT_FILES = ['.gitignore']
 
-# Delete SVG and INI files from the compiled folders
-DELETE_BRANCH_FILES = ['*.svg', '*.ini']
+# Delete these files from the compiled folders
+DELETE_BRANCH_FILES = ['*.ini', '*.svg', '*.png', '.gitignore', '.git']
 
 
 # Path where compilation takes place (important for error raising!)
