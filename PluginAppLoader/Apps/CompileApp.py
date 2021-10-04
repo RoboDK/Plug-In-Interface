@@ -130,7 +130,7 @@ if CompileVersion is None:
     # Delete pycache on final directory
     delete_pycache = path_compile_to + '/__pycache__'
     if os.path.exists(delete_pycache):
-        shutil.rmtree(delete_pycache)
+        shutil.rmtree(delete_pycache, ignore_errors=False, onerror=handle_remove_readonly)
 
     # Delete GIT and gitignore
     delete_git = path_compile_to + '/.git'
