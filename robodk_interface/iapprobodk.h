@@ -96,10 +96,10 @@
 *
 * \subsection LinkInstall Installation Requirements
 * Requirements to make RoboDK Plug-Ins work:
-* - It is required to install RoboDK (v3.5.4 or later): https://robodk.com/download
+* - Install RoboDK (v3.5.4 or later): https://robodk.com/download
 * - Make sure you compile your plugin using the correct version of Qt and compiler:
-*   - Qt version 5.15.6 on Windows (MSVC2019).
-*   - Qt version 5.15.2 on Mac (clang 64 bit).
+*   - Qt version 5.15 on Windows (MSVC2019).
+*   - Qt version 5.15 on Mac (clang 64 bit).
 *   - Qt version 5.12 on Linux.
 * - It is possible to run in \ref LinkDebug debug mode on Windows.
 *

@@ -381,59 +381,57 @@ public:
 
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Joint" mode). By default, this function blocks until the robot finishes its movements.
-    /// Given a target item, MoveJ can also be applied to programs and a new movement instruction will be added.
+    /// Add a joint move to a program or move a robot to a target item ("Move Joint" mode). This function does not block.
     /// </summary>
     /// <param name="target">Target to move to as a target item (RoboDK target item)</param>
     virtual bool MoveJ(const Item &itemtarget)=0;
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Joint" mode). By default, this function blocks until the robot finishes its movements.
+    /// Add a joint move to a program or move a robot to a joint target ("Move Joint" mode). This function does not block.
     /// </summary>
     /// <param name="target">Robot joints to move to</param>
     virtual bool MoveJ(const tJoints &joints)=0;
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Joint" mode). By default, this function blocks until the robot finishes its movements.
+    /// Add a joint move to a program or move a robot to a pose target ("Move Joint" mode). This function does not block.
     /// </summary>
     /// <param name="target">Pose target to move to. It must be a 4x4 Homogeneous matrix</param>
     virtual bool MoveJ(const Mat &target)=0;
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Linear" mode). By default, this function blocks until the robot finishes its movements.
-    /// Given a target item, MoveL can also be applied to programs and a new movement instruction will be added.
+    /// Add a linear move to a program or move a robot to a target item ("Move Linear" mode). This function does not block.
     /// </summary>
     /// <param name="itemtarget">Target to move to as a target item (RoboDK target item)</param>
     virtual bool MoveL(const Item &itemtarget)=0;
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Linear" mode). By default, this function blocks until the robot finishes its movements.
+    /// Add a linear move to a program or move a robot to a joint target ("Move Linear" mode). This function does not block.
     /// </summary>
     /// <param name="joints">Robot joints to move to</param>
     virtual bool MoveL(const tJoints &joints)=0;
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Linear" mode). By default, this function blocks until the robot finishes its movements.
+    /// Add a linear move to a program or move a robot to a pose target  ("Move Linear" mode). This function does not block.
     /// </summary>
     /// <param name="target">Pose target to move to. It must be a 4x4 Homogeneous matrix</param>
     virtual bool MoveL(const Mat &target)=0;
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Circular" mode). By default, this function blocks until the robot finishes its movements.
+    /// Add a circular move to a program or move a robot through an arc given two target items ("Move Circular" mode). This function does not block.
     /// </summary>
-    /// <param name="itemtarget1">Intermediate target to move to as a target item (RoboDK target item)</param>
-    /// <param name="itemtarget2">Final target to move to as a target item (RoboDK target item)</param>
+    /// <param name="itemtarget1">Intermediate target to move to as a target item (target item)</param>
+    /// <param name="itemtarget2">Final target to move to as a target item (target item)</param>
     virtual bool MoveC(const Item &itemtarget1, const Item &itemtarget2)=0;
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Circular" mode). By default, this function blocks until the robot finishes its movements.
+    /// Add a circular move to a program or move a robot through an arc given two joint targets ("Move Circular" mode). This function does not block.
     /// </summary>
     /// <param name="joints1">Intermediate joint target to move to.</param>
     /// <param name="joints2">Final joint target to move to.</param>
     virtual bool MoveC(const tJoints &joints1, const tJoints &joints2)=0;
 
     /// <summary>
-    /// Moves a robot to a specific target ("Move Circular" mode). By default, this function blocks until the robot finishes its movements.
+    /// Add a circular move to a program or move a robot through an arc given two pose targets ("Move Circular" mode). This function does not block.
     /// </summary>
     /// <param name="target1">Intermediate pose target to move to. It must be a 4x4 Homogeneous matrix</param>
     /// <param name="target2">Final pose target to move to. It must be a 4x4 Homogeneous matrix</param>
