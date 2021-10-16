@@ -13,7 +13,7 @@ Follow these steps to load the AppLoader plugin:
 * Select Load Plug-Ins
 * Select AppLoader
  
-![Sample Apps Loaded](./doc/Apps-Loaded.png)
+![Sample Apps Loaded](../doc/Apps-Loaded.png)
  
 Each App is a subfolder inside the /RoboDK/Apps/ folder. You can add or remove apps by adding or deleting folders. You can also add or remove scripts (Python files) inside each subfolder to add or remove actions/buttons. Scripts that start with an underscore (_) are ignored and can be used as shared modules.
 
@@ -80,7 +80,7 @@ C:/RoboDK/
 
 The sample tree structure will create 2 menus and 2 toolbars (one for each subfolder). Each each script file in a subfolder will show as a button (action).
 
-![Sample Apps Menu](./doc/Apps-Menu.png)
+![Sample Apps Menu](../doc/Apps-Menu.png)
 
 
 Package
@@ -92,7 +92,7 @@ Double clicking an rdkp file provokes RoboDK to load the AppLoader plugin automa
 
 The script PackageCreate.py will pack the contents in the Apps folder and save it as Package.apploader.rdkp automatically. This file is then ready to distribute.
 
-![Create a package](./doc/PackageCreate.png)
+![Create a package](../doc/PackageCreate.png)
 
 Icons
 =====
