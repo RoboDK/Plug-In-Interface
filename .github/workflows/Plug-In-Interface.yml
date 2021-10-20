@@ -11,7 +11,7 @@ on:
       - "**.md"
 
 env:
-  BUILD_TYPE: release
+  BUILD_TYPE: Release
 
 jobs:
   build:
@@ -38,27 +38,41 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.14.0
         with:
+          tools: "tools_qtcreator,5.0.2,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
 
       - name: Configure and build Plug-In-Interface on Windows
         if: startsWith(matrix.os, 'windows')
         run: |
           cd ${{ github.workspace }}
-          call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          qmake CONFIG+=${{ env.BUILD_TYPE }}
-          nmake
+          call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+          qmake Plug-In-Interface.pro -spec win32-msvc CONFIG+=qtquickcompiler CONFIG+=${{ env.BUILD_TYPE }}
+          call %IQTA_TOOLS%\QtCreator\bin\jom\jom.exe
         shell: cmd
 
       - name: Configure and build Plug-In-Interface on Unix
         if: (!startsWith(matrix.os, 'windows'))
         run: |
           cd ${{ github.workspace }}
-          qmake CONFIG+=${{ env.BUILD_TYPE }}
+          qmake Plug-In-Interface.pro  CONFIG+=qtquickcompiler CONFIG+=${{ env.BUILD_TYPE }}
           make
         shell: bash
 
-      - name: Upload artefacts
+      - name: Upload runtime artefacts
         uses: actions/upload-artifact@v2
         with:
-          name: Plug-In-Interface-${{ matrix.os }}-${{ env.BUILD_TYPE }}
-          path: ${{ matrix.OUTPUT_DIR }}
+          name: Plug-In-Interface-Runtime-${{ matrix.os }}-${{ env.BUILD_TYPE }}
+          if-no-files-found: error
+          path: |
+            ${{ matrix.OUTPUT_DIR }}/*.dll
+            ${{ matrix.OUTPUT_DIR }}/*.so
+            ${{ matrix.OUTPUT_DIR }}/*.dylib
+
+      - name: Upload buildtime artefacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Plug-In-Interface-Buildtime-${{ matrix.os }}-${{ env.BUILD_TYPE }}
+          if-no-files-found: ignore
+          path: |
+            ${{ matrix.OUTPUT_DIR }}/*.exp
+            ${{ matrix.OUTPUT_DIR }}/*.lib
