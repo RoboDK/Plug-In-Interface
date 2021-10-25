@@ -58,7 +58,7 @@ jobs:
           make
         shell: bash
 
-      - name: Upload runtime artefacts
+      - name: Upload runtime artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Plug-In-Interface-Runtime-${{ matrix.os }}-${{ env.BUILD_TYPE }}
@@ -68,11 +68,11 @@ jobs:
             ${{ matrix.OUTPUT_DIR }}/*.so
             ${{ matrix.OUTPUT_DIR }}/*.dylib
 
-      - name: Upload buildtime artefacts
+      - name: Upload buildtime artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Plug-In-Interface-Buildtime-${{ matrix.os }}-${{ env.BUILD_TYPE }}
-          if-no-files-found: ignore
+          if-no-files-found: warn
           path: |
             ${{ matrix.OUTPUT_DIR }}/*.exp
             ${{ matrix.OUTPUT_DIR }}/*.lib
