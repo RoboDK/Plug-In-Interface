@@ -22,6 +22,7 @@
 #include <QProcess>
 #include <QMessageBox>
 #include <QTimer>
+#include <QSysInfo>
 
 // Function to check and sort priority of apps
 struct CheckPriority {
@@ -132,7 +133,7 @@ bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
             continue;
         }
         const QList<int>& types_show = ListActions[i]->TypesShowOnContextMenu;
-        for (int type_show : types_show){
+        for (const int& type_show : types_show){
             if (item->Type() == type_show){
                 menu->addAction(ListActions[i]->Action); // add action at the end
                 break;
@@ -152,7 +153,7 @@ bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeCl
     }
 
     int common_type = item_list.front()->Type();
-    for (const auto& item : item_list){
+    for (const Item& item : item_list){
         if (item->Type() != common_type){
             return false;
         }
@@ -305,6 +306,8 @@ void AppLoader::AppsDelete(){
     for (int i=ListToolbars.length()-1; i>=0; i--){
         delete ListToolbars.takeLast();
     }
+
+    AllAppPaths.clear();
 }
 
 void AppLoader::AppsSearch(){
@@ -360,6 +363,11 @@ void AppLoader::AppsSearch(){
                     }
                 }
             }
+        }
+
+        // Add the absolute app dir to the list
+        if (!AllAppPaths.contains(dirAppComplete)){
+            AllAppPaths.append(dirAppComplete);
         }
 
         if (!fileExist){
@@ -464,7 +472,7 @@ void AppLoader::AppsSearch(){
             QStringList types_leftclick_str = settings.value(keyName + "/TypeOnContextMenu", {}).toStringList(); // Multiple item support. Format can be "TypeOnContextMenu=int" or "TypeOnContextMenu=int, int, .."
 
             QList<int> types_leftclick; // it's much more readable to use string list than int list, as they get binarized
-            for (QString string : types_leftclick_str){
+            for (const QString& string : types_leftclick_str){
                 types_leftclick.append(string.toInt());
             }
 
@@ -847,12 +855,40 @@ void AppLoader::onRunScript(){
         }
     }
 
-    // update environment to provide the same pythonpath used in RoboDK
+    // Update environment to provide the same used in RoboDK
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QStringList envlist = env.toStringList();
-    envlist.append("PYTHONPATH=" + RDK->getParam("PYTHONPATH"));
-    envlist.append("ROBODK_API_PORT=" + RDK->Command("PORT",""));
-    proc->setEnvironment(envlist);
+
+    QString pathsep = ";";
+    if (!QSysInfo::productType().toLower().startsWith("win")){
+        pathsep = ":"; // ; on Windows, : on UNIX (at runtime, not compile time!)
+    }
+
+    // Append RoboDK's PYTHONPATH and App's paths
+    QStringList pypathList = RDK->getParam("PYTHONPATH").split(pathsep);
+    if (env.contains("PYTHONPATH")){
+        QString procPypath = env.value("PYTHONPATH").replace("\\","/");
+        qDebug() << "Appending to PYTHONPATH=" << procPypath;
+
+        // Add RoboDK's PYTHONPATH after the process path, so that user robolink.py is find before RoboDK's
+        QStringList procPypathList = procPypath.split(pathsep);
+        pypathList = procPypathList + pypathList;
+    }
+    pypathList.append(AllAppPaths);
+
+    QString pypath = "";
+    for (const QString& path : pypathList){
+        pypath += pathsep + path;
+    }
+    env.insert("PYTHONPATH", pypath);
+
+    // Override API port
+    QString apiport = RDK->Command("PORT","");
+    if (env.contains("ROBODK_API_PORT")){
+        qDebug() << "Overriding ROBODK_API_PORT=" << env.value("ROBODK_API_PORT") << " with " << apiport;
+    }
+    env.insert("ROBODK_API_PORT", apiport);
+
+    proc->setEnvironment(env.toStringList());
 
     // run the script
     QStringList args;
