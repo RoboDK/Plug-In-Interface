@@ -307,7 +307,33 @@ void AppLoader::AppsDelete(){
         delete ListToolbars.takeLast();
     }
 
-    AllAppPaths.clear();
+    // Remove App paths from RoboDK's PYTHONPATH
+    if (!AllAppPaths.empty()){
+#ifdef WIN32
+        QString path_sep(";");
+#else
+        QString path_sep(":");
+#endif
+
+        QStringList pypathList = RDK->getParam("PYTHONPATH").split(path_sep);
+        pypathList.removeDuplicates();
+
+        QStringListIterator i(AllAppPaths);
+        while(i.hasNext()){
+            pypathList.removeAll(i.next());
+        }
+
+        QString pypath = "";
+        for (const QString& path : pypathList){
+            if (pypath != ""){
+                pypath += path_sep;
+            }
+            pypath += path;
+        }
+        RDK->Command("PYTHONPATH", pypath);
+
+        AllAppPaths.clear();
+    }
 }
 
 void AppLoader::AppsSearch(){
@@ -631,12 +657,35 @@ void AppLoader::AppsSearch(){
     if (ListToolbars.length() > 1){
         qSort(ListToolbars.begin(), ListToolbars.end(), CheckPriority());
     }
+
+    // Append AllAppPaths to RoboDK's PYTHONPATH
+    if (!AllAppPaths.empty()){
+#ifdef WIN32
+        QString path_sep(";");
+#else
+        QString path_sep(":");
+#endif
+
+        QStringList pypathList = RDK->getParam("PYTHONPATH").replace("\\","/").split(path_sep);
+        pypathList.append(AllAppPaths);
+        pypathList.removeDuplicates();
+
+        QString pypath = "";
+        for (const QString& path : pypathList){
+            if (pypath != ""){
+                pypath += path_sep;
+            }
+            pypath += path;
+        }
+        RDK->Command("PYTHONPATH", pypath);
+    }
+
+    // Done
     QString msg(tr("Done loading Apps"));
     if (appsenabled_count > 0){
         msg.append(": " + QString("%1 RoboDK Apps active.").arg(appsenabled_count));
     }
     RDK->ShowMessage(msg, false);
-
 }
 
 void AppLoader::AppsLoadMenus(){
@@ -855,37 +904,27 @@ void AppLoader::onRunScript(){
         }
     }
 
-    // Update environment to provide the same used in RoboDK
+    // Add RoboDK's environnement to the process
+#ifdef WIN32
+    QString path_sep(";");
+#else
+    QString path_sep(":");
+#endif
+
+    // Append to PYTHONPATH
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-
-    QString pathsep = ";";
-    if (!QSysInfo::productType().toLower().startsWith("win")){
-        pathsep = ":"; // ; on Windows, : on UNIX (at runtime, not compile time!)
-    }
-
-    // Append RoboDK's PYTHONPATH and App's paths
-    QStringList pypathList = RDK->getParam("PYTHONPATH").split(pathsep);
+    QString pypath = RDK->getParam("PYTHONPATH");
     if (env.contains("PYTHONPATH")){
+        // Add RoboDK's PYTHONPATH after the process PYTHONPATH, so that user's robolink.py is find before RoboDK's
         QString procPypath = env.value("PYTHONPATH").replace("\\","/");
-        qDebug() << "Appending to PYTHONPATH=" << procPypath;
-
-        // Add RoboDK's PYTHONPATH after the process path, so that user robolink.py is find before RoboDK's
-        QStringList procPypathList = procPypath.split(pathsep);
-        pypathList = procPypathList + pypathList;
-    }
-    pypathList.append(AllAppPaths);
-
-    QString pypath = "";
-    for (const QString& path : pypathList){
-        pypath += pathsep + path;
+        if (procPypath != ""){
+            pypath = procPypath + path_sep + pypath;
+        }
     }
     env.insert("PYTHONPATH", pypath);
 
     // Override API port
     QString apiport = RDK->Command("PORT","");
-    if (env.contains("ROBODK_API_PORT")){
-        qDebug() << "Overriding ROBODK_API_PORT=" << env.value("ROBODK_API_PORT") << " with " << apiport;
-    }
     env.insert("ROBODK_API_PORT", apiport);
 
     proc->setEnvironment(env.toStringList());
