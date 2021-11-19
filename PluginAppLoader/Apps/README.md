@@ -109,23 +109,25 @@ The AppConfig.ini file allows you to customize the priority of the App, the size
 The top section (General) of the INI file allows you to customize the look. For example, the Recorder general App settings look like this:
 [General]
 * MenuName=Recorder - Name displayed in the main menu
+* MenuParent= - Name of the parent menu, if not using the main menu
+* Enabled=true - Set to false to disable this app (not show it)
 * MenuPriority=999 - Lower shows first compared to other apps
 * ToolbarArea=2 - Location in the toolbar, it can be: left (1), right (2), top (4), bottom (8) or default (-1)
 * ToolbarSizeRatio=2 - Size of the toolbar as a ratio with respect to the default size (2 means twice the size of the default size)
-* RunCommands=@Invalid() - String with commands to execute when the toolbar is loaded
-* Enabled=true - Set to false to disable this app (not show it)
+* RunCommands= - String with commands to execute when the toolbar is loaded
 
 Each action will also have some settings to customize the appearance. For example, the Record action (script Record.py) looks like this:
 [Record]
 * DisplayName=Record - Name displayed in the main menu
 * Description=Start/stop screen recording (3D view) - Description to display on hover
+* Visible=true - Set to false to disable this action (not show it)
+* Shortcut= - Set a keyboard shortcut to trigger this action
 * Checkable=true - Set to true if we want this to be checkable
 * CheckableGroup=1 - Set to a number greater than zero if you want to group this action with other actions having the same group index
 * AddToToolbar=true - Set to false to not show this action in the toolbar
 * Priority=1 - Set the priority within the same app (lower shows first)
-* TypeOnContextMenu=-1 - Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API)
-* Visible=true - Set to false to disable this action (not show it)
-* Shortcut= - Set a keyboard shortcut to trigger this action
+* TypeOnContextMenu= - Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API). -1 means any type, and you can use commas to specify multiple items
+* TypeOnDoubleClick= - Set to an item type to run this action when double clicking on the item (same index as the ITEM_TYPE_* in the API). -1 means any type, and you can use commas to specify multiple items
 
 
 AppLink.ini

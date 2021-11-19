@@ -32,6 +32,19 @@ struct CheckPriority {
     }
 };
 
+// Function to parse a string list of ITEM_TYPE
+static QList<int> ParseStringList(const QStringList& l){
+    QList<int> nl;
+    for (const QString& s : l){
+        bool ok = false;
+        int v = s.trimmed().toInt(&ok);
+        if (ok && (v != 0) && (v >= -1) && (v < 50)){
+           nl.append(v);
+        }
+    }
+    return nl;
+}
+
 //------------------------------- RoboDK Plug-in commands ------------------------------
 QString AppLoader::PluginName(){
     return "App Loader";
@@ -123,20 +136,33 @@ void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 }
 
 bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
-    if (menu == nullptr){
-        return false; // Generic types will send null menus
-    }
-
     qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
+
     for (int i=0; i<ListActions.length(); i++){
         if (ListActions[i]->AppMenu != nullptr && !ListActions[i]->AppMenu->Active){
             continue;
         }
-        const QList<int>& types_show = ListActions[i]->TypesShowOnContextMenu;
-        for (const int& type_show : types_show){
-            if (item->Type() == type_show){
-                menu->addAction(ListActions[i]->Action); // add action at the end
-                break;
+
+        // Check for right click menu. -1 Means any type.
+        if ((menu != nullptr) && (click_type == ClickRight)){
+            const QList<int>& types_show = ListActions[i]->TypesShowOnContextMenu;
+            for (const int& type_show : types_show){
+                if ((item->Type() == type_show) || (type_show == -1)){
+                    menu->addAction(ListActions[i]->Action); // add action at the end
+                    break;
+                }
+            }
+        }
+
+        // Check for double clicks. -1 Means any type.
+        // Currently, this will only work for ITEM_TYPE_GENERIC, and will not prevent multiple triggers
+        else if (click_type == ClickDouble){
+            const QList<int>& types_trigger = ListActions[i]->TypesDoubleClick;
+            for (const int& type_trigger : types_trigger){
+                if ((item->Type() == type_trigger) || (type_trigger == -1)){
+                    ListActions[i]->Action->trigger();
+                    break;
+                }
             }
         }
     }
@@ -423,7 +449,7 @@ void AppLoader::AppsSearch(){
         double menuPriority = settings.value("MenuPriority", 50.0).toDouble();
         int toolbarArea = settings.value("ToolbarArea", 2).toInt();
         double toolbarSize = settings.value("ToolbarSizeRatio", 1.5).toDouble();
-        QStringList RunCommands = settings.value("RunCommands", QStringList()).toStringList();
+        QStringList RunCommands = settings.value("RunCommands", QStringList("")).toStringList();
 
         settings.setValue("MenuName", menuName);
         settings.setValue("MenuParent", menuParent);
@@ -495,12 +521,12 @@ void AppLoader::AppsSearch(){
             int checkable_group = settings.value(keyName + "/CheckableGroup", -1).toInt();
             bool addToolBar = settings.value(keyName + "/AddToToolbar", true).toBool();
             double priority = settings.value(keyName + "/Priority", 50.0f).toDouble();
-            QStringList types_leftclick_str = settings.value(keyName + "/TypeOnContextMenu", {}).toStringList(); // Multiple item support. Format can be "TypeOnContextMenu=int" or "TypeOnContextMenu=int, int, .."
+            QStringList types_rightclick_str = settings.value(keyName + "/TypeOnContextMenu", QStringList("")).toStringList(); // Multiple item support. Format can be "TypeOnContextMenu=int" or "TypeOnContextMenu=int, int, .."
+            QStringList types_doubleclick_str = settings.value(keyName + "/TypeOnDoubleClick", QStringList("")).toStringList(); // Multiple item support. Format can be "TypeOnDoubleClick=int" or "TypeOnDoubleClick=int, int, .."
 
-            QList<int> types_leftclick; // it's much more readable to use string list than int list, as they get binarized
-            for (const QString& string : types_leftclick_str){
-                types_leftclick.append(string.toInt());
-            }
+            // Remove invalid inputs from string lists
+            QList<int> types_rightclick = ParseStringList(types_rightclick_str);
+            QList<int> types_doubleclick = ParseStringList(types_doubleclick_str);
 
             // Prevent empty names
             if (displayName.isEmpty()){
@@ -516,7 +542,8 @@ void AppLoader::AppsSearch(){
             settings.setValue(keyName + "/CheckableGroup", checkable_group);
             settings.setValue(keyName + "/AddToToolbar", addToolBar);
             settings.setValue(keyName + "/Priority", priority);
-            settings.setValue(keyName + "/TypeOnContextMenu",  types_leftclick_str);
+            settings.setValue(keyName + "/TypeOnContextMenu",  types_rightclick_str);
+            settings.setValue(keyName + "/TypeOnDoubleClick",  types_doubleclick_str);
 
             // Forget about this action if it is set to non visible
             if (!visible){
@@ -606,7 +633,7 @@ void AppLoader::AppsSearch(){
             }
 
             // Add the actions in the global list:
-            ListActions.append(new tAppAction(action, priority, appMenu, types_leftclick));
+            ListActions.append(new tAppAction(action, priority, appMenu, types_rightclick, types_doubleclick));
 
             // Add the actions to the menu and toolbar
             menuActions.append(new tAppAction(action, priority, appMenu));
