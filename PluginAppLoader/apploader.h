@@ -186,6 +186,9 @@ private:
     /// List of scripts that can be executed
     //QList<QString*> AllScripts;
 
+    /// List of paths to apps (including AppLinks)
+    QStringList AllAppPaths;
+
     /// List of all actions that need to be deleted
     QList<QAction*> AllActions;
 
