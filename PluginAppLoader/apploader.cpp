@@ -22,6 +22,7 @@
 #include <QProcess>
 #include <QMessageBox>
 #include <QTimer>
+#include <QSysInfo>
 
 // Function to check and sort priority of apps
 struct CheckPriority {
@@ -178,7 +179,7 @@ bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeCl
     }
 
     int common_type = item_list.front()->Type();
-    for (const auto& item : item_list){
+    for (const Item& item : item_list){
         if (item->Type() != common_type){
             return false;
         }
@@ -331,6 +332,34 @@ void AppLoader::AppsDelete(){
     for (int i=ListToolbars.length()-1; i>=0; i--){
         delete ListToolbars.takeLast();
     }
+
+    // Remove App paths from RoboDK's PYTHONPATH
+    if (!AllAppPaths.empty()){
+#ifdef WIN32
+        QString path_sep(";");
+#else
+        QString path_sep(":");
+#endif
+
+        QStringList pypathList = RDK->getParam("PYTHONPATH").split(path_sep);
+        pypathList.removeDuplicates();
+
+        QStringListIterator i(AllAppPaths);
+        while(i.hasNext()){
+            pypathList.removeAll(i.next());
+        }
+
+        QString pypath = "";
+        for (const QString& path : pypathList){
+            if (pypath != ""){
+                pypath += path_sep;
+            }
+            pypath += path;
+        }
+        RDK->Command("PYTHONPATH", pypath);
+
+        AllAppPaths.clear();
+    }
 }
 
 void AppLoader::AppsSearch(){
@@ -386,6 +415,11 @@ void AppLoader::AppsSearch(){
                     }
                 }
             }
+        }
+
+        // Add the absolute app dir to the list
+        if (!AllAppPaths.contains(dirAppComplete)){
+            AllAppPaths.append(dirAppComplete);
         }
 
         if (!fileExist){
@@ -650,12 +684,35 @@ void AppLoader::AppsSearch(){
     if (ListToolbars.length() > 1){
         qSort(ListToolbars.begin(), ListToolbars.end(), CheckPriority());
     }
+
+    // Append AllAppPaths to RoboDK's PYTHONPATH
+    if (!AllAppPaths.empty()){
+#ifdef WIN32
+        QString path_sep(";");
+#else
+        QString path_sep(":");
+#endif
+
+        QStringList pypathList = RDK->getParam("PYTHONPATH").replace("\\","/").split(path_sep);
+        pypathList.append(AllAppPaths);
+        pypathList.removeDuplicates();
+
+        QString pypath = "";
+        for (const QString& path : pypathList){
+            if (pypath != ""){
+                pypath += path_sep;
+            }
+            pypath += path;
+        }
+        RDK->Command("PYTHONPATH", pypath);
+    }
+
+    // Done
     QString msg(tr("Done loading Apps"));
     if (appsenabled_count > 0){
         msg.append(": " + QString("%1 RoboDK Apps active.").arg(appsenabled_count));
     }
     RDK->ShowMessage(msg, false);
-
 }
 
 void AppLoader::AppsLoadMenus(){
@@ -874,12 +931,30 @@ void AppLoader::onRunScript(){
         }
     }
 
-    // update environment to provide the same pythonpath used in RoboDK
+    // Add RoboDK's environnement to the process
+#ifdef WIN32
+    QString path_sep(";");
+#else
+    QString path_sep(":");
+#endif
+
+    // Append to PYTHONPATH
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QStringList envlist = env.toStringList();
-    envlist.append("PYTHONPATH=" + RDK->getParam("PYTHONPATH"));
-    envlist.append("ROBODK_API_PORT=" + RDK->Command("PORT",""));
-    proc->setEnvironment(envlist);
+    QString pypath = RDK->getParam("PYTHONPATH");
+    if (env.contains("PYTHONPATH")){
+        // Add RoboDK's PYTHONPATH after the process PYTHONPATH, so that user's robolink.py is find before RoboDK's
+        QString procPypath = env.value("PYTHONPATH").replace("\\","/");
+        if (procPypath != ""){
+            pypath = procPypath + path_sep + pypath;
+        }
+    }
+    env.insert("PYTHONPATH", pypath);
+
+    // Override API port
+    QString apiport = RDK->Command("PORT","");
+    env.insert("ROBODK_API_PORT", apiport);
+
+    proc->setEnvironment(env.toStringList());
 
     // run the script
     QStringList args;
