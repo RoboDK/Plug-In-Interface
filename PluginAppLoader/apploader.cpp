@@ -704,7 +704,7 @@ void AppLoader::AppsSearch(){
             }
             pypath += path;
         }
-        RDK->Command("PYTHONPATH", pypath);
+        qDebug() << "Python path: " << RDK->Command("PYTHONPATH", pypath);
     }
 
     // Done
