@@ -180,8 +180,8 @@ root.title(window_title)
 
 # Logo
 icon_path = getPathIcon()
-if os.path.exists(icon_path): 
-  root.iconbitmap(icon_path)
+if os.path.exists(icon_path):
+    root.iconbitmap(icon_path)
 
 # We can embed the window into RoboDK as a docked window
 # Make sure the window title is unique

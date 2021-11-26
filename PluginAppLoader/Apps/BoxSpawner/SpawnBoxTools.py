@@ -6,11 +6,6 @@
 from robolink import Robolink, Item  # RoboDK API
 import os
 
-# TODO:
-# User can override the box name
-# Open/Closed box
-# Avoid stretching on box sides
-
 #------ GLOBAL PARAMETERS ------#
 
 # Paths
@@ -160,6 +155,7 @@ def createBox(RDK=None):
     else:
         new_box = RDK.AddFile(REF_BOX_IN_PATH, PARENT)
         new_box.setName(BOX_ITEM_NAME_IN % (x, y, z))
+
     new_box.Scale([x, y, z])
 
     # Conveyors
