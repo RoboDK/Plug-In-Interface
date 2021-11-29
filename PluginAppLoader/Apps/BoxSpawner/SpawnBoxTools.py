@@ -4,9 +4,11 @@
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 # Note: It is not required to keep a copy of this file, your python script is saved with the station
 from robolink import Robolink, Item  # RoboDK API
+from robodk import eye
 import os
+import copy
 
-#------ GLOBAL PARAMETERS ------#
+#------ PARAMETERS ------#
 
 # Paths
 LOCAL_PATH: str = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +31,7 @@ PARAM_PARENT_NAME: str = PARAM_UID % 'PARENT'
 PARAM_CONV_PARENT_NAME: str = PARAM_UID % 'CONV_PARENT'
 
 # Defaults
-DEFAULT_BOX_SIZE_XYZ: list = [200, 400, 200]
+DEFAULT_BOX_SIZE_XYZ: list = [400, 200, 200]
 DEFAULT_USE_METRIC: bool = True
 DEFAULT_PARENT: Item = None
 DEFAULT_CONV_PARENT: Item = None
@@ -39,10 +41,10 @@ global BOX_SIZE_XYZ
 global USE_METRIC
 global PARENT
 global CONV_PARENT
-BOX_SIZE_XYZ = []
-USE_METRIC = False
-PARENT = None
-CONV_PARENT = None
+BOX_SIZE_XYZ = copy.copy(DEFAULT_BOX_SIZE_XYZ)
+USE_METRIC = copy.copy(DEFAULT_USE_METRIC)
+PARENT = copy.copy(DEFAULT_PARENT)
+CONV_PARENT = copy.copy(DEFAULT_CONV_PARENT)
 
 
 def loadDefaults():
@@ -51,16 +53,12 @@ def loadDefaults():
     global PARENT
     global CONV_PARENT
 
-    BOX_SIZE_XYZ = DEFAULT_BOX_SIZE_XYZ
-    USE_METRIC = DEFAULT_USE_METRIC
-    PARENT = DEFAULT_PARENT
-    CONV_PARENT = DEFAULT_CONV_PARENT
+    BOX_SIZE_XYZ = copy.copy(DEFAULT_BOX_SIZE_XYZ)
+    USE_METRIC = copy.copy(DEFAULT_USE_METRIC)
+    PARENT = copy.copy(DEFAULT_PARENT)
+    CONV_PARENT = copy.copy(DEFAULT_CONV_PARENT)
 
 
-loadDefaults()
-
-
-# Get parameters
 def loadParameters(RDK=None):
     if RDK is None:
         RDK = Robolink()
@@ -147,7 +145,8 @@ def createBox(RDK=None):
     global PARENT
     global CONV_PARENT
 
-    # Create the box object
+    RDK.Render(False)
+
     x, y, z = BOX_SIZE_XYZ
     if USE_METRIC:
         new_box = RDK.AddFile(REF_BOX_MM_PATH, PARENT)
@@ -156,14 +155,16 @@ def createBox(RDK=None):
         new_box = RDK.AddFile(REF_BOX_IN_PATH, PARENT)
         new_box.setName(BOX_ITEM_NAME_IN % (x, y, z))
 
+    new_box.setPose(eye(4))
     new_box.Scale([x, y, z])
+    RDK.Update()
 
-    # Conveyors
     if CONV_PARENT is not None:
         new_box.setParentStatic(CONV_PARENT)
 
     new_box.setVisible(True)
+    RDK.Render(True)
 
 
 if __name__ == "__main__":
-    removeParameters()
+    pass

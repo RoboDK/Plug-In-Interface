@@ -8,183 +8,220 @@ import tkinter as tk
 import SpawnBoxTools as sbt
 import os
 
-#------ UI PARAMETERS ------#
 
-SIZE_SPINBOX_FROM = 0.1  # mm or in
-SIZE_SPINBOX_TO = 10000  # mm or in
-SIZE_SPINBOX_INCREMENT = 0.5  # mm or in
-STICKY = tk.NSEW
+class SpawnBoxEditor:
+
+    SIZE_SPINBOX_FROM = 0.1
+    SIZE_SPINBOX_TO = 10000
+    SIZE_SPINBOX_INCREMENT = 0.5
+    SIZE_SPINBOX_FORMAT = "%0.2f"
+    STICKY = tk.NSEW
+
+    def __init__(self, RDK=None) -> None:
+        self.RDK = RDK
+        if self.RDK is None:
+            self.RDK = Robolink()
+
+        self.root = tk.Tk()
+
+        self.unit_options = tk.IntVar()
+        self.units_format = ''
+
+        self.box_length = tk.DoubleVar(value=0)
+        self.box_width = tk.DoubleVar(value=0)
+        self.box_height = tk.DoubleVar(value=0)
+
+        self.box_length_text = tk.StringVar(value='')
+        self.box_width_text = tk.StringVar(value='')
+        self.box_height_text = tk.StringVar(value='')
+
+        self.parent_name_text = tk.StringVar(value='')
+        self.conv_parent_name_text = tk.StringVar(value='')
+
+        sbt.loadParameters(self.RDK)
+
+        self.init()
+
+    def init(self):
+        self.unit_options.set(int(sbt.USE_METRIC))
+        self.units_format = '(mm)' if sbt.USE_METRIC else '(in)'
+
+        self.box_length.set(sbt.BOX_SIZE_XYZ[0])
+        self.box_width.set(sbt.BOX_SIZE_XYZ[1])
+        self.box_height.set(sbt.BOX_SIZE_XYZ[2])
+
+        self.box_length_text.set('Box Length ' + self.units_format)
+        self.box_width_text.set('Box Width ' + self.units_format)
+        self.box_height_text.set('Box Height ' + self.units_format)
+
+        self.parent_name_text.set(sbt.PARENT.Name() if sbt.PARENT is not None else 'Unset')
+        self.conv_parent_name_text.set(sbt.CONV_PARENT.Name() if sbt.CONV_PARENT is not None else 'Unset')
+
+    def switchUnitsFormat(self):
+
+        use_metric = self.unit_options.get() == 1
+
+        if use_metric != sbt.USE_METRIC:
+            # Convert units
+            factor = 25.4  # in to mm
+            if sbt.USE_METRIC and not use_metric:
+                factor = 1 / 25.4  # mm to in
+
+            self.box_length.set(round(self.box_length.get() * factor, 5))
+            self.box_width.set(round(self.box_width.get() * factor, 5))
+            self.box_height.set(round(self.box_height.get() * factor, 5))
+
+        sbt.USE_METRIC = use_metric
+
+    def setBoxDimensions(self):
+        sbt.BOX_SIZE_XYZ[0] = self.box_length.get()
+        sbt.BOX_SIZE_XYZ[1] = self.box_width.get()
+        sbt.BOX_SIZE_XYZ[2] = self.box_height.get()
+
+    def selectParent(self):
+        self.RDK.setSelection([])
+        choices = self.RDK.ItemList(ITEM_TYPE_FRAME)
+        choices.append(self.RDK.ActiveStation())
+        parent = self.RDK.ItemUserPick('Select spawning location', choices)
+        if parent is not None and parent.Valid():
+            sbt.PARENT = parent
+            self.parent_name_text.set(sbt.PARENT.Name())
+
+    def selectConvParent(self):
+        self.RDK.setSelection([])
+        conv_parent = self.RDK.ItemUserPick('Select conveyor relocation', ITEM_TYPE_FRAME)
+        if conv_parent is not None and conv_parent.Valid():
+            sbt.CONV_PARENT = conv_parent
+            self.conv_parent_name_text.set(sbt.CONV_PARENT.Name())
+
+    def clearConvParent(self):
+        sbt.CONV_PARENT = None
+        self.conv_parent_name_text.set('Unset')
+
+    def saveAndClose(self):
+        self.setBoxDimensions()  # This is not called if user entered manually
+        sbt.setParameters(self.RDK)
+        self.root.destroy()
+
+    def loadDefaults(self):
+        sbt.loadDefaults()
+        self.init()
+
+    def show(self):
+
+        # Generate the main window
+        frame = tk.Frame(self.root)
+        frame.pack(side=tk.TOP, fill=tk.X, padx=1, pady=1)
+        row = -1
+
+        # Unit selection
+        row += 1
+        l_units = tk.Label(frame, text='Units', anchor='w')
+        rb_box_units_mm = tk.Radiobutton(frame, text='mm', variable=self.unit_options, value=1, command=self.switchUnitsFormat)
+        rb_box_units_in = tk.Radiobutton(frame, text='in', variable=self.unit_options, value=0, command=self.switchUnitsFormat)
+
+        l_units.grid(column=0, row=row, sticky=self.STICKY)
+        rb_box_units_mm.grid(column=1, columnspan=1, row=row, sticky=tk.NW)
+        rb_box_units_in.grid(column=2, columnspan=3, row=row, sticky=tk.NW)
+
+        # Box length (x)
+        row += 1
+        l_box_length = tk.Label(frame, textvariable=self.box_length_text, anchor='w')
+        sb_box_length = tk.Spinbox(
+            frame,
+            textvariable=self.box_length,
+            from_=self.SIZE_SPINBOX_FROM,
+            to=self.SIZE_SPINBOX_TO,
+            increment=self.SIZE_SPINBOX_INCREMENT,
+            format=self.SIZE_SPINBOX_FORMAT,
+            command=self.setBoxDimensions,
+        )
+
+        l_box_length.grid(column=0, columnspan=1, row=row, sticky=self.STICKY)
+        sb_box_length.grid(column=1, columnspan=3, row=row, sticky=self.STICKY)
+
+        # Box width (y)
+        row += 1
+        l_box_width = tk.Label(frame, textvariable=self.box_width_text, anchor='w')
+        sb_box_width = tk.Spinbox(
+            frame,
+            textvariable=self.box_width,
+            from_=self.SIZE_SPINBOX_FROM,
+            to=self.SIZE_SPINBOX_TO,
+            increment=self.SIZE_SPINBOX_INCREMENT,
+            format=self.SIZE_SPINBOX_FORMAT,
+            command=self.setBoxDimensions,
+        )
+
+        l_box_width.grid(column=0, columnspan=1, row=row, sticky=self.STICKY)
+        sb_box_width.grid(column=1, columnspan=3, row=row, sticky=self.STICKY)
+
+        # Box height (z)
+        row += 1
+        l_box_height = tk.Label(frame, textvariable=self.box_height_text, anchor='w')
+        sb_box_height = tk.Spinbox(
+            frame,
+            textvariable=self.box_height,
+            from_=self.SIZE_SPINBOX_FROM,
+            to=self.SIZE_SPINBOX_TO,
+            increment=self.SIZE_SPINBOX_INCREMENT,
+            format=self.SIZE_SPINBOX_FORMAT,
+            command=self.setBoxDimensions,
+        )
+
+        l_box_height.grid(column=0, columnspan=1, row=row, sticky=self.STICKY)
+        sb_box_height.grid(column=1, columnspan=3, row=row, sticky=self.STICKY)
+
+        # Spawn location
+        row += 1
+        l_parent = tk.Label(frame, text='Spawn location (Item)', anchor='w')
+        e_parent = tk.Entry(frame, textvariable=self.parent_name_text, state='readonly')
+        b_parent = tk.Button(frame, text='Select', command=self.selectParent)
+
+        l_parent.grid(column=0, columnspan=1, row=row, sticky=self.STICKY)
+        e_parent.grid(column=1, columnspan=1, row=row, sticky=self.STICKY)
+        b_parent.grid(column=2, columnspan=2, row=row, sticky=self.STICKY)
+
+        # Conveyor remap
+        row += 1
+        l_conv_parent = tk.Label(frame, text='Conveyor relocation (Item)', anchor='w')
+        e_conv_parent = tk.Entry(frame, textvariable=self.conv_parent_name_text, state='readonly')
+        b_conv_parent = tk.Button(frame, text='Select', command=self.selectConvParent)
+        b_conv_parent_clr = tk.Button(frame, text='Clear', command=self.clearConvParent)
+
+        l_conv_parent.grid(column=0, columnspan=1, row=row, sticky=self.STICKY)
+        e_conv_parent.grid(column=1, columnspan=1, row=row, sticky=self.STICKY)
+        b_conv_parent.grid(column=2, columnspan=1, row=row, sticky=self.STICKY)
+        b_conv_parent_clr.grid(column=3, columnspan=1, row=row, sticky=self.STICKY)
+
+        # User controls
+        control_row = tk.Frame(self.root)
+
+        # Creating the OK button
+        b_ok = tk.Button(control_row, text='OK', command=self.saveAndClose, width=12)
+        b_ok.pack(side=tk.LEFT, padx=5, pady=5)
+
+        # Creating the Cancel button
+        b_cancel = tk.Button(control_row, text='Cancel', command=self.root.destroy, width=12)
+        b_cancel.pack(side=tk.LEFT, padx=5, pady=5)
+
+        # Creating the Default button
+        b_defaults = tk.Button(control_row, text='Defaults', command=self.loadDefaults, width=12)
+        b_defaults.pack(side=tk.LEFT, padx=5, pady=5)
+
+        control_row.pack(side=tk.BOTTOM, fill=tk.X, padx=1, pady=1)
+
+        # Set window name
+        window_title = "Box Spawner Editor"
+        self.root.title(window_title)
+
+        # Logo
+        icon_path = getPathIcon()
+        if os.path.exists(icon_path):
+            self.root.iconbitmap(icon_path)
+
+        self.root.mainloop()
 
 
-#------ UI FUNCTIONS ------#
-def switchUnitsFormat(toggle=True):
-    global units_format
-
-    if toggle:
-        sbt.USE_METRIC = not sbt.USE_METRIC
-
-    units_format = '(mm)' if sbt.USE_METRIC else '(in)'
-
-    if 'l_boxlength_text' in globals():
-        l_boxlength_text.set('Box Length ' + units_format)
-        l_boxwidth_text.set('Box Width ' + units_format)
-        l_boxheight_text.set('Box Height ' + units_format)
-
-
-def setBoxDimensions():
-    sbt.BOX_SIZE_XYZ[0] = box_length.get()
-    sbt.BOX_SIZE_XYZ[1] = box_width.get()
-    sbt.BOX_SIZE_XYZ[2] = box_height.get()
-
-
-def selectParent():
-    global e_parentname_text
-    RDK.setSelection([])
-    choices = [RDK.ActiveStation()]
-    choices.extend(RDK.ItemList(ITEM_TYPE_FRAME))
-    parent = RDK.ItemUserPick('Select spawning location', choices)
-    if parent is not None and parent.Valid():
-        sbt.PARENT = parent
-        e_parentname_text.set(sbt.PARENT.Name())
-
-
-def selectConvParent():
-    global e_convparentname_text
-    RDK.setSelection([])
-    conv_parent = RDK.ItemUserPick('Select conveyor relocation', ITEM_TYPE_FRAME)
-    if conv_parent is not None and conv_parent.Valid():
-        sbt.CONV_PARENT = conv_parent
-        e_convparentname_text.set(sbt.CONV_PARENT.Name())
-
-
-def clearConvParent():
-    global e_convparentname_text
-    sbt.CONV_PARENT = None
-    e_convparentname_text.set('Unset')
-
-
-def saveAndClose():
-    global root
-    setBoxDimensions()  # This is not called if user entered manually
-    sbt.setParameters(RDK)
-    root.destroy()
-
-
-#------ UI PROGRAM ------#
-
-RDK = Robolink()
-
-sbt.loadParameters(RDK)
-
-switchUnitsFormat(False)
-
-# Generate the main window
-root = tk.Tk()
-frame = tk.Frame(root)
-frame.pack(side=tk.TOP, fill=tk.X, padx=1, pady=1)
-row = -1
-
-# Unit selection
-row += 1
-l_boxunits = tk.Label(frame, text='Units', anchor='w')
-
-unit_options = tk.StringVar(value=units_format)
-rb_box_units_mm = tk.Radiobutton(frame, text='mm', variable=unit_options, value='(mm)', command=switchUnitsFormat)
-rb_box_units_in = tk.Radiobutton(frame, text='in', variable=unit_options, value='(in)', command=switchUnitsFormat)
-
-l_boxunits.grid(column=0, row=row, sticky=STICKY)
-rb_box_units_mm.grid(column=1, columnspan=1, row=row, sticky=tk.NW)
-rb_box_units_in.grid(column=2, columnspan=3, row=row, sticky=tk.NW)
-
-# Box length (x)
-row += 1
-l_boxlength_text = tk.StringVar(value='Box Length ' + units_format)
-l_boxlength = tk.Label(frame, textvariable=l_boxlength_text, anchor='w')
-
-box_length = tk.DoubleVar(value=sbt.BOX_SIZE_XYZ[0])
-e_boxlenght = tk.Spinbox(frame, textvariable=box_length, from_=SIZE_SPINBOX_FROM, to=SIZE_SPINBOX_TO, increment=SIZE_SPINBOX_INCREMENT, command=setBoxDimensions)
-
-l_boxlength.grid(column=0, columnspan=1, row=row, sticky=STICKY)
-e_boxlenght.grid(column=1, columnspan=3, row=row, sticky=STICKY)
-
-# Box width (y)
-row += 1
-l_boxwidth_text = tk.StringVar(value='Box Width ' + units_format)
-l_boxwidth = tk.Label(frame, textvariable=l_boxwidth_text, anchor='w')
-
-box_width = tk.DoubleVar(value=sbt.BOX_SIZE_XYZ[1])
-e_boxwidth = tk.Spinbox(frame, textvariable=box_width, from_=SIZE_SPINBOX_FROM, to=SIZE_SPINBOX_TO, increment=SIZE_SPINBOX_INCREMENT, command=setBoxDimensions)
-
-l_boxwidth.grid(column=0, columnspan=1, row=row, sticky=STICKY)
-e_boxwidth.grid(column=1, columnspan=3, row=row, sticky=STICKY)
-
-# Box height (z)
-row += 1
-l_boxheight_text = tk.StringVar(value='Box Height ' + units_format)
-l_boxheight = tk.Label(frame, textvariable=l_boxheight_text, anchor='w')
-
-box_height = tk.DoubleVar(value=sbt.BOX_SIZE_XYZ[2])
-e_boxheight = tk.Spinbox(frame, textvariable=box_height, from_=SIZE_SPINBOX_FROM, to=SIZE_SPINBOX_TO, increment=SIZE_SPINBOX_INCREMENT, command=setBoxDimensions)
-
-l_boxheight.grid(column=0, columnspan=1, row=row, sticky=STICKY)
-e_boxheight.grid(column=1, columnspan=3, row=row, sticky=STICKY)
-
-# Spawn location
-row += 1
-l_parent = tk.Label(frame, text='Spawn location (Item)', anchor='w')
-
-e_parentname_text = tk.StringVar(value=sbt.PARENT.Name() if sbt.PARENT is not None else 'Unset')
-e_parent = tk.Entry(frame, textvariable=e_parentname_text, state='readonly')
-
-b_parent = tk.Button(frame, text='Select', command=selectParent)
-
-l_parent.grid(column=0, columnspan=1, row=row, sticky=STICKY)
-e_parent.grid(column=1, columnspan=1, row=row, sticky=STICKY)
-b_parent.grid(column=2, columnspan=2, row=row, sticky=STICKY)
-
-# Conveyor remap
-row += 1
-l_convparent = tk.Label(frame, text='Conveyor relocation (Item)', anchor='w')
-
-e_convparentname_text = tk.StringVar(value=sbt.CONV_PARENT.Name() if sbt.CONV_PARENT is not None else 'Unset')
-e_convparent = tk.Entry(frame, textvariable=e_convparentname_text, state='readonly')
-
-b_convparent = tk.Button(frame, text='Select', command=selectConvParent)
-b_convparent_clr = tk.Button(frame, text='Clear', command=clearConvParent)
-
-l_convparent.grid(column=0, columnspan=1, row=row, sticky=STICKY)
-e_convparent.grid(column=1, columnspan=1, row=row, sticky=STICKY)
-b_convparent.grid(column=2, columnspan=1, row=row, sticky=STICKY)
-b_convparent_clr.grid(column=3, columnspan=1, row=row, sticky=STICKY)
-
-# User controls
-control_row = tk.Frame(root)
-
-# Creating the OK button
-b_ok = tk.Button(control_row, text='OK', command=saveAndClose, width=12)
-b_ok.pack(side=tk.LEFT, padx=5, pady=5)
-
-# Creating the Cancel button
-b_cancel = tk.Button(control_row, text='Cancel', command=root.destroy, width=12)
-b_cancel.pack(side=tk.LEFT, padx=5, pady=5)
-
-# Creating the Default button
-b_defaults = tk.Button(control_row, text='Defaults', command=sbt.loadDefaults, width=12)
-b_defaults.pack(side=tk.LEFT, padx=5, pady=5)
-
-control_row.pack(side=tk.BOTTOM, fill=tk.X, padx=1, pady=1)
-
-# Set window name
-window_title = "Box Spawner Editor"
-root.title(window_title)
-
-# Logo
-icon_path = getPathIcon()
-if os.path.exists(icon_path):
-    root.iconbitmap(icon_path)
-
-# We can embed the window into RoboDK as a docked window
-# Make sure the window title is unique
-#EmbedWindow(window_title, size_w=200, area_add=2)
-
-root.mainloop()
+if __name__ == "__main__":
+    SpawnBoxEditor().show()
