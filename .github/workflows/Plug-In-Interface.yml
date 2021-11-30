@@ -5,10 +5,14 @@ on:
     branches: [master]
     paths-ignore:
       - "**.md"
+      - "**/PluginAppLoader/Apps/**"
+      - "**/robodk_interface/**"
   pull_request:
     branches: [master]
     paths-ignore:
       - "**.md"
+      - "**/PluginAppLoader/Apps/**"
+      - "**/robodk_interface/**"
 
 env:
   BUILD_TYPE: Release
