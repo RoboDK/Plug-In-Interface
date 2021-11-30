@@ -67,9 +67,9 @@ class SpawnBoxEditor:
             if sbt.USE_METRIC and not use_metric:
                 factor = 1 / 25.4  # mm to in
 
-            self.box_length.set(round(self.box_length.get() * factor, 5))
-            self.box_width.set(round(self.box_width.get() * factor, 5))
-            self.box_height.set(round(self.box_height.get() * factor, 5))
+            self.box_length.set(self.box_length.get() * factor)
+            self.box_width.set(self.box_width.get() * factor)
+            self.box_height.set(self.box_height.get() * factor)
 
         sbt.USE_METRIC = use_metric
 
@@ -176,40 +176,39 @@ class SpawnBoxEditor:
         row += 1
         l_parent = tk.Label(frame, text='Spawn location (Item)', anchor='w')
         e_parent = tk.Entry(frame, textvariable=self.parent_name_text, state='readonly')
-        b_parent = tk.Button(frame, text='Select', command=self.selectParent)
+        b_parent = tk.Button(frame, text='Select', command=self.selectParent, padx=1, pady=1)
 
         l_parent.grid(column=0, columnspan=1, row=row, sticky=self.STICKY)
         e_parent.grid(column=1, columnspan=1, row=row, sticky=self.STICKY)
-        b_parent.grid(column=2, columnspan=2, row=row, sticky=self.STICKY)
+        b_parent.grid(column=2, columnspan=2, row=row, sticky=self.STICKY, padx=1, pady=1)
 
         # Conveyor remap
         row += 1
         l_conv_parent = tk.Label(frame, text='Conveyor relocation (Item)', anchor='w')
-        e_conv_parent = tk.Entry(frame, textvariable=self.conv_parent_name_text, state='readonly')
+        e_conv_parent = tk.Entry(frame, textvariable=self.conv_parent_name_text, state='readonly', width=32)
         b_conv_parent = tk.Button(frame, text='Select', command=self.selectConvParent)
         b_conv_parent_clr = tk.Button(frame, text='Clear', command=self.clearConvParent)
 
         l_conv_parent.grid(column=0, columnspan=1, row=row, sticky=self.STICKY)
         e_conv_parent.grid(column=1, columnspan=1, row=row, sticky=self.STICKY)
-        b_conv_parent.grid(column=2, columnspan=1, row=row, sticky=self.STICKY)
-        b_conv_parent_clr.grid(column=3, columnspan=1, row=row, sticky=self.STICKY)
+        b_conv_parent.grid(column=2, columnspan=1, row=row, sticky=self.STICKY, padx=1, pady=1)
+        b_conv_parent_clr.grid(column=3, columnspan=1, row=row, sticky=self.STICKY, padx=1, pady=1)
 
         # User controls
         control_row = tk.Frame(self.root)
+        control_row.pack(side=tk.BOTTOM, padx=1, pady=1)
 
         # Creating the OK button
         b_ok = tk.Button(control_row, text='OK', command=self.saveAndClose, width=12)
-        b_ok.pack(side=tk.LEFT, padx=5, pady=5)
+        b_ok.grid(column=0, row=0, sticky=self.STICKY, padx=1, pady=1)
 
         # Creating the Cancel button
         b_cancel = tk.Button(control_row, text='Cancel', command=self.root.destroy, width=12)
-        b_cancel.pack(side=tk.LEFT, padx=5, pady=5)
+        b_cancel.grid(column=1, row=0, sticky=self.STICKY, padx=1, pady=1)
 
         # Creating the Default button
         b_defaults = tk.Button(control_row, text='Defaults', command=self.loadDefaults, width=12)
-        b_defaults.pack(side=tk.LEFT, padx=5, pady=5)
-
-        control_row.pack(side=tk.BOTTOM, fill=tk.X, padx=1, pady=1)
+        b_defaults.grid(column=2, row=0, sticky=self.STICKY, padx=1, pady=1)
 
         # Set window name
         window_title = "Box Spawner Editor"
@@ -220,6 +219,7 @@ class SpawnBoxEditor:
         if os.path.exists(icon_path):
             self.root.iconbitmap(icon_path)
 
+        self.root.resizable(0, 0)
         self.root.mainloop()
 
 
