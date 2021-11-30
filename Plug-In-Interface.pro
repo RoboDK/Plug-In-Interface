@@ -12,6 +12,7 @@ QMAKE_CXXFLAGS+=-Wno-comment
 TEMPLATE = subdirs
 
 SUBDIRS += PluginAppLoader/AppLoader.pro
+SUBDIRS += PluginBallbarTracker/PluginBallbarTracker.pro
 SUBDIRS += PluginExample/PluginExample.pro
 SUBDIRS += PluginLockTCP/PluginLockTCP.pro
 win32 {
