@@ -52,7 +52,7 @@ def LoadView(view_name, vr_view=False):
     
     if vr_view:
         # Set headset VR view
-        RDK.Command("ViewPose", str(pose_2_xyzrxyz(vp)))
+        RDK.Command("ViewPoseVR", str(Pose_2_TxyzRxyz(vp)))
         
     else:
         # Set normal VR view

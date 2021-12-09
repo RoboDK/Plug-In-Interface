@@ -6,6 +6,7 @@
 #-------------------------------------------------------
 
 from robolink import *
+from robodk import Pose_2_KUKA
 
 def SaveView(view_name):
 

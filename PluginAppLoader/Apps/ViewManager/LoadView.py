@@ -6,6 +6,7 @@
 #-------------------------------------------------------
 
 from robolink import *
+from robodk import KUKA_2_Pose
 
 def LoadView(view_name):
     import ast

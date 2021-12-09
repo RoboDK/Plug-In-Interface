@@ -228,7 +228,8 @@ class AppSettings:
             
         bytes_data = rdk.getParam(param_backup, False)
         if len(bytes_data) > 0:
-            result = ShowMessageYesNoCancel("Something went wrong with the last test.\nRecover lost data?", "Auto recover")
+            import robodk
+            result = robodk.ShowMessageYesNoCancel("Something went wrong with the last test.\nRecover lost data?", "Auto recover")
             if result is None:
                 return False
 
@@ -418,7 +419,8 @@ class AppSettings:
                     value_input = value
                     value = Str2FloatList(value_input, FLOAT_ARRAY_ATTRIBS[fkey])
                     if value is None:
-                        ShowMessage("Invalid input: " + value_input)
+                        import robodk
+                        robodk.ShowMessage("Invalid input: " + value_input)
                         return                    
                 
                 else:

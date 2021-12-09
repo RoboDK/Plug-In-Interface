@@ -102,7 +102,7 @@ def RecordProgram():
 
         if video is None:
             # Create VideoWriter object
-            video = cv2.VideoWriter(file_video_temp, fourcc, frames_per_second, (frame.shape[:2]))
+            video = cv2.VideoWriter(file_video_temp, fourcc, frames_per_second, frame.shape[:2])
 
         video.write(frame)  # Write out frame to video
 
