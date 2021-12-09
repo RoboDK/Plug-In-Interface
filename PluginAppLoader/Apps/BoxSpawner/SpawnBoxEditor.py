@@ -15,6 +15,7 @@ class SpawnBoxEditor:
     SIZE_SPINBOX_TO = 10000
     SIZE_SPINBOX_INCREMENT = 0.5
     SIZE_SPINBOX_FORMAT = "%0.2f"
+    WIDTH_ENTRY = 32
     STICKY = tk.NSEW
 
     def __init__(self, RDK=None) -> None:
@@ -175,8 +176,8 @@ class SpawnBoxEditor:
         # Spawn location
         row += 1
         l_parent = tk.Label(frame, text='Spawn location (Item)', anchor='w')
-        e_parent = tk.Entry(frame, textvariable=self.parent_name_text, state='readonly')
-        b_parent = tk.Button(frame, text='Select', command=self.selectParent, padx=1, pady=1)
+        e_parent = tk.Entry(frame, textvariable=self.parent_name_text, state='readonly', width=self.WIDTH_ENTRY)
+        b_parent = tk.Button(frame, text='Select', command=self.selectParent)
 
         l_parent.grid(column=0, columnspan=1, row=row, sticky=self.STICKY)
         e_parent.grid(column=1, columnspan=1, row=row, sticky=self.STICKY)
@@ -185,7 +186,7 @@ class SpawnBoxEditor:
         # Conveyor remap
         row += 1
         l_conv_parent = tk.Label(frame, text='Conveyor relocation (Item)', anchor='w')
-        e_conv_parent = tk.Entry(frame, textvariable=self.conv_parent_name_text, state='readonly', width=32)
+        e_conv_parent = tk.Entry(frame, textvariable=self.conv_parent_name_text, state='readonly', width=self.WIDTH_ENTRY)
         b_conv_parent = tk.Button(frame, text='Select', command=self.selectConvParent)
         b_conv_parent_clr = tk.Button(frame, text='Clear', command=self.clearConvParent)
 
