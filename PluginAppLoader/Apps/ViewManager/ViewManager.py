@@ -81,10 +81,9 @@ def threadMoveTo(poses, stop):
 
 
 def NavigateTo(poses_to):
+    on_Stop()
 
     global stop_threads
-    stop_threads = True
-    pause(1 / 30)  # let the threads die
     stop_threads = False
 
     global STEPS_SIZE
@@ -119,6 +118,8 @@ def NavigateTo(poses_to):
                 pose_i = invH(KUKA_2_Pose(xyzabc))
 
             pose_list.append(pose_i)
+
+        pose_list.append(pose2)  # Ensure we do not 'jump'
 
         return pose_list
 
@@ -170,8 +171,7 @@ if __name__ == "__main__":
     ListPoses = []
 
     def SaveViews():
-        global stop_threads
-        stop_threads = True
+        on_Stop()
 
         # The first view is always the main view
         strall = ""
@@ -187,8 +187,7 @@ if __name__ == "__main__":
         RDK.setParam("ViewNames", strall)
 
     def SaveSettings():
-        global stop_threads
-        stop_threads = True
+        on_Stop()
 
         global STEPS_SIZE
         global WAYPOINTS_DELAY
@@ -228,9 +227,7 @@ if __name__ == "__main__":
                     ListPoses.append(vp)
 
     def on_Close():
-        global stop_threads
-        stop_threads = True
-
+        on_Stop()
         SaveViews()
         SaveSettings()
         w.destroy()
@@ -251,12 +248,14 @@ if __name__ == "__main__":
     for i in range(len(ListNames)):
         listbox.insert(i + 1, ListNames[i])
 
-    #listbox.select_set(0) #(0, tkinter.END)
-
-    # Select all
-    #listbox.select_set(0, tkinter.END)
+    def on_Stop():
+        global stop_threads
+        stop_threads = True
+        pause(0.1)
 
     def on_ListDelete():
+        on_Stop()
+
         sel = listbox.curselection()
         if len(sel) == 0:
             print("Nothing selected")
@@ -276,6 +275,8 @@ if __name__ == "__main__":
                 RDK.ShowMessage(msg, False)
 
     def on_ListRename():
+        on_Stop()
+
         sel = listbox.curselection()
         if len(sel) == 0:
             print("Nothing selected")
@@ -298,6 +299,8 @@ if __name__ == "__main__":
         SaveViews()
 
     def on_ListUpdate():
+        on_Stop()
+
         sel = listbox.curselection()
         index = 0
         if len(sel) == 0:
@@ -322,6 +325,8 @@ if __name__ == "__main__":
         RDK.ShowMessage(msg, False)
 
     def on_ListAdd():
+        on_Stop()
+
         sel = listbox.curselection()
         new_name = mbox("Enter the view name", entry="New View %i" % (len(ListNames) + 1))
         if not new_name:
@@ -345,6 +350,8 @@ if __name__ == "__main__":
         RDK.ShowMessage(msg, False)
 
     def on_ListShow(evtdblclick=None):
+        on_Stop()
+
         sel = listbox.curselection()
         if len(sel) == 0:
             print("Nothing selected")
@@ -366,6 +373,7 @@ if __name__ == "__main__":
             break
 
     def on_ListNavigateTo(evtdblclick=None):
+        on_Stop()
 
         SaveSettings()  # Force update the fields, as manual entry doesn't trigger the update
 
@@ -380,6 +388,8 @@ if __name__ == "__main__":
         t.start()
 
     def on_ListUp():
+        on_Stop()
+
         sel = listbox.curselection()
         for index in sel:
             print(index)
@@ -398,6 +408,8 @@ if __name__ == "__main__":
         SaveViews()
 
     def on_ListDown():
+        on_Stop()
+
         sel = listbox.curselection()
         for index in sel:
             print(index)
@@ -433,6 +445,9 @@ if __name__ == "__main__":
     sbWaypointDelay.grid(column=1, row=row, sticky='ew')
 
     # Controls
+    btnStop = tkinter.Button(w, text="Stop", command=on_Stop)
+    btnStop.pack(fill=tkinter.X, side=tkinter.BOTTOM)
+
     btnDel = tkinter.Button(w, text="Delete", command=on_ListDelete)
     btnDel.pack(fill=tkinter.X, side=tkinter.BOTTOM)
 
