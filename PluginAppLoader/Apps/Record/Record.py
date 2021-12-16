@@ -17,137 +17,127 @@ import tempfile
 import sys
 
 
-class RunApplication:
-    """Class to detect when the terminate signal is emited.
-    Example:
-        run = RunApplication()
-        while run.run:
-            # your loop
-
-    """
-    run = True
-
-    def __init__(self):
-        import signal
-        signal.signal(signal.SIGTERM, self.clean_exit)
-        signal.signal(signal.SIGINT, self.clean_exit)  # ctrl + c
-
-    def clean_exit(self, signum, frame):
-        self.run = False
-
-
 def RecordProgram():
 
     # Define the frames per second:
-    frames_per_second = 25
+    FRAMES_PER_SECOND = 24
 
     # Define the video extension (you may need to change the codec)
-    #video_extension = "avi"
-    video_extension = "mp4"
+    #VIDEO_EXTENSION = ".avi"
+    VIDEO_EXTENSION = ".mp4"
 
     # Choose the codec (mp4v, XVID or DIVX)
-    #fourcc = cv2.VideoWriter_fourcc(*'DIVX') # good quality (avi)
-    #fourcc = cv2.VideoWriter_fourcc(*'XVID') # low quality (avi)
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # good quality (mp4)
+    #FOURCC = cv2.VideoWriter_fourcc(*'DIVX') # good quality (avi)
+    #FOURCC = cv2.VideoWriter_fourcc(*'XVID') # low quality (avi)
+    FOURCC = cv2.VideoWriter_fourcc(*'mp4v')  # good quality (mp4)
 
     # Default screenshot style:
-    snapshot_style = "Snapshot"
+    SNAPSHOT_STYLE = "Snapshot"
 
     # Other snapshot styles are not recommended, otherwise it will create a delay and a lot of flickering
     # Instead, change the appearance of RoboDK in the menu Tools-Options-Display
-    #snapshot_style = "SnapshotWhite"
-    #snapshot_style = "SnapshotWhiteNoText"
-    #snapshot_style = "SnapshotNoTextNoFrames"
+    #SNAPSHOT_STYLE = "SnapshotWhite"
+    #SNAPSHOT_STYLE = "SnapshotWhiteNoText"
+    #SNAPSHOT_STYLE = "SnapshotNoTextNoFrames"
+
+    PREFER_SOCKET = True # If available, prefer socket (usually faster) over temporary file to retrieve the image
 
     #-------------------------------------------------------------------
-    RDK = Robolink()
+    # Use a temporary folder
+    with tempfile.TemporaryDirectory(prefix='Record_') as td:
 
-    # Define a temporary frame image and video files
-    tempdir = tempfile.TemporaryDirectory(prefix='Record_')  # will cleanup itself
-    file_video_temp = tempdir.name.replace('\\', '/') + '/RoboDK_Video.' + video_extension
+        RDK = Robolink()
 
-    # Get the file name of this file/script and check the station parameter to detect stop (old method)
-    filename = getFileName(__file__)
+        file_video_temp = os.path.join(td, 'RoboDK_Video' + VIDEO_EXTENSION)
 
-    # Allow running an infinite loop if this script is run without the parameter AttachCamera
-    infinite_loop = False
-    if RDK.getParam(filename) is None:
-        infinite_loop = True
+        video = None
+        frame = None
+        use_socket = PREFER_SOCKET  
+        render_time_last = 0
+        time_per_frame = 1 / FRAMES_PER_SECOND
 
-    # Class to stop the process if we receive the terminate signal
-    #run = RunApplication()
+        app = RunApplication()
+        while app.Run():
+            tic()
 
-    # Run until the station parameter AttachCamera is set to 0
-    video = None
-    frame = None
-    render_time_last = 0
-    time_per_frame = 1 / frames_per_second
-    tic()
-    while infinite_loop or RDK.getParam(filename) == 1:  # old method
+            # There's no need to get a new image if no render as occurred.
+            render_time = int(RDK.Command("LastRender"))
+            if (render_time_last != render_time):
+                render_time_last = render_time
 
-        # Get the last time an image was rendered in ms (ms since epoch)
-        render_time = int(RDK.Command("LastRender"))
-        if (abs(render_time_last - render_time) > 1e-10):
+                def getSnapshot(use_socket, tempdir):
+                    fallback = False
+                    if use_socket:
+                        # Socket method. Added in version 5.3.2
+                        try:
+                            bytes_img = RDK.Cam2D_Snapshot('', None)  # None means station and will throw before version 5.3.2
+                            if isinstance(bytes_img, bytes) and bytes_img != b'':
+                                return True, cv2.imdecode(np.frombuffer(bytes_img, np.uint8), cv2.IMREAD_UNCHANGED)
+                        except Exception:
+                            fallback = True
+                            pass
 
-            # A render happened in RoboDK. Retrieve the last frame
-            render_time_last = render_time
+                    # Fallback to tempfile method
+                    tf = tempdir + '/temp.png'
+                    if RDK.Command(SNAPSHOT_STYLE, tf) == 'OK':
+                        return not fallback, cv2.imread(tf)
 
-            bytes_img = RDK.Command(snapshot_style, '')
-            if bytes_img is None or bytes_img == b'':
-                RDK.ShowMessage("Problems retrieving the RoboDK image buffer", False)
-                break
+                    return False, None
 
-            # Load the frame image using OpenCV
-            frame = cv2.imdecode(np.frombuffer(bytes_img, np.uint8), cv2.IMREAD_UNCHANGED)
+                # Get the station snapshot
+                success, frame = getSnapshot(use_socket, td)
+                if not success:
+                    if use_socket:
+                        use_socket = False
+                    else:
+                        RDK.ShowMessage("Problems retrieving the RoboDK image buffer", False)
+                        break
 
+            # Write the frame to the video file
+            if video is None:
+                # Requires at least one frame to extract the frame size.
+                height, width = frame.shape[:2] 
+                video = cv2.VideoWriter(file_video_temp, FOURCC, FRAMES_PER_SECOND, (width, height))
+            video.write(frame)
+
+            # Wait some time, if necessary, to have accurate frame rate
+            elapsed = toc()
+            if elapsed < time_per_frame:
+                t_sleep = time_per_frame - elapsed
+                print("Waiting for next frame: " + str(t_sleep))
+                pause(t_sleep)
+
+        print("Done recording")
+
+        # Check if nothing was saved
         if video is None:
-            # Create VideoWriter object
-            video = cv2.VideoWriter(file_video_temp, fourcc, frames_per_second, frame.shape[:2])
+            quit()
+        video.release()
 
-        video.write(frame)  # Write out frame to video
+        # Save the file
+        msg_str = "Saving video recording... "
+        print(msg_str)
+        RDK.ShowMessage(msg_str, False)
 
-        # Wait some time, if necessary, to have accurate frame rate
-        elapsed = toc()
-        if elapsed < time_per_frame:
-            t_sleep = time_per_frame - elapsed
-            print("Waiting for next frame: " + str(t_sleep))
-            pause(t_sleep)
+        # Create a suggested file name
+        print("Saving video...")
+        date_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        path_rdk = RDK.getParam('PATH_DESKTOP')  # or path_rdk = RDK.getParam('PATH_OPENSTATION')
+        file_name = "RoboDK-Video-" + date_str + VIDEO_EXTENSION
 
-        tic()
+        # Ask the user to provide a file to save
+        file_path = getSaveFileName(path_preference=path_rdk, strfile=file_name, defaultextension=VIDEO_EXTENSION, filetypes=[("Video file", "*" + VIDEO_EXTENSION)])
+        if not file_path:
+            quit()
 
-    print("Done recording")
-    # Check if nothing was saved
-    if video is None:
-        quit()
+        # Save the file
+        print("Saving video to: " + file_path)
+        if os.path.exists(file_path):
+            print("Deleting existing file: " + file_path)
+            os.remove(file_path)
 
-    # Save the file
-    msg_str = "Saving video recording... "
-    print(msg_str)
-    RDK.ShowMessage(msg_str, False)
-
-    # Finish/release the file
-    video.release()
-
-    # Create a suggested file name
-    print("Saving video...")
-    date_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    #path_rdk = RDK.getParam('PATH_OPENSTATION')
-    path_rdk = RDK.getParam('PATH_DESKTOP')
-    file_name = "RoboDK-Video-" + date_str + "." + video_extension
-
-    # Ask the user to provide a file to save
-    file_path = getSaveFileName(path_preference=path_rdk, strfile=file_name, defaultextension='.' + video_extension, filetypes=[("Video file", "*." + video_extension), ("All files", "*.*")])
-    if not file_path:
-        quit()
-
-    # Save the file
-    print("Saving video to: " + file_path)
-    if os.path.exists(file_path):
-        print("Deleting existing file: " + file_path)
-        os.remove(file_path)
-
-    # Move the file
-    os.rename(file_video_temp, file_path)
+        # Move the file
+        os.rename(file_video_temp, file_path)
 
     # Done
     msg_str = "Video recording saved: " + file_path
@@ -155,21 +145,89 @@ def RecordProgram():
     RDK.ShowMessage(msg_str, False)
 
 
-def runmain():
-    # Make sure we don't run this file if we are unchecking it
-    if len(sys.argv) >= 2:
-        if sys.argv[1] == "Unchecked":
-            print("This action is triggered by the uncheck action")
-            quit()
+class RunApplication:
+    """Class to detect when the terminate signal is emited to stop an action.
 
-    # Important: This setting will tell RoboDK App loader to not kill the process a few seconds after the terminate function is called
-    # This is needed if we want the user input to save the file
+    .. code-block:: python
+
+        run = RunApplication()
+        while run.Run():
+            # your main loop to run until the terminate signal is detected
+            ...
+
+    """
+    time_last = -1
+    param_name = None
+    RDK = None
+
+    def __init__(self, rdk=None):
+        if rdk is None:
+            from robolink import Robolink
+            self.RDK = Robolink()
+        else:
+            self.RDK = rdk
+
+        self.time_last = time.time()
+        if len(sys.argv) > 0:
+            path = sys.argv[0]
+            folder = os.path.basename(os.path.dirname(path))
+            file = os.path.basename(path)
+            if file.endswith(".py"):
+                file = file[:-3]
+            elif file.endswith(".exe"):
+                file = file[:-4]
+
+            self.param_name = file + "_" + folder
+            self.RDK.setParam(self.param_name, "1")  # makes sure we can run the file separately in debug mode
+
+    def Run(self):
+        time_now = time.time()
+        if time_now - self.time_last < 0.25:
+            return True
+        self.time_last = time_now
+        if self.param_name is None:
+            # Unknown start
+            return True
+
+        keep_running = not (self.RDK.getParam(self.param_name) == 0)
+        return keep_running
+
+
+def Unchecked():
+    """Verify if the command "Unchecked" is present. In this case it means the action was just unchecked from RoboDK (applicable to checkable actions only)."""
+    if len(sys.argv) >= 2:
+        if "Unchecked" in sys.argv[1:]:
+            return True
+
+    return False
+
+
+def Checked():
+    """Verify if the command "Checked" is present. In this case it means the action was just checked from RoboDK (applicable to checkable actions only)."""
+    if len(sys.argv) >= 2:
+        if "Checked" in sys.argv[1:]:
+            return True
+
+    return False
+
+
+def SkipKill():
+    """For Checkable actions, this setting will tell RoboDK App loader to not kill the process a few seconds after the terminate function is called.
+    This is needed if we want the user input to save the file. For example: The Record action from the Record App."""
     print("App Setting: Skip kill")
     sys.stdout.flush()
 
-    RecordProgram()
+
+def runmain():
+    # Verify if this is an action that was just unchecked
+    if Unchecked():
+        quit(0)
+    else:
+        # Checked (or checkable status not applicable)
+        SkipKill()
+        RecordProgram()
 
 
-# Function to run when this module is executed on its own or by selecting the action button in RoboDK
 if __name__ == "__main__":
+    # Important: leave the main function as runmain if you want to compile this app
     runmain()

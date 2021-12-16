@@ -1,7 +1,7 @@
 # This script will promt the user to enter the size of the screen and update the main window of RoboDK accordingly
 
-from robolink import *  # RoboDK API
-from robodk import mbox
+from robolink import *   # RoboDK API
+from robodk import mbox  # Robot toolbox
 
 
 def runmain():
