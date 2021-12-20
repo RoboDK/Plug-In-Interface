@@ -161,6 +161,10 @@ QString PluginPartAttached::PluginCommand(const QString &command, const QString 
             return "Invalid object item";
         }
 
+        if (isAttached(object)) {
+            return "Object already attached";
+        }
+
         // Needs to be processed last so that last_clicked_item is the parent (robot can be the TCP, last_clicked_item will be the robot)
         Item robot = RDK->getItem(values.at(1));
         if (!RDK->Valid(robot) || !validItem(robot)) {
@@ -201,18 +205,19 @@ void PluginPartAttached::PluginEvent(TypeEvent event_type) {
         qDebug() << "An item has been added or deleted. Current station: " << RDK->getActiveStation()->Name();
 
         // Check if any attached objects or parent were removed
-        for (auto it = attached_objects.begin(); it != attached_objects.end(); it++) {
+        for (auto it = attached_objects.begin(); it != attached_objects.end(); ) {
             attached_object_t attached_object = *it;
             if (!RDK->Valid(attached_object.parent)) {
                 qDebug() << "Removing attached object(s) from deleted robot.";
-                attached_objects.erase(it--);
+                it = attached_objects.erase(it);
                 continue;
             }
             if (!RDK->Valid(attached_object.object)) {
                 qDebug() << "Removing deleted object from attached robot(s).";
-                attached_objects.erase(it--);
+                it = attached_objects.erase(it);
                 continue;
             }
+            ++it;
         }
         break;
     }
@@ -244,10 +249,12 @@ void PluginPartAttached::callback_robot_select_attach() {
     // Get a list of free objects to show the user
     QList<Item> list_objects = RDK->getItemList(IItem::ITEM_TYPE_OBJECT);
     if (!attached_objects.empty()) {
-        for (auto it = list_objects.begin(); it != list_objects.end(); it++) {
+        for (auto it = list_objects.begin(); it != list_objects.end(); ) {
             if (isAttached(*it)) {
-                list_objects.erase(it--);
+                it = list_objects.erase(it);
+                continue;
             }
+            ++it;
         }
     }
 
@@ -317,12 +324,13 @@ void PluginPartAttached::callback_robot_select_detach() {
 
     // Remove objects from the selected item
     for (const auto &selected_object : selected_objects) {
-        for (auto it = attached_objects.begin(); it != attached_objects.end(); it++) {
+        for (auto it = attached_objects.begin(); it != attached_objects.end(); ) {
             attached_object_t attached_object = *it;
             if (attached_object.parent == last_clicked_item && attached_object.object == selected_object) {
-                attached_objects.erase(it--);
+                it = attached_objects.erase(it);
                 break;
             }
+            ++it;
         }
     }
 }
@@ -336,11 +344,13 @@ void PluginPartAttached::callback_robot_detach_all() {
         return;
     }
 
-    for (auto it = attached_objects.begin(); it != attached_objects.end(); it++) {
+    for (auto it = attached_objects.begin(); it != attached_objects.end(); ) {
         attached_object_t attached_object = *it;
         if (attached_object.parent == last_clicked_item) {
-            attached_objects.erase(it--);
+            it = attached_objects.erase(it);
+            continue;
         }
+        ++it;
     }
 }
 
@@ -393,11 +403,13 @@ void PluginPartAttached::callback_objet_detach_all() {
         return;
     }
 
-    for (auto it = attached_objects.begin(); it != attached_objects.end(); it++) {
+    for (auto it = attached_objects.begin(); it != attached_objects.end(); ) {
         attached_object_t attached_object = *it;
         if (attached_object.object == last_clicked_item) {
-            attached_objects.erase(it--);
+            it = attached_objects.erase(it);
+            break;
         }
+        ++it;
     }
 }
 
