@@ -20,5 +20,6 @@ SUBDIRS += Plugin-OPC-UA/PluginOPCUA.pro
 SUBDIRS += PluginOpenGL/PluginOpengl.pro
 SUBDIRS += PluginOpenGL-Shaders/PluginChip8Opengl.pro
 }
+SUBDIRS += PluginRealTime/PluginPartAttachedRobot.pro
 SUBDIRS += PluginRealTime/PluginRealTime.pro
 SUBDIRS += PluginRobotPilot/PluginRobotPilot.pro

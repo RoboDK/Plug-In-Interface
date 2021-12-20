@@ -68,6 +68,13 @@ public:
     /// \return
     virtual bool PluginItemClick(Item item, QMenu *menu, TypeClick click_type) override;
 
+    /// \brief This function is called every time a new context menu is created for a list of items.
+    /// \param item The List of Items (\ref IItem) clicked
+    /// \param menu Pointer to the context menu
+    /// \param click_type Click type (usually left click)
+    /// \return
+    virtual bool PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeClick click_type) override;
+
     ///
     /// \brief Specific commands can be passed from the RoboDK API. For example, a parent application can rely on a plugin for certain operations (for example, to create native windows within RoboDK application or take advantage of the RoboDK API speed within the plugin).
     /// Use the RoboDK API (PluginCommand(plugin_name, command, value) to send specific commands to your plugin from an external application.
@@ -109,12 +116,11 @@ public slots:
     /// Called when the detach all objects from robot is clicked
     void callback_robot_detach_all();
 
-    /// Called when the attach object to robot is clicked
-    void callback_object_select_attach();
+    /// Called when the attach objects to robot is clicked
+    void callback_object_select_attach_multi();
 
-    /// Called when the detach object from robots is clicked
-    void callback_objet_detach_all();
-
+    /// Called when the detach objects from robots is clicked
+    void callback_objet_detach_all_multi();
 
 public:
 
@@ -127,33 +133,45 @@ public:
     /// Get the objects attached to a parent
     QList<Item> attachedObjects(Item parent);
 
-    /// Process an item. Returns true if it succeeds, else false.
-    bool validItem(Item item);
+    /// Attach N objects to a robot joint
+    void attachObjects(Item robot, const QList<Item> &objects, int joint);
 
-    /// Update event
-    void updatePoses();
+    /// Detach N objects from a robot
+    void detachObjects(Item robot, const QList<Item> &objects);
+
+    /// Detach all objects from a robot
+    void detachObjectsAll(Item robot);
+
+    /// Detach object from all robots (should be 1)
+    void detachRobotsAll(Item object);
+
+    /// Validates an item (object or robot), returns the linked robot or object if valid, else nullptr.
+    Item validItem(Item item);
 
     /// Get the pose of the moving frame we want
     Mat getCustomPose(Item item, int joint_id);
+
+    /// Update event
+    void updatePoses();
 
 
     // define your actions: usually, one action per button
 private:
 
     /// Menu to select objects to attach to the ROBOT
-    QAction *action_robot_select_attach;
+    QAction *action_robot_select_attach { nullptr };
 
     /// Menu to select objects to detach from the ROBOT
-    QAction *action_robot_select_detach;
+    QAction *action_robot_select_detach { nullptr };
 
     /// Menu to detach all objects from the ROBOT
-    QAction *action_robot_detach_all;
+    QAction *action_robot_detach_all { nullptr };
 
-    /// Menu to select the robot to attach the OBJECT to
-    QAction *action_object_select_attach;
+    /// Menu to select the robot to attach the OBJECTS to
+    QAction *action_object_select_attach_multi { nullptr };
 
-    /// Menu to detach an OBJECT from all robots
-    QAction *action_objet_detach_all;
+    /// Menu to detach a OBJECTS from all robots
+    QAction *action_objet_detach_all_multi { nullptr };
 
     /// Data structure of an attached object
     struct attached_object_t
@@ -167,8 +185,8 @@ private:
     /// Vector of all available attached objects
     QVector<attached_object_t> attached_objects;
 
-    /// Last clicked item
-    Item last_clicked_item { nullptr };
+    /// Last clicked items, items to process
+    QList<Item> last_clicked_items;
 
 };
 
