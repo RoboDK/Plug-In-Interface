@@ -5,7 +5,6 @@
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 #-------------------------------------------------------
 
-
 # Import the original module functions
 from SaveView import *
 
