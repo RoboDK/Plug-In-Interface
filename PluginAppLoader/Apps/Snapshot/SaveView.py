@@ -6,6 +6,8 @@
 #-------------------------------------------------------
 
 from robolink import *
+from robodk import Pose_2_KUKA
+
 
 def SaveView(view_name):
 
@@ -20,9 +22,10 @@ def SaveView(view_name):
 
     # Save it as a station parameter (saved with the RDK file)
     RDK.setParam(view_name, vp_str)
-    
+
     RDK.ShowMessage("Current view point saved: " + vp_str, False)
     print("Done")
+
 
 if __name__ == "__main__":
     # Define the station parameter name
