@@ -1,18 +1,21 @@
 name: Build plugins
 
 on:
-  push:
-    branches: [master]
-    paths-ignore:
-      - "**.md"
-      - "**/PluginAppLoader/Apps/**"
-      - "**/robodk_interface/**"
+  #push:
+  #  branches: [master]
+  #  paths-ignore:
+  #    - "**.md"
+  #    - "**/PluginAppLoader/Apps/**"
+  #    - "**/robodk_interface/**"
+
   pull_request:
     branches: [master]
     paths-ignore:
       - "**.md"
       - "**/PluginAppLoader/Apps/**"
       - "**/robodk_interface/**"
+
+  workflow_dispatch: # Run workflow manually
 
 env:
   BUILD_TYPE: Release
@@ -42,7 +45,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.14.0
         with:
-          tools: "tools_qtcreator,5.0.3,qt.tools.qtcreator"
+          tools: "tools_qtcreator,6.0.1,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
 
       - name: Configure and build Plug-In-Interface on Windows
