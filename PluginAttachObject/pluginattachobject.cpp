@@ -11,7 +11,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-#include "pluginpartattached.h"
+#include "pluginattachobject.h"
 
 #include "robodk_interface.h"
 #include "iitem.h"
@@ -19,15 +19,15 @@
 
 //------------------------------- RoboDK Plug-in commands ------------------------------
 
-PluginPartAttached::PluginPartAttached() {
+PluginAttachObject::PluginAttachObject() {
 
 }
 
-QString PluginPartAttached::PluginName() {
-    return "Plugin Part Attached";
+QString PluginAttachObject::PluginName() {
+    return "Plugin Attach Object";
 }
 
-QString PluginPartAttached::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings) {
+QString PluginAttachObject::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings) {
     RDK = rdk;
     MainWindow = mw;
     StatusBar = statusbar;
@@ -59,7 +59,7 @@ QString PluginPartAttached::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStat
     return "";
 };
 
-void PluginPartAttached::PluginUnload() {
+void PluginAttachObject::PluginUnload() {
     // Cleanup the plugin
     qDebug() << "Unloading plugin " << PluginName();
 
@@ -97,7 +97,7 @@ void PluginPartAttached::PluginUnload() {
     }
 }
 
-bool PluginPartAttached::PluginItemClick(Item item, QMenu *menu, TypeClick click_type) {
+bool PluginAttachObject::PluginItemClick(Item item, QMenu *menu, TypeClick click_type) {
     last_clicked_items.clear();
 
     if (click_type != ClickRight) {
@@ -119,8 +119,9 @@ bool PluginPartAttached::PluginItemClick(Item item, QMenu *menu, TypeClick click
         // Create the menu option, or update if it already exist
         if (nullptr != menu) {
             menu->addSeparator();
-            menu->addAction(action_object_select_attach_multi);
-            if (already_attached) {
+            if (!already_attached) {
+                menu->addAction(action_object_select_attach_multi);
+            } else {
                 menu->addAction(action_objet_detach_all_multi);
             }
         }
@@ -148,7 +149,7 @@ bool PluginPartAttached::PluginItemClick(Item item, QMenu *menu, TypeClick click
     return false;
 }
 
-bool PluginPartAttached::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeClick click_type) {
+bool PluginAttachObject::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeClick click_type) {
     last_clicked_items.clear();
 
     if (click_type != ClickRight) {
@@ -185,7 +186,7 @@ bool PluginPartAttached::PluginItemClickMulti(QList<Item> &item_list, QMenu *men
     return false;
 }
 
-QString PluginPartAttached::PluginCommand(const QString &command, const QString &value) {
+QString PluginAttachObject::PluginCommand(const QString &command, const QString &value) {
     qDebug() << "Received command: " << command << "    with value: " << value;
 
     // Expected format: "Attach", "Joint|Robot|Object|". Attaches Object to Robot at Joint
@@ -241,7 +242,7 @@ QString PluginPartAttached::PluginCommand(const QString &command, const QString 
     return "";
 }
 
-void PluginPartAttached::PluginEvent(TypeEvent event_type) {
+void PluginAttachObject::PluginEvent(TypeEvent event_type) {
     switch (event_type) {
     case EventChanged:
     {
@@ -276,7 +277,7 @@ void PluginPartAttached::PluginEvent(TypeEvent event_type) {
 //----------------------------------------------------------------------------------
 // Define your own button callbacks here (and other slots)
 
-void PluginPartAttached::callback_robot_select_attach() {
+void PluginAttachObject::callback_robot_select_attach() {
     if (last_clicked_items.length() != 1) {
         return;
     }
@@ -354,7 +355,7 @@ void PluginPartAttached::callback_robot_select_attach() {
     attachObjects(robot, selected_objects, joint_id);
 }
 
-void PluginPartAttached::callback_robot_select_detach() {
+void PluginAttachObject::callback_robot_select_detach() {
     if (last_clicked_items.length() != 1) {
         return;
     }
@@ -413,7 +414,7 @@ void PluginPartAttached::callback_robot_select_detach() {
     detachObjects(robot, selected_objects);
 }
 
-void PluginPartAttached::callback_robot_detach_all() {
+void PluginAttachObject::callback_robot_detach_all() {
     if (last_clicked_items.length() != 1) {
         return;
     }
@@ -426,7 +427,7 @@ void PluginPartAttached::callback_robot_detach_all() {
     detachObjectsAll(robot);
 }
 
-void PluginPartAttached::callback_object_select_attach_multi() {
+void PluginAttachObject::callback_object_select_attach_multi() {
     if (last_clicked_items.empty()) {
         return;
     }
@@ -456,7 +457,7 @@ void PluginPartAttached::callback_object_select_attach_multi() {
     attachObjects(robot, last_clicked_items, joint_id);
 }
 
-void PluginPartAttached::callback_objet_detach_all_multi() {
+void PluginAttachObject::callback_objet_detach_all_multi() {
     if (last_clicked_items.empty()) {
         return;
     }
@@ -469,7 +470,7 @@ void PluginPartAttached::callback_objet_detach_all_multi() {
 
 //----------------------------------------------------------------------------------
 
-bool PluginPartAttached::isAttached(Item object) {
+bool PluginAttachObject::isAttached(Item object) {
     for (const auto &attached_object : attached_objects) {
         if (attached_object.object == object) {
             return true;
@@ -478,7 +479,7 @@ bool PluginPartAttached::isAttached(Item object) {
     return false;
 }
 
-bool PluginPartAttached::hasObjects(Item parent) {
+bool PluginAttachObject::hasObjects(Item parent) {
     for (const auto &attached_object : attached_objects) {
         if (attached_object.parent == parent) {
             return true;
@@ -487,7 +488,7 @@ bool PluginPartAttached::hasObjects(Item parent) {
     return false;
 }
 
-QList<Item> PluginPartAttached::attachedObjects(Item parent) {
+QList<Item> PluginAttachObject::attachedObjects(Item parent) {
     QList<Item> childs;
 
     for (const auto &attached_object : attached_objects) {
@@ -498,7 +499,7 @@ QList<Item> PluginPartAttached::attachedObjects(Item parent) {
     return childs;
 }
 
-void PluginPartAttached::attachObjects(Item robot, const QList<Item> &objects, int joint) {
+void PluginAttachObject::attachObjects(Item robot, const QList<Item> &objects, int joint) {
     if (nullptr == robot || objects.empty() || joint < 1) {
         return;
     }
@@ -519,7 +520,7 @@ void PluginPartAttached::attachObjects(Item robot, const QList<Item> &objects, i
     }
 }
 
-void PluginPartAttached::detachObjects(Item robot, const QList<Item> &objects) {
+void PluginAttachObject::detachObjects(Item robot, const QList<Item> &objects) {
     if (nullptr == robot || objects.empty()) {
         return;
     }
@@ -550,7 +551,7 @@ void PluginPartAttached::detachObjects(Item robot, const QList<Item> &objects) {
     }
 }
 
-void PluginPartAttached::detachObjectsAll(Item robot) {
+void PluginAttachObject::detachObjectsAll(Item robot) {
     if (nullptr == robot) {
         return;
     }
@@ -568,7 +569,7 @@ void PluginPartAttached::detachObjectsAll(Item robot) {
     }
 }
 
-void PluginPartAttached::detachRobotsAll(Item object) {
+void PluginAttachObject::detachRobotsAll(Item object) {
     if (nullptr == object) {
         return;
     }
@@ -586,7 +587,7 @@ void PluginPartAttached::detachRobotsAll(Item object) {
     }
 }
 
-Item PluginPartAttached::validItem(Item item) {
+Item PluginAttachObject::validItem(Item item) {
 
     if ((item == nullptr) || !RDK->Valid(item)) {
         return nullptr;
@@ -618,14 +619,14 @@ Item PluginPartAttached::validItem(Item item) {
     return nullptr;
 }
 
-Mat PluginPartAttached::getCustomPose(Item item, int joint_id) {
+Mat PluginAttachObject::getCustomPose(Item item, int joint_id) {
     QList<Mat> poses = item->JointPoses(item->Joints());
     joint_id = qBound(0, joint_id, poses.length() - 1);
     Mat pose = poses[joint_id];
     return item->PoseAbs() * pose;
 }
 
-void PluginPartAttached::updatePoses() {
+void PluginAttachObject::updatePoses() {
 
     // Update all objects
     for (const auto &attached_object : attached_objects) {

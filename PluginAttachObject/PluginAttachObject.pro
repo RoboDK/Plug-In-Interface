@@ -26,19 +26,19 @@ CONFIG         += plugin
 # Add any Qt libraries you would like to use:
 #QT += core gui
 QT += widgets
-QT += network   # Allows using QTcpSocket
+#QT += network   # Allows using QTcpSocket
 
 # Define your plugin name (name of the DLL file generated)
-TARGET          = PluginPartAttached
+TARGET          = PluginAttachObject
 
 
 
 #-----------------------------------------------------
 # Define the location to place the plugin library (release and/or debug binaries)
-#exists( "$$PWD/../../destdir_rdk_plugins.pri" ) {
-#include("$$PWD/../../destdir_rdk_plugins.pri")
-#DESTDIR = $$DESTDIR_RDK_PLUGINS
-#} else {
+exists( "$$PWD/../../destdir_rdk_plugins.pri" ) {
+include("$$PWD/../../destdir_rdk_plugins.pri")
+DESTDIR = $$DESTDIR_RDK_PLUGINS
+} else {
 CONFIG(release, debug|release) {
 
     message("Using release binaries.")
@@ -75,7 +75,7 @@ CONFIG(release, debug|release) {
     }
 
 }
-#}
+}
 
 
 #--------------------------
@@ -84,10 +84,10 @@ CONFIG(release, debug|release) {
 
 
 HEADERS += \
-    pluginpartattached.h
+    pluginattachobject.h
 
 SOURCES += \
-    pluginpartattached.cpp 
+    pluginattachobject.cpp 
 
 
 

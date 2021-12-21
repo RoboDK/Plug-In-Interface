@@ -23,9 +23,9 @@ class IItem;
 class FormRobotPilot;
 
 ///
-/// \brief The PluginPartAttached allow attaching one or more objects to one or more robot links.
+/// \brief The PluginAttachObject allow attaching one or more objects to one or more robot links.
 ///
-class PluginPartAttached : public QObject, IAppRoboDK
+class PluginAttachObject : public QObject, IAppRoboDK
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "RoboDK.IAppRoboDK")// FILE "metadatalugin.json")
@@ -34,7 +34,7 @@ class PluginPartAttached : public QObject, IAppRoboDK
 public:
     //------------------------------- RoboDK Plug-in Interface commands ------------------------------
 
-    PluginPartAttached();
+    PluginAttachObject();
 
     ///
     /// @brief Return the plugin name. Try to be creative and make sure the name is unique.
