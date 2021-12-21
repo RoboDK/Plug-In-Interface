@@ -23,6 +23,7 @@ If more than one object is present in the station, a selection prompt will appea
 
 
 Once the objects an the robot are selected, a prompt will appear to select the joint ID to attach. For instance, to attach an object on the last joint of a six axis robot, enter 6.
+
 ![Attaching objects](./doc/joint-entry.png)
 
 Attaching and detaching objects from the API
