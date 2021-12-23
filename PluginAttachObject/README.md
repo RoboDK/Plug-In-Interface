@@ -53,6 +53,6 @@ for obj in objects:
     joint = int(entry)
 
     value = "%i|%s|%s" % (joint, robot.Name(), obj)
-    result = RDK.PluginCommand("Plugin Part Attached", "Attach", value)
+    result = RDK.PluginCommand("Plugin Attach Object", "Attach", value)
     RDK.ShowMessage(value + " -> " + result, False)
 ```
