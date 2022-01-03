@@ -151,8 +151,11 @@ public:
     /// Get the pose of the moving frame we want
     Mat getCustomPose(Item item, int joint_id);
 
-    /// Update event
-    void updatePoses();
+    /// Update object poses
+    void updatePoses(bool check_station = true);
+
+    /// Clean up removed items and stations
+    void cleanupRemovedItems();
 
 
     // define your actions: usually, one action per button
@@ -179,7 +182,10 @@ private:
         int joint_id { -1 }; // Parent joint the object is attached to
         Item parent { nullptr }; // Parent to which the object is attached (robot, external axis, etc)
         Item object { nullptr }; // The object itself
+        Item station { nullptr }; // Station holding the parent/object
         Mat pose; // Initial object pose when attached
+
+        QString toString() { return object->Name() + " attached to " + parent->Name() + " on joint " + QString::number(joint_id) + " from station " + station->Name(); };
     };
 
     /// Vector of all available attached objects
