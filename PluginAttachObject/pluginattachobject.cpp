@@ -189,7 +189,7 @@ bool PluginAttachObject::PluginItemClickMulti(QList<Item> &item_list, QMenu *men
 QString PluginAttachObject::PluginCommand(const QString &command, const QString &value) {
     qDebug() << "Received command: " << command << "    with value: " << value;
 
-    // Expected format: "Attach", "Joint|Robot|Object|". Attaches Object to Robot at Joint
+    // Expected format: "Attach", "Joint|Robot|Object". Attaches Object to Robot at Joint
     //                  "Detach", "Object". Detach Object from any Robot
     //                  "Detach", "Robot". Detach all Objects from Robot
     //
@@ -244,23 +244,11 @@ QString PluginAttachObject::PluginCommand(const QString &command, const QString 
 
 void PluginAttachObject::PluginEvent(TypeEvent event_type) {
     switch (event_type) {
+    case EventChangedStation:
     case EventChanged:
     {
-        // Check if any attached objects or parent were removed
-        for (auto it = attached_objects.begin(); it != attached_objects.end(); ) {
-            attached_object_t attached_object = *it;
-            if (!RDK->Valid(attached_object.parent)) {
-                qDebug() << "Removing attached object(s) from deleted robot.";
-                it = attached_objects.erase(it);
-                continue;
-            }
-            if (!RDK->Valid(attached_object.object)) {
-                qDebug() << "Removing deleted object from attached robot(s).";
-                it = attached_objects.erase(it);
-                continue;
-            }
-            ++it;
-        }
+        // Check for item or station deletion
+        cleanupRemovedItems();
         break;
     }
     case EventMoved:
@@ -514,9 +502,10 @@ void PluginAttachObject::attachObjects(Item robot, const QList<Item> &objects, i
         attached_object.joint_id = joint;
         attached_object.parent = robot;
         attached_object.object = object;
+        attached_object.station = RDK->getActiveStation();
         attached_object.pose = getCustomPose(robot, joint).inv() * object->PoseAbs();
         attached_objects.append(attached_object);
-        qDebug() << "Attached " + attached_object.object->Name() + " to " + attached_object.parent->Name();
+        qDebug() << "Attached " + attached_object.toString();
     }
 }
 
@@ -533,17 +522,8 @@ void PluginAttachObject::detachObjects(Item robot, const QList<Item> &objects) {
             continue;
         }
 
-        // Nested for-loop
-        bool found = false;
-        for (const auto &object : objects) {
-            if (attached_object.object == object) {
-                found = true;
-                break;
-            }
-        }
-
-        if (found) {
-            qDebug() << "Detached " + attached_object.object->Name() + " from " + attached_object.parent->Name();
+        if (objects.contains(attached_object.object)) {
+            qDebug() << "Detaching " + attached_object.toString();
             it = attached_objects.erase(it);
             continue;
         }
@@ -564,7 +544,7 @@ void PluginAttachObject::detachObjectsAll(Item robot) {
             continue;
         }
 
-        qDebug() << "Detached " + attached_object.object->Name() + " from " + attached_object.parent->Name();
+        qDebug() << "Detaching " + attached_object.toString();
         it = attached_objects.erase(it);
     }
 }
@@ -582,7 +562,7 @@ void PluginAttachObject::detachRobotsAll(Item object) {
             continue;
         }
 
-        qDebug() << "Detached " + attached_object.object->Name() + " from " + attached_object.parent->Name();
+        qDebug() << "Detaching " + attached_object.toString();
         it = attached_objects.erase(it);
     }
 }
@@ -594,7 +574,6 @@ Item PluginAttachObject::validItem(Item item) {
     }
 
     if (item->Type() == IItem::ITEM_TYPE_OBJECT) {
-        qDebug() << "Found valid object: " << item->Name();
         return item;
     } else {
         // A robot, external axis, etc. can have multiple objects attached to it
@@ -610,8 +589,6 @@ Item PluginAttachObject::validItem(Item item) {
             // Get the parent robot, this will always return the pointer to the robot
             Item robot_item = item->getLink(IItem::ITEM_TYPE_ROBOT);
 
-            qDebug() << "Found valid parent: " << robot_item->Name();
-
             // At this point, we don't know which objects to attach to this robot
             return robot_item;
         }
@@ -626,17 +603,57 @@ Mat PluginAttachObject::getCustomPose(Item item, int joint_id) {
     return item->PoseAbs() * pose;
 }
 
-void PluginAttachObject::updatePoses() {
-
-    // Update all objects
-    for (const auto &attached_object : attached_objects) {
-        attached_object.object->setPoseAbs(getCustomPose(attached_object.parent, attached_object.joint_id) * attached_object.pose);
+void PluginAttachObject::updatePoses(bool check_station) {
+    if (attached_objects.empty()){
+        return;
     }
 
-    // We must force a new update before render (a render is on its way),
+    // Update all objects
+    Item station = RDK->getActiveStation();
+    for (const auto &attached_object : attached_objects) {
+        if (!check_station || (attached_object.station == station)) {
+            attached_object.object->setPoseAbs(getCustomPose(attached_object.parent, attached_object.joint_id) * attached_object.pose);
+        }
+    }
+
+    // We must force a new update before render (a render is on its way)
     // Keep in mind we are already inside an update operation
-    // RoboDK will check for recursivity and prevent it
     if (!attached_objects.empty()) {
         RDK->Render(RoboDK::RenderUpdateOnly);
+    }
+}
+
+void PluginAttachObject::cleanupRemovedItems() {
+    if (attached_objects.empty()){
+        return;
+    }
+
+    Item station = RDK->getActiveStation();
+    QList<Item> stations = RDK->getOpenStations();
+    for (auto it = attached_objects.begin(); it != attached_objects.end(); ) {
+        attached_object_t attached_object = *it;
+
+        // Remove deleted stations
+        if (!stations.contains(attached_object.station)) {
+            qDebug() << "Station closed. Removing " << attached_object.toString();
+            it = attached_objects.erase(it);
+            continue;
+        }
+
+        // Remove deleted items from the current station
+        // Note: RDK->Valid(item) return false for items in other stations
+        if (attached_object.station == station) {
+            if (!RDK->Valid(attached_object.parent)) {
+                qDebug() << "Robot deleted. Removing " << attached_object.toString();
+                it = attached_objects.erase(it);
+                continue;
+            }
+            if (!RDK->Valid(attached_object.object)) {
+                qDebug() << "Object Deleted. Removing " << attached_object.toString();
+                it = attached_objects.erase(it);
+                continue;
+            }
+        }
+        ++it;
     }
 }
