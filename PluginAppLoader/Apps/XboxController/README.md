@@ -1,9 +1,9 @@
 Xbox Controller App for RoboDK
 ===========================
 
-The Xbox Controller App allows you to control your robot arm using an Xbox One Controller.
+The Xbox Controller App allows you to control your robot arm using an Xbox Controller.
 
-To use this app, you can load the XboxController.apploader.rdkp file in this folder or manually copy the contents of this folder in your RoboDK Apps folder:
+To use this app, you can load the XboxController.apploader.rdkp file from this folder or manually copy the contents of this folder in your RoboDK Apps folder:
 
 ``` bash
 C:/RoboDK/Apps/XboxController
@@ -36,7 +36,7 @@ Controller mapping
 * Press the left joystick to toggle between translation (default) and rotation.
 * Press the right joystick to toggle between MoveJ (default) and MoveL.
 * Press both bumpers to Home.
-* Use the right trigger to engage the safeguard.
+* **Use the right trigger to engage the safeguard and enable movements.**
 
 Settings
 ========

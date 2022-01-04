@@ -20,6 +20,7 @@ import_install('inputs')
 from inputs import get_gamepad
 from inputs import devices
 
+import_install('numpy')
 from numpy import allclose
 
 
@@ -126,6 +127,8 @@ def MainAction():
         quit(0)
     gamepad = gamepads[0]
     print('Using controller: %s' % gamepad.name)
+    if len(gamepads) > 1:
+        RDK.ShowMessage("Multiple controllers found. Defaulting to %s." % gamepad.name)
 
     # Get a robot. Will not ask the user if there's only one.
     robot = RDK.ItemUserPick("Select a robot", ITEM_TYPE_ROBOT)
