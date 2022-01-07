@@ -7,6 +7,10 @@ This example shows how to dynamically attach an object to a robot joint.
 * An object can be attached once, and a robot can have multiple objects attached to multiple joints.
 * The user can attach and detach objects by right-clicking an object, multiple objects, or a robot.
 
+|                                         |                                         |                                               |
+| --------------------------------------- | --------------------------------------- | --------------------------------------------- |
+| ![Parts](./doc/parts-view-portrait.png) | ![Robot](./doc/robot-view-portrait.png) | ![Assembly](./doc/assembly-view-portrait.png) |
+
 Attaching and detaching objects from RoboDK
 ---------------------------------------------
 Attach or detach an object or multiple objects to the same robot joint by right-clicking them (either in the tree or in the cell). Attach and detach menus will be present according to the state of the selected objects.

@@ -10,7 +10,7 @@ C:/RoboDK/Apps/XboxController
 ```
 
 Then, make sure the AppLoader is enabled (Shift+I) and this app is enabled (Shift+A).
-Press the Controller icon in the toolbar to start the app, and click again to stop it.
+Press the Controller icon in the toolbar to start the app, and click again to stop it. Status updates will be available on the status bar of RoboDK (bottom of the screen).
 
 By default, this app moves the simulated robot. You can also move the real robot if you are connected using the RoboDK driver for your robot controller:
 * Select Connect-Connect robot
