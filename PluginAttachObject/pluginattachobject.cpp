@@ -635,7 +635,7 @@ void PluginAttachObject::cleanupRemovedItems() {
 
         // Remove deleted stations
         if (!stations.contains(attached_object.station)) {
-            qDebug() << "Station closed. Removing " << attached_object.toString();
+            qDebug() << "Station closed. Removing affected items.";
             it = attached_objects.erase(it);
             continue;
         }
@@ -644,12 +644,12 @@ void PluginAttachObject::cleanupRemovedItems() {
         // Note: RDK->Valid(item) return false for items in other stations
         if (attached_object.station == station) {
             if (!RDK->Valid(attached_object.parent)) {
-                qDebug() << "Robot deleted. Removing " << attached_object.toString();
+                qDebug() << "Robot deleted. Removing affected items.";
                 it = attached_objects.erase(it);
                 continue;
             }
             if (!RDK->Valid(attached_object.object)) {
-                qDebug() << "Object Deleted. Removing " << attached_object.toString();
+                qDebug() << "Object Deleted. Removing affected items.";
                 it = attached_objects.erase(it);
                 continue;
             }
