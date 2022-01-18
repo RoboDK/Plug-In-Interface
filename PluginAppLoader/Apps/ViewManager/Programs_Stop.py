@@ -1,6 +1,5 @@
 # Stop all programs and moving robots
-from robolink import *    # RoboDK API
-from robodk import *      # Robot toolbox
+from robodk.robolink import *    # RoboDK API
 RDK = Robolink()
 
 RDK.Render(False)

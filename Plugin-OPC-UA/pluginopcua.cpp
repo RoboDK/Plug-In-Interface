@@ -240,8 +240,8 @@ QString PluginOPCUA::PluginCommand(const QString &command, const QString &value)
         // Use an OPC-UA Client to connect to the server. A value can be optionally provided to override the Endpoint URL
         // Trick: Create a macro such as the following one to update the variables automatically every 100 ms
         /*
-        from robolink import *    # RoboDK API
-        from robodk import *      # Robot toolbox
+        from robodk.robolink import *    # RoboDK API
+        from robodk.robomath import *    # Robot toolbox
         RDK = Robolink()
         while True:
             RDK.PluginCommand("", "ClientBrowse")

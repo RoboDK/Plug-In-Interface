@@ -1,4 +1,4 @@
-from robolink import *
+from robodk.robolink import *
 RDK = Robolink()
 
 # Improve render speed for VR: Do not display objects smaller than 1% of the screen 

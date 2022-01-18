@@ -262,7 +262,7 @@ if exists:
 UnZipDir(file_path, apps_path)
 printFlush('Done')
 
-from robolink import Robolink
+from robodk.robolink import Robolink
 RDK = Robolink()
 RDK.PluginCommand("App Loader", "Reload")
 exit(0)
@@ -942,7 +942,7 @@ void AppLoader::onRunScript(){
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QString pypath = RDK->getParam("PYTHONPATH");
     if (env.contains("PYTHONPATH")){
-        // Add RoboDK's PYTHONPATH after the process PYTHONPATH, so that user's robolink.py is find before RoboDK's
+        // Add RoboDK's PYTHONPATH after the process PYTHONPATH, so that user's robodk package is found before RoboDK's
         QString procPypath = env.value("PYTHONPATH").replace("\\","/");
         if (procPypath != ""){
             pypath = procPypath + path_sep + pypath;

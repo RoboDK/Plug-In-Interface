@@ -1,4 +1,4 @@
-from robolink import *
+from robodk.robolink import *
 RDK = Robolink()
 
 RDK.Command("DisplayThreshold", 0.1) # Display everything

@@ -30,7 +30,7 @@ Using the API
 Here's a sample code to use this plugin through the API.
 
 ```
-from robolink import ITEM_TYPE_TOOL, Robolink
+from robodk.robolink import ITEM_TYPE_TOOL, Robolink
 
 RDK = Robolink()
 
@@ -57,7 +57,7 @@ RDK.ShowMessage('Ballbar detached from %s' % item.Name())
 To attach multiple ballbars to the same robot, you will have to use the API. Here's an example for a tripod configuration:
 
 ```
-from robolink import ITEM_TYPE_TOOL, Robolink
+from robodk.robolink import ITEM_TYPE_TOOL, Robolink
 
 RDK = Robolink()
 

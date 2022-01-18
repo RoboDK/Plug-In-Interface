@@ -1,6 +1,6 @@
 # Set the current view in the RoboDK main window to the VR headset
-from robolink import *
-from robodk import *
+from robodk.robolink import *
+from robodk.robomath import *
 import ast
 
 # Start the RoboDK API

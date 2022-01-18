@@ -4,8 +4,9 @@
 # Therefore, we can use the Record station parameter to detect if the button is checked or unchecked.
 # This script will be triggered when the button is clicked (checked or unchecked)
 
-from robolink import *  # API to communicate with RoboDK
-from robodk import *  # import the robodk library (robotics toolbox)
+from robodk.robolink import *  # API to communicate with RoboDK
+from robodk.robomath import *  # import the robodk library (robotics toolbox)
+from robodk.robodialogs import *
 
 import_install("cv2", "opencv-python")
 import_install("numpy")
@@ -162,7 +163,7 @@ class RunApplication:
 
     def __init__(self, rdk=None):
         if rdk is None:
-            from robolink import Robolink
+            from robodk.robolink import Robolink
             self.RDK = Robolink()
         else:
             self.RDK = rdk

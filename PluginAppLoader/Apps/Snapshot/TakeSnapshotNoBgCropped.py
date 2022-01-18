@@ -11,8 +11,9 @@ AA_SAMPLES = 2  # OK quality (slow)
 #AA_SAMPLES = 4  # Good quality (slow)
 
 #---------------------------------------
-from robodk import *
-from robolink import *
+from robodk.robomath import *
+from robodk.robodialogs import *
+from robodk.robolink import *
 import datetime
 
 import os

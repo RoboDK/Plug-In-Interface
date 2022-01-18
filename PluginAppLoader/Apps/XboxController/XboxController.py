@@ -12,8 +12,9 @@
 #
 # --------------------------------------------
 
-from robolink import *  # API to communicate with RoboDK
-from robodk import *
+from robodk.robolink import *  # API to communicate with RoboDK
+from robodk.robomath import *
+from robodk.robodialogs import *
 from _tools import *  # "Apps" tools for RoboDK. Can be reused with other apps.
 
 import_install('inputs')

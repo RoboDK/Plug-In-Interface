@@ -1,11 +1,11 @@
 # Expand program calls of the selected program(s) into new program(s).
 #
-# Type help("robolink") or help("robodk") for more information
+# Type help("robodk.robolink") or help("robodk.robomath") for more information
 # Press F5 to run the script
 # Documentation: https://robodk.com/doc/en/RoboDK-API.html
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 
-import robolink as rlk
+from robodk import robolink as rlk
 
 PROG_EXPAND_NAME = "%s Expanded"  # ex: MyProg Expanded
 

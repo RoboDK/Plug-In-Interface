@@ -5,8 +5,9 @@
 IMAGE_WIDTH = 8000
 IMAGE_HEIGHT = 6000
 
-from robodk import *
-from robolink import *
+from robodk.robomath import *
+from robodk.robodialogs import *
+from robodk.robolink import *
 import datetime
 
 RDK = Robolink()

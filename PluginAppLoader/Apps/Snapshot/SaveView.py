@@ -5,8 +5,8 @@
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 #-------------------------------------------------------
 
-from robolink import *
-from robodk import Pose_2_KUKA
+from robodk.robolink import *
+from robodk.robomath import Pose_2_KUKA
 
 
 def SaveView(view_name):

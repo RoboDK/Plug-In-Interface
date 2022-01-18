@@ -5,8 +5,8 @@
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 #-------------------------------------------------------
 
-from robolink import *
-from robodk import KUKA_2_Pose
+from robodk.robolink import *
+from robodk.robomath import KUKA_2_Pose
 
 
 def LoadView(view_name):
