@@ -30,7 +30,7 @@ More information about the RoboDK API for Python here:
 * https://github.com/RoboDK/RoboDK-API/tree/master/Python
 * https://pypi.org/project/robodk/
 * https://robodk.com/doc/en/RoboDK-API.html#PythonAPI
-* https://robodk.com/doc/en/PythonAPI/robolink.html
+* https://robodk.com/doc/en/PythonAPI/index.html
 
 Example
 =======

@@ -33,7 +33,7 @@ ref_cam.setPose(RDK.ViewPose().inv() * rotx(pi))
 #RDK.Render(True)
 
 # Create a new 2D camera view with high snapshot resolution, take a snapshot and close
-# More information here: https://robodk.com/doc/en/PythonAPI/robolink.html#robolink.Robolink.Cam2D_Snapshot
+# More information here: https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Robolink.Cam2D_Snapshot
 cam_id = RDK.Cam2D_Add(ref_cam, "SNAPSHOT=%ix%i FOV=30 FAR_LENGTH=100000" % (IMAGE_WIDTH, IMAGE_HEIGHT))
 #cam_id = RDK.Cam2D_Add(ref_cam, "NEAR_LENGTH=5 FAR_LENGTH=100000 FOV=30 SNAPSHOT=%ix%i NO_TASKBAR BG_COLOR=black" % (IMAGE_WIDTH, IMAGE_HEIGHT))
 RDK.Render()
