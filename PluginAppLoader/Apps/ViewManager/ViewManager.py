@@ -5,8 +5,9 @@
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 #-------------------------------------------------------
 
-from robolink import *
-from robodk import *
+from robodk.robolink import *
+from robodk.robomath import *
+from robodk.robodialogs import *
 import ast
 import sys
 import os

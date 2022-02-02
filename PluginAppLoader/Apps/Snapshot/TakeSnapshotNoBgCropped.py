@@ -11,8 +11,9 @@ AA_SAMPLES = 2  # OK quality (slow)
 #AA_SAMPLES = 4  # Good quality (slow)
 
 #---------------------------------------
-from robodk import *
-from robolink import *
+from robodk.robomath import *
+from robodk.robodialogs import *
+from robodk.robolink import *
 import datetime
 
 import os
@@ -55,7 +56,7 @@ ref_cam.setPose(campose.inv() * rotx(pi))
 #RDK.Render(True)
 
 # Create a new 2D camera view with high snapshot resolution, take a snapshot and close
-# More information here: https://robodk.com/doc/en/PythonAPI/robolink.html#robolink.Robolink.Cam2D_Snapshot
+# More information here: https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Robolink.Cam2D_Snapshot
 camparams = "SNAPSHOT=%ix%i FOV=30 FAR_LENGTH=100000" % (IMAGE_WIDTH * AA_SAMPLES, IMAGE_HEIGHT * AA_SAMPLES)
 #cam_id = RDK.Cam2D_Add(ref_cam, "NEAR_LENGTH=5 FAR_LENGTH=100000 FOV=30 SNAPSHOT=%ix%i NO_TASKBAR BG_COLOR=black" % (IMAGE_WIDTH, IMAGE_HEIGHT))
 

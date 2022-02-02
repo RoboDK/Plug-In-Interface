@@ -8,7 +8,7 @@
 import os
 import sys
 import time
-import robolink
+from robodk import robolink
 
 
 class RunApplication:

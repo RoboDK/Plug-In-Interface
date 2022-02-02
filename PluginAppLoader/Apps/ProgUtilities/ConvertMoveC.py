@@ -1,12 +1,11 @@
 # Convert MoveC to linear movements (MoveL) in the selected program(s).
 #
-# Type help("robolink") or help("robodk") for more information
+# Type help("robodk.robolink") or help("robodk.robomath") for more information
 # Press F5 to run the script
 # Documentation: https://robodk.com/doc/en/RoboDK-API.html
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 
-import robolink as rlk
-import robodk as rdk
+from robodk import robolink as rlk
 
 STEP_MM = 1
 STEP_DEG = 1

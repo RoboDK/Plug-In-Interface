@@ -6,7 +6,8 @@ import sys
 import shutil
 import glob
 import fnmatch
-from robodk import *
+from robodk.robodialogs import *
+from robodk.robofileio import *
 
 # Prevent compiling the following files (Important: name in filename will be used as a check)
 SKIP_COMPILE = ['_config']

@@ -36,8 +36,8 @@ Attaching and detaching objects from the API
 Here's a sample code to use this plugin through the API.
 
 ```
-from robolink import *  # RoboDK API
-from robodk import *  # Robot toolbox
+from robodk.robolink import *
+from robodk.robodialogs import *
 
 RDK = Robolink()
 

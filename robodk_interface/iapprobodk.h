@@ -42,7 +42,7 @@
 *
 * More information about the RoboDK API is available here:
 * - IRoboDK: C++ reference for the plugin.
-* - Python Reference (using standard API): https://robodk.com/doc/en/PythonAPI/robolink.html.
+* - Python Reference (using standard API): https://robodk.com/doc/en/PythonAPI/index.html.
 *
 *
 *
@@ -51,7 +51,7 @@
 * Item is a pointer to IItem. Items should be deleted using class: IItem::Delete (not using the class destructor).
 *
 * More information about the RoboDK Item class (based on the Python API) is available here:
-* - https://robodk.com/doc/en/PythonAPI/robolink.html#robolink-item.
+* - https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Item.
 *
 *
 * \subsubsection LinkTypes RoboDK types file
@@ -158,7 +158,7 @@
 * \section LinkRefs Useful Links
 * Useful links involving the RoboDK API:
 * - Standard RoboDK API Introduction: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
-* - Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/robolink.html.
+* - Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/index.html.
 * - Latest RoboDK API on GitHub (you'll find RoboDK Plugins in a subfolder): https://github.com/RoboDK/RoboDK-API.
 * - RoboDK API Introductory video: https://www.youtube.com/watch?v=3I6OK1Kd2Eo.
 *

@@ -99,6 +99,6 @@ Useful Links
 Useful links involving the RoboDK API:
  * RoboDK Plug-In interface documentation reference: https://robodk.com/doc/en/PlugIns/index.html.
  * Standard RoboDK API Introduction: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
- * Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/robolink.html.
+ * Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/index.html.
  * Latest RoboDK API on GitHub: https://github.com/RoboDK/RoboDK-API.
  * RoboDK API Introductory video: https://www.youtube.com/watch?v=3I6OK1Kd2Eo.

@@ -1,4 +1,4 @@
-from robolink import *
+from robodk.robolink import *
 RDK = Robolink()
 
 RDK.Command("DisplayThreshold", 0.1) # Display everything
@@ -11,7 +11,7 @@ RDK.Command("MouseFeedback", 1)
 
 
 # Allow all default RoboDK flags
-# https://robodk.com/doc/en/PythonAPI/robolink.html#robolink.Robolink.setFlagsRoboDK
+# https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Robolink.setFlagsRoboDK
 RDK.setFlagsRoboDK(FLAG_ROBODK_ALL)
 
 

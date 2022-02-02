@@ -8,8 +8,8 @@
 #
 
 from _config import *
-from robolink import *    # RoboDK API
-from robodk import *      # Robot toolbox
+from robodk.robolink import *    # RoboDK API
+from robodk.robomath import *    # Robot toolbox
 
 
 # Define the ranges to test

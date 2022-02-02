@@ -24,7 +24,7 @@ Run from API
 Here's a sample code to use this plugin through the API.
 
 ```
-from robolink import ITEM_TYPE_TOOL, Robolink
+from robodk.robolink import ITEM_TYPE_TOOL, Robolink
 
 RDK = Robolink()
 

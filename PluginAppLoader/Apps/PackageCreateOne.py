@@ -3,7 +3,7 @@ import sys
 import shutil
 import glob
 import fnmatch
-from robodk import *
+from robodk.robodialogs import *
 
 ROOT_PATH = os.path.dirname(__file__)
 

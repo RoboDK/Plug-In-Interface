@@ -45,7 +45,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.14.0
         with:
-          tools: "tools_qtcreator,6.0.1,qt.tools.qtcreator"
+          tools: "tools_qtcreator,6.0.2,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
 
       - name: Configure and build Plug-In-Interface on Windows

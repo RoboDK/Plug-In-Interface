@@ -1,4 +1,4 @@
-from robolink import *
+from robodk.robolink import *
 RDK = Robolink()
 
 # Improve render speed for VR: Do not display objects smaller than 1% of the screen 
@@ -11,7 +11,7 @@ RDK.Command("DisplayCurves", 0) # Hide Curves
 RDK.Command("DisplayPoints", 0) # Hide Points
 
 # Allow all default RoboDK flags
-# https://robodk.com/doc/en/PythonAPI/robolink.html#robolink.Robolink.setFlagsRoboDK
+# https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Robolink.setFlagsRoboDK
 block_flags = 0
 
 #block_flags = block_flags and FLAG_ROBODK_TREE_ACTIVE 

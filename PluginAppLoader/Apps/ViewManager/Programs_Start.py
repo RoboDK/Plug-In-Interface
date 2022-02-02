@@ -1,7 +1,6 @@
 # Start all programs. If multiple programs are found for the same robot, only the first one is executed
 # Start the RoboDK API
-from robolink import *    # RoboDK API
-from robodk import *      # Robot toolbox
+from robodk.robolink import *    # RoboDK API
 RDK = Robolink()
 
 RDK.Render(False)

@@ -1,7 +1,7 @@
 # This script allows you to take snapshots
 
-from robodk import *
-from robolink import *
+from robodk.robolink import *
+from robodk.robodialogs import *
 import datetime
 
 RDK = Robolink()

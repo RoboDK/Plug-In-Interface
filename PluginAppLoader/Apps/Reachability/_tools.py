@@ -197,7 +197,7 @@ class AppSettings:
         import pickle
         bytes_data = pickle.dumps(dict_data,protocol=2) # protocol=2: bynary, compatible with python 2.3 and later
         if rdk is None:
-            from robolink import Robolink
+            from robodk.robolink import Robolink
             rdk = Robolink()
         
         param_val = self._SETTINGS_PARAM
@@ -220,7 +220,7 @@ class AppSettings:
 
         print("Loading data from RoboDK station...")
         if rdk is None:
-            from robolink import Robolink
+            from robodk.robolink import Robolink
             rdk = Robolink()
 
         param_backup = self._SETTINGS_PARAM
@@ -228,8 +228,8 @@ class AppSettings:
             
         bytes_data = rdk.getParam(param_backup, False)
         if len(bytes_data) > 0:
-            import robodk
-            result = robodk.ShowMessageYesNoCancel("Something went wrong with the last test.\nRecover lost data?", "Auto recover")
+            from robodk.robodialogs import ShowMessageYesNoCancel
+            result = ShowMessageYesNoCancel("Something went wrong with the last test.\nRecover lost data?", "Auto recover")
             if result is None:
                 return False
 
@@ -419,8 +419,8 @@ class AppSettings:
                     value_input = value
                     value = Str2FloatList(value_input, FLOAT_ARRAY_ATTRIBS[fkey])
                     if value is None:
-                        import robodk
-                        robodk.ShowMessage("Invalid input: " + value_input)
+                        from robodk.robodialogs import ShowMessage
+                        ShowMessage("Invalid input: " + value_input)
                         return                    
                 
                 else:
@@ -465,14 +465,14 @@ class AppSettings:
         w.title(windowtitle)        
         
         import os
-        from robolink import getPathIcon
+        from robodk.robolink import getPathIcon
         iconpath = getPathIcon()
         if os.path.exists(iconpath):
             w.iconbitmap(iconpath)  
         
         # Embed the window in RoboDK
         if embed:
-            from robolink import EmbedWindow
+            from robodk.robolink import EmbedWindow
             EmbedWindow(windowtitle)
         else:
             # If not, make sure to make the window stay on top

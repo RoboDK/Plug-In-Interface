@@ -69,14 +69,14 @@
 * The RoboDK class defines the interface to the RoboDK API. The original Python reference is available here: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
 *
 * More information about the RoboDK API is available here:
-* - Python Reference: https://robodk.com/doc/en/PythonAPI/robolink.html
+* - Python Reference: https://robodk.com/doc/en/PythonAPI/index.html
 *
 * \subsection LinkItem Item class
 * The Item class can be used to operate on any item available in the RoboDK tree. Use functions such as class: IRoboDK::getItem or class: IRoboDK::getItemList to retrieve items from the RoboDK station tree.
 * Item is a pointer to IItem. Items should be deleted using class: IItem::Delete (not using the class destructor).
 *
 * More information about the RoboDK Item class (based on the Python API) is available here:
-* - https://robodk.com/doc/en/PythonAPI/robolink.html#robolink-item.
+* - https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Item.
 *
 * \image html station-tree.png width=800
 *
@@ -227,7 +227,7 @@
 * \section LinkRefs Useful Links
 * Useful links involving the RoboDK API:
 * - Standard RoboDK API Introduction: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
-* - Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/robolink.html.
+* - Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/index.html.
 * - Latest RoboDK API on GitHub (you'll find RoboDK C++ in a subfolder): https://github.com/RoboDK/RoboDK-API.
 * - RoboDK API Introductory video: https://www.youtube.com/watch?v=3I6OK1Kd2Eo.
 * - RoboDK API using the Plugin Interface: https://robodk.com/doc/en/PlugIns/index.html.

@@ -1,4 +1,4 @@
-from robolink import *
+from robodk.robolink import *
 #RDK = Robolink(args=["-SKIPINI", "-TREE_STATE=0"])
 RDK = Robolink()
 

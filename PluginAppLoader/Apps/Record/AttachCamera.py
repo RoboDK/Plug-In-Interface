@@ -2,8 +2,8 @@
 # Therefore, we can use the AttachCamera station parameter to detect if the button is checked or unchecked.
 # This script will be triggered when the button is clicked (checked or unchecked)
 
-from robolink import *  # RoboDK API
-from robodk import *  # Robot toolbox
+from robodk.robolink import *  # RoboDK API
+from robodk.robomath import *  # Robot toolbox
 
 
 def AttachCamera():
@@ -68,7 +68,7 @@ class RunApplication:
 
     def __init__(self, rdk=None):
         if rdk is None:
-            from robolink import Robolink
+            from robodk.robolink import Robolink
             self.RDK = Robolink()
         else:
             self.RDK = rdk
