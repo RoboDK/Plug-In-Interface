@@ -51,7 +51,7 @@ def runmain():
         __FIELDS_UI['CONTINUOUS'] = "Connect lines"
         COVER_ALL = False
         EVEN_DISTRIBUTION = False
-        CONTINUOUS = False
+        CONTINUOUS = True
 
         __FIELDS_UI['REPEAT_TIMES'] = "Repeat times"
         __FIELDS_UI['REPEAT_OFFSET'] = "Repeat Offset along Z (mm)"
@@ -144,6 +144,7 @@ def runmain():
     #---------------------------------------------
     # First: Retrieve the part item
     if PART_NAME is None:
+        RDK.setSelection([])
         PART = RDK.ItemUserPick("Select a part", robolink.ITEM_TYPE_OBJECT)
         if not PART.Valid():
             ShowMsg("Operation cancelled by user")

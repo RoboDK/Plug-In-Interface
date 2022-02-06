@@ -78,7 +78,6 @@ def GridPoints(ref, size_x, size_y, step_x, step_y, cover_all=False, even_distri
         if angle_triangle:
             limit_inf_y = index_x * robomath.sin(angle_triangle / 180 * robomath.pi) / robomath.sin((90 - angle_triangle) / 180 * robomath.pi)
             limit_sup_y = size_y - (index_x * robomath.sin(angle_triangle / 180 * robomath.pi) / robomath.sin((90 - angle_triangle) / 180 * robomath.pi))
-        print(line)
         flip = -1 * flip
 
     if continuous:
@@ -139,20 +138,20 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
 
     ShowMsg("Projecting %s to surface..." % REF_NAME)
 
-    points_object = None
-    for line in lines:
-        # Project the points on the object surface
-        line_projected = PART.ProjectPoints(robomath.Mat(line).tr(), robolink.PROJECTION_ALONG_NORMAL_RECALC)
-        line_projected2 = PART.ProjectPoints(robomath.Mat(line).tr(), robolink.PROJECTION_CLOSEST_RECALC)
+    # Project the points on the object surface
+    projected_lines = [PART.ProjectPoints(robomath.Mat(line).tr(), robolink.PROJECTION_ALONG_NORMAL_RECALC).tr().rows for line in lines]
 
-        # Patch
-        line_projected = line_projected.tr().rows
-        line_projected2 = line_projected2.tr().rows
+    import numpy as np
+    lines = np.array(lines).round(6).tolist()
+    projected_lines = np.array(projected_lines).round(6).tolist()
+
+    points_object = None
+    for line, line_projected in zip(lines, projected_lines):
 
         line_projected_filtered = []
 
         if len(line) != len(line_projected):
-            print("Projection error")
+            print("Projection failed on some points!")
 
         # Remember the last valid projection
         pti_last = None
@@ -165,23 +164,12 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
             pti = Pose_x_XYZijk(pose_part_wrt_ref, point)
             pti_proj = Pose_x_XYZijk(pose_part_wrt_ref, proj_point)
 
-            if sum(proj_point[3:]) > 1.0:
-                print("Projection error")
-
             if abs(pti_proj[2]) < 1e-3:
                 # There is an bug with ProjectPoints, and sometimes points are not projected correctly.
                 # Try to recover the point by using the closest method.
                 # Note: if the ref is exactly on the surface.. this might break
-                print("Point not projected correctly! Trying to recover..")
-
-                proj_point2 = line_projected2[i]
-                pti_proj2 = Pose_x_XYZijk(pose_part_wrt_ref, proj_point2)
-                if pti_proj[:2] == pti_proj2[:2]:
-                    proj_point = proj_point2
-                    pti_proj = pti_proj2
-                else:
-                    print("Point ignored!")
-                    continue
+                print("Point not projected correctly! Ignoring..")
+                continue
 
             # Check if we have the first valid projected point
             if pti_last is None:
@@ -191,15 +179,31 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
                 continue
 
             # Check if the projection falls through a "window" or "climbs" a wall with respect to the previous pointS
-            if robomath.distance(pti_proj, pti_proj_last) < TOL_PROJ_Z * robomath.distance(pti, pti_last):
-                # List the point as valid
-                line_projected_filtered.append(pti_proj)
-
-                # Remember the last valid projection
-                pti_last = pti
-                pti_proj_last = pti_proj
-            else:
+            if robomath.distance(pti_proj, pti_proj_last) > TOL_PROJ_Z * robomath.distance(pti, pti_last):
+                #print("Point falls through or climbs, skipping")
                 continue
+
+            # List the point as valid
+            line_projected_filtered.append(pti_proj)
+
+            # Remember the last valid projection
+            pti_last = pti
+            pti_proj_last = pti_proj
+
+        # TODO: This is temporary code to fix the normals that sometimes break
+        # This needs to be done once all invalid projected points are removed
+        import numpy as np
+        ijk_array = np.array(np.array(line_projected_filtered)[:, 3:6]).round(8)
+        mean_ijk = ijk_array.mean(axis=0).round(8)
+        std_ijk = ijk_array.std(axis=0).round(8)
+        if sum(std_ijk) > 0:
+            ijk_range = [mean_ijk - std_ijk, mean_ijk + std_ijk]
+            filtered_ijk_array = np.array([ijk for ijk in ijk_array if all(np.greater_equal(ijk, ijk_range[0])) and all(np.less_equal(ijk, ijk_range[1]))])
+            mean_ijk = filtered_ijk_array.mean(axis=0)
+        mean_ijk = list(mean_ijk)
+
+        for pt in line_projected_filtered:
+            pt[3:6] = mean_ijk
 
         if len(line_projected_filtered) == 0:
             # no projection found. Skip
