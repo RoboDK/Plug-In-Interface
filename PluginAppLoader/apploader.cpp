@@ -495,6 +495,21 @@ void AppLoader::AppsSearch(){
 
         // Iterate through each App (folder)
         foreach (QString file, filesApp){
+
+            if (file.compare("requirements.txt", Qt::CaseInsensitive) == 0){
+                // Preload all dependencies to the Python Interpreter
+                qDebug() << "Installing Python dependencies for " + dirApp;
+
+                QStringList args;
+                args << "-m" << "pip" << "install" << "-r" << dirAppComplete+"/"+file;
+
+                int status = QProcess::execute(RDK->getParam("PYTHON_EXEC"), args);
+                if (status < 0){
+                    qDebug() << "Failed to install dependecies for " + dirApp;
+                }
+                continue;
+            }
+
             if (!(file.endsWith(".py", Qt::CaseInsensitive) || file.endsWith(".exe", Qt::CaseInsensitive))){
                 continue;
             }
