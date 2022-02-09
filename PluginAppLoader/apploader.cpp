@@ -76,7 +76,7 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
     connect(action_Apps, SIGNAL(triggered()), this, SLOT(callback_AppList()), Qt::QueuedConnection);
 
     // look for apps and load them in the main menu
-    AppsSearch();
+    AppsSearch(true);
     AppsLoadMenus();
 
     // adding the action before the Plug-Ins action in the Tools menu
@@ -362,7 +362,7 @@ void AppLoader::AppsDelete(){
     }
 }
 
-void AppLoader::AppsSearch(){
+void AppLoader::AppsSearch(bool install_requirements){
     // We keep the list of all toolbars and menus to sort them properly and display the toolbar when required
     // (global variable)
     //QList<tAppMenu*> ListMenus;
@@ -495,10 +495,27 @@ void AppLoader::AppsSearch(){
 
         // Iterate through each App (folder)
         foreach (QString file, filesApp){
-            if (!(file.endsWith(".py", Qt::CaseInsensitive) || file.endsWith(".exe", Qt::CaseInsensitive))){
+            if (file.startsWith("_")){
                 continue;
             }
-            if (file.startsWith("_")){
+
+            if (install_requirements && (file.compare("requirements.txt", Qt::CaseInsensitive) == 0)){
+                // Preload all dependencies to the Python Interpreter
+                qDebug() << "Installing Python dependencies for " + dirApp;
+
+                QStringList args;
+                args << "-m" << "pip" << "install" << "-r" << dirAppComplete+"/"+file;
+
+                // Using a detached process on Windows breaks the debugger (requires run from terminal).
+                // This solution works in all cases, but is time consuming.. do this only when loading the plugin.
+                int status = QProcess::execute(RDK->getParam("PYTHON_EXEC"), args);
+                if (status < 0){
+                    qDebug() << "Failed to install dependecies for " + dirApp;
+                }
+                continue;
+            }
+
+            if (!file.endsWith(".py", Qt::CaseInsensitive) && !file.endsWith(".exe", Qt::CaseInsensitive)){
                 continue;
             }
 

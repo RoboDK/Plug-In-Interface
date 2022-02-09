@@ -122,7 +122,7 @@ public:
     void AppsDelete();
 
     /// Look for apps in the Apps folder
-    void AppsSearch();
+    void AppsSearch(bool install_requirements=false);
 
     /// Retrieve all apps and load them in the main menu
     void AppsLoadMenus();
