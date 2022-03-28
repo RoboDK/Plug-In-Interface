@@ -503,14 +503,25 @@ void AppLoader::AppsSearch(bool install_requirements){
                 // Preload all dependencies to the Python Interpreter
                 qDebug() << "Installing Python dependencies for " + dirApp;
 
+                // Check if requirements are missing. This is quicker than pip install, thus it does not hang the UI as much.
                 QStringList args;
-                args << "-m" << "pip" << "install" << "-r" << dirAppComplete+"/"+file;
+                args << "-c" << "import pkg_resources; pkg_resources.require(open('" + dirAppComplete + "/" + file + "',mode='r'))";
+                int status = QProcess::execute(RDK->getParam("PYTHON_EXEC"), args);
+                if (status == 0){ // 1 means something to install
+                    qDebug() << "All dependencies are installed for " + dirApp;
+                    continue;
+                }
+
+                // Install missing requirements (hangs the UI)
+                RDK->ShowMessage("Installing additionnal Python dependencies for App \"" + dirApp + "\". See requirements.txt in the app folder.\n\nRoboDK might become unresponsive during this process, please wait.", true);
 
                 // Using a detached process on Windows breaks the debugger (requires run from terminal).
                 // This solution works in all cases, but is time consuming.. do this only when loading the plugin.
-                int status = QProcess::execute(RDK->getParam("PYTHON_EXEC"), args);
+                args.clear();
+                args << "-m" << "pip" << "install" << "--ignore-installed" << "-r" << dirAppComplete + "/" + file;
+                status = QProcess::execute(RDK->getParam("PYTHON_EXEC"), args);
                 if (status < 0){
-                    qDebug() << "Failed to install dependecies for " + dirApp;
+                    RDK->ShowMessage("Failed to install additional Python dependencies for App \"" + dirApp + "\".", true);
                 }
                 continue;
             }
