@@ -176,20 +176,11 @@ public slots:
 // define your actions: usually, one action per button
 private:
 
-    /// Path to Python executable (usually C:/RoboDK/Python37/python.exe)
-    /// This path will be retrieved from RoboDK every time we need to run Python
-    //QString FilePythonExe;
-
     /// Path to Apps folder (usually C:/RoboDK/Apps/)
     QString PathApps;
-    /// Path to PYTHON_PATH environment variable (usually C:/RoboDK/Python/)
-    //QString PathPythonPath;
 
-    /// List of scripts that can be executed
-    //QList<QString*> AllScripts;
-
-    /// List of paths to apps (including AppLinks)
-    QStringList AllAppPaths;
+    /// List of directories containing enabled Apps (including AppLinks) to add to PYTHONPATH. i.e. C:/RoboDK/Apps/MyApp -> C:/RoboDK/Apps, C:/RoboDK/Apps/MyApp/AppLink.ini -> C:/DirOfMyApp
+    QStringList PypathAppsDirs;
 
     /// List of all actions that need to be deleted
     QList<QAction*> AllActions;
