@@ -65,7 +65,6 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
 
     // ---------------------------------------------------
     // We can get some settings from RoboDK
-    //FilePythonExe = RDK->getParam("PYTHON_EXEC"); //python";
     PathApps = RDK->getParam("PATH_ROBODK") + "/Apps";
 
     // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
@@ -334,7 +333,7 @@ void AppLoader::AppsDelete(){
     }
 
     // Remove App paths from RoboDK's PYTHONPATH
-    if (!AllAppPaths.empty()){
+    if (!PypathAppsDirs.empty()){
 #ifdef WIN32
         QString path_sep(";");
 #else
@@ -344,7 +343,7 @@ void AppLoader::AppsDelete(){
         QStringList pypathList = RDK->getParam("PYTHONPATH").split(path_sep);
         pypathList.removeDuplicates();
 
-        QStringListIterator i(AllAppPaths);
+        QStringListIterator i(PypathAppsDirs);
         while(i.hasNext()){
             pypathList.removeAll(i.next());
         }
@@ -358,7 +357,7 @@ void AppLoader::AppsDelete(){
         }
         RDK->Command("PYTHONPATH", pypath);
 
-        AllAppPaths.clear();
+        PypathAppsDirs.clear();
     }
 }
 
@@ -417,11 +416,6 @@ void AppLoader::AppsSearch(bool install_requirements){
             }
         }
 
-        // Add the absolute app dir to the list
-        if (!AllAppPaths.contains(dirAppComplete)){
-            AllAppPaths.append(dirAppComplete);
-        }
-
         if (!fileExist){
              fileSettings = dirAppComplete + "/AppConfig.ini"; // Use default INI file name
         }
@@ -449,7 +443,7 @@ void AppLoader::AppsSearch(bool install_requirements){
         double menuPriority = settings.value("MenuPriority", 50.0).toDouble();
         int toolbarArea = settings.value("ToolbarArea", 2).toInt();
         double toolbarSize = settings.value("ToolbarSizeRatio", 1.5).toDouble();
-        QStringList RunCommands = settings.value("RunCommands", QStringList("")).toStringList();
+        QStringList RunCommands = settings.value("RunCommands", QStringList()).toStringList();
 
         settings.setValue("MenuName", menuName);
         settings.setValue("MenuParent", menuParent);
@@ -476,7 +470,9 @@ void AppLoader::AppsSearch(bool install_requirements){
         if (appEnabled){
             appsenabled_count = appsenabled_count + 1;
             foreach (QString command, RunCommands){
-                RDK->Command(command);
+                if (!command.isEmpty()){
+                    RDK->Command(command);
+                }
             }
         }
 
@@ -495,11 +491,21 @@ void AppLoader::AppsSearch(bool install_requirements){
 
         // Iterate through each App (folder)
         foreach (QString file, filesApp){
+
+            if (appEnabled && file.compare("__init__.py", Qt::CaseSensitive) == 0){
+                // Add the App's directory to the search path for Python modules (PYTHONPATH). Typically C:/RoboDK/Apps unless there is an AppLink.ini
+                QString appDir = QFileInfo(dirAppComplete).absolutePath();
+                if (!PypathAppsDirs.contains(appDir)){
+                    PypathAppsDirs.append(appDir);
+                }
+            }
+
+            // Files that starts with _ are skipped as they are 'internal' files
             if (file.startsWith("_")){
                 continue;
             }
 
-            if (install_requirements && (file.compare("requirements.txt", Qt::CaseInsensitive) == 0)){
+            if (install_requirements && (file.compare("requirements.txt", Qt::CaseSensitive) == 0)){
                 // Preload all dependencies to the Python Interpreter
                 qDebug() << "Installing Python dependencies for " + dirApp;
 
@@ -713,8 +719,8 @@ void AppLoader::AppsSearch(bool install_requirements){
         qSort(ListToolbars.begin(), ListToolbars.end(), CheckPriority());
     }
 
-    // Append AllAppPaths to RoboDK's PYTHONPATH
-    if (!AllAppPaths.empty()){
+    // Append Apps directories to RoboDK's PYTHONPATH
+    if (!PypathAppsDirs.empty()){
 #ifdef WIN32
         QString path_sep(";");
 #else
@@ -722,7 +728,7 @@ void AppLoader::AppsSearch(bool install_requirements){
 #endif
 
         QStringList pypathList = RDK->getParam("PYTHONPATH").replace("\\","/").split(path_sep);
-        pypathList.append(AllAppPaths);
+        pypathList.append(PypathAppsDirs);
         pypathList.removeDuplicates();
 
         QString pypath = "";
@@ -842,7 +848,7 @@ bool AppLoader::RunPythonShell(const QString &python_exec, const QString &python
     QProcess *process = new QProcess(this);
     QStringList arguments;
     arguments.append("-i"); // use standard input as console input
-    process->start(python_exec, arguments);//FilePythonExe);
+    process->start(python_exec, arguments);
     if (!process->waitForStarted(1000)){
         qDebug() << "Unable to start Python to run the file: " << python_exec;
         qDebug() << process->errorString();
