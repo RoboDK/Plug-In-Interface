@@ -23,3 +23,4 @@ SUBDIRS += PluginOpenGL-Shaders/PluginChip8Opengl.pro
 SUBDIRS += PluginAttachObject/PluginAttachObject.pro
 SUBDIRS += PluginRealTime/PluginRealTime.pro
 SUBDIRS += PluginRobotPilot/PluginRobotPilot.pro
+SUBDIRS += PluginLVDT/PluginLVDT.pro
