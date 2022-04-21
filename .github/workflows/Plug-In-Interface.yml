@@ -8,12 +8,12 @@ on:
   #    - "**/PluginAppLoader/Apps/**"
   #    - "**/robodk_interface/**"
 
-  pull_request:
-    branches: [master]
-    paths-ignore:
-      - "**.md"
-      - "**/PluginAppLoader/Apps/**"
-      - "**/robodk_interface/**"
+  #pull_request:
+  #  branches: [master]
+  #  paths-ignore:
+  #    - "**.md"
+  #    - "**/PluginAppLoader/Apps/**"
+  #    - "**/robodk_interface/**"
 
   workflow_dispatch: # Run workflow manually
 
@@ -45,7 +45,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.14.0
         with:
-          tools: "tools_qtcreator,qt.tools.qtcreator"
+          tools: "tools_qtcreator,7.0.0-0,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
           target: 'desktop'
           aqtversion: '==2.0.*'
