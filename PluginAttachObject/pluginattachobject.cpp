@@ -649,7 +649,7 @@ void PluginAttachObject::cleanupRemovedItems() {
                 continue;
             }
             if (!RDK->Valid(attached_object.object)) {
-                qDebug() << "Object Deleted. Removing affected items.";
+                qDebug() << "Object deleted. Removing affected items.";
                 it = attached_objects.erase(it);
                 continue;
             }
