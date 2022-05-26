@@ -9,13 +9,7 @@
 # https://robodk.com/doc/en/RoboDK-API.html
 #
 
-try:
-    from robodk import robolink, roboapps
-except:
-    # Fall back to old robodk and local roboapps
-    import robolink
-    import _roboapps as roboapps
-
+from robodk import robolink, roboapps
 from _RasterCurveTools import *
 
 # Optionally provide a part name to auto select it without asking the user
@@ -38,13 +32,13 @@ def runmain():
         SIZE_X = 500.0
         SIZE_Y = 500.0
 
-        __FIELDS_UI['ANGLE_TRIANGLE'] = "Triangular path (deg)"
-        ANGLE_TRIANGLE = 0.0
-
         __FIELDS_UI['STEP_X'] = "Step along X (mm)"
         __FIELDS_UI['STEP_Y'] = "Step along Y (mm)"
         STEP_X = 20.0
         STEP_Y = 50.0
+
+        __FIELDS_UI['ANGLE_TRIANGLE'] = "Triangular path (deg)"
+        ANGLE_TRIANGLE = 0.0
 
         __FIELDS_UI['COVER_ALL'] = "Cover all surface"
         __FIELDS_UI['EVEN_DISTRIBUTION'] = "Distribute lines evenly"
@@ -58,13 +52,13 @@ def runmain():
         REPEAT_TIMES = 1
         REPEAT_OFFSET = 2.0
 
-        __FIELDS_UI['SPEED_OPERATION'] = "Operation speed (mm/s)"
-        SPEED_OPERATION = 20.0
-
         __FIELDS_UI['ANGLE_TCP_X'] = "Tool angle X (deg)"
         __FIELDS_UI['ANGLE_TCP_Y'] = "Tool angle Y (deg)"
         ANGLE_TCP_X = 0.0
         ANGLE_TCP_Y = 0.0
+
+        __FIELDS_UI['SPEED_OPERATION'] = "Operation speed (mm/s)"
+        SPEED_OPERATION = 20.0
 
         def __init__(self):
             super(SurfaceSettings, self).__init__('Surface-Settings')

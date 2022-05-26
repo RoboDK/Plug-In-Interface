@@ -1,4 +1,5 @@
 from robodk import robolink, robomath
+import math
 
 # Set other constants:
 TOL_PROJ_Z = robomath.sqrt(2)  # Tolerance to ignore a point as a ratio (if it falls through a window for example)
@@ -20,7 +21,7 @@ def Pose_x_XYZijk(pose, xyzijk):
     return new_xyz + new_ijk
 
 
-def GridPoints(ref, size_x, size_y, step_x, step_y, cover_all=False, even_distribution=False, continuous=False, angle_triangle=0.0):
+def GridPoints(ref, size_x, size_y, step_x, step_y, cover_all=False, even_distribution=False, continuous=False, angle_triangle_deg=0.0):
     """
     Generates a list of lines, each containing a list of xyzijk points, from a grid size.
     By default, this will generate (size / step) "horizontal" lines along the y axis of the reference.
@@ -31,7 +32,17 @@ def GridPoints(ref, size_x, size_y, step_x, step_y, cover_all=False, even_distri
     step_x: step size between points along the x axis of the reference. If size / step is not a integer, the generated grid will be cropped.
     step_y: step size between points along the y axis of the reference. If size / step is not a integer, the generated grid will be cropped.
     continuous: If true, each "horizontal" lines will be connected to the next in a zig-zag pattern, resulting in one single line
+    angle_triangle_deg: Degrees. Create an angle along the X edges (binds Y points withing this angle)
     """
+
+    if angle_triangle_deg:
+        # We have a square size of size_x * size_y, but a triangle height that can be smaller than size_x
+        angle_triangle_deg = max(0, min(90, angle_triangle_deg))
+        angle_triangle_rad = angle_triangle_deg / 180 * robomath.pi
+        angle_factor = robomath.sin(angle_triangle_rad) / robomath.sin(robomath.pi / 2 - angle_triangle_rad)
+        if angle_triangle_rad > 0:
+            size_x = min(size_x, (size_y / 2) / math.tan(angle_triangle_rad))
+
     lines = []
     flip = 1  # 1 => Y+  -1 => Y-
     index_x = 0
@@ -75,9 +86,9 @@ def GridPoints(ref, size_x, size_y, step_x, step_y, cover_all=False, even_distri
             cover_all = False
             index_x = size_x
 
-        if angle_triangle:
-            limit_inf_y = index_x * robomath.sin(angle_triangle / 180 * robomath.pi) / robomath.sin((90 - angle_triangle) / 180 * robomath.pi)
-            limit_sup_y = size_y - (index_x * robomath.sin(angle_triangle / 180 * robomath.pi) / robomath.sin((90 - angle_triangle) / 180 * robomath.pi))
+        if angle_triangle_deg:
+            limit_inf_y = index_x * angle_factor
+            limit_sup_y = size_y - (index_x * angle_factor)
         flip = -1 * flip
 
     if continuous:
@@ -101,7 +112,7 @@ def PointsOffset(points, offset):
 
 #---------------------------------------------
 # Main program call that will project the path to a surface
-def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEAT_OFFSET=2, cover_all=False, even_distribution=False, continuous=False, angle_triangle=0.0):
+def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEAT_OFFSET=2, cover_all=False, even_distribution=False, continuous=False, angle_triangle_deg=0.0):
     """
     Create an object containing the curves
     REF: Reference frame item
@@ -126,7 +137,7 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
 
     # Generate the curve path
     # IMPORTANT: the point coordinates must be relative to the part reference
-    lines = GridPoints(pose_ref_wrt_part, SIZE_X, SIZE_Y, STEP_X, STEP_Y, cover_all, even_distribution, continuous, angle_triangle)
+    lines = GridPoints(pose_ref_wrt_part, SIZE_X, SIZE_Y, STEP_X, STEP_Y, cover_all, even_distribution, continuous, angle_triangle_deg)
     if len(lines) == 0:
         ShowMsg("No points found for: " + REF_NAME)
         return
@@ -140,10 +151,6 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
 
     # Project the points on the object surface
     projected_lines = [PART.ProjectPoints(robomath.Mat(line).tr(), robolink.PROJECTION_ALONG_NORMAL_RECALC).tr().rows for line in lines]
-
-    import numpy as np
-    lines = np.array(lines).round(6).tolist()
-    projected_lines = np.array(projected_lines).round(6).tolist()
 
     points_object = None
     for line, line_projected in zip(lines, projected_lines):
@@ -164,13 +171,6 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
             pti = Pose_x_XYZijk(pose_part_wrt_ref, point)
             pti_proj = Pose_x_XYZijk(pose_part_wrt_ref, proj_point)
 
-            if abs(pti_proj[2]) < 1e-3:
-                # There is an bug with ProjectPoints, and sometimes points are not projected correctly.
-                # Try to recover the point by using the closest method.
-                # Note: if the ref is exactly on the surface.. this might break
-                print("Point not projected correctly! Ignoring..")
-                continue
-
             # Check if we have the first valid projected point
             if pti_last is None:
                 line_projected_filtered.append(pti_proj)
@@ -189,21 +189,6 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
             # Remember the last valid projection
             pti_last = pti
             pti_proj_last = pti_proj
-
-        # TODO: This is temporary code to fix the normals that sometimes break
-        # This needs to be done once all invalid projected points are removed
-        import numpy as np
-        ijk_array = np.array(np.array(line_projected_filtered)[:, 3:6]).round(8)
-        mean_ijk = ijk_array.mean(axis=0).round(8)
-        std_ijk = ijk_array.std(axis=0).round(8)
-        if sum(std_ijk) > 0:
-            ijk_range = [mean_ijk - std_ijk, mean_ijk + std_ijk]
-            filtered_ijk_array = np.array([ijk for ijk in ijk_array if all(np.greater_equal(ijk, ijk_range[0])) and all(np.less_equal(ijk, ijk_range[1]))])
-            mean_ijk = filtered_ijk_array.mean(axis=0)
-        mean_ijk = list(mean_ijk)
-
-        for pt in line_projected_filtered:
-            pt[3:6] = mean_ijk
 
         if len(line_projected_filtered) == 0:
             # no projection found. Skip
