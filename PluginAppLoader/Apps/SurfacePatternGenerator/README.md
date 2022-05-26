@@ -1,7 +1,7 @@
 Surface Pattern Generator
 =============================
 
-The Surface Pattern Generator (SPG) App let's you generate surface patterns on an object surface, with the associated Curve Follow Project (CFP).
+The Surface Pattern Generator (SPG) App let's you generate surface patterns on an object surface, with its associated Curve Follow Project (CFP).
 
 Setup
 ------------------------

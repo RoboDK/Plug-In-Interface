@@ -1,3 +1,10 @@
+# Surface Pattern Generator utilities.
+#
+# Type help("robodk.robolink") or help("robodk.robomath") for more information
+# Press F5 to run the script
+# Documentation: https://robodk.com/doc/en/RoboDK-API.html
+# Reference:     https://robodk.com/doc/en/PythonAPI/index.html
+
 from robodk import robolink, robomath
 import math
 
@@ -5,15 +12,14 @@ import math
 TOL_PROJ_Z = robomath.sqrt(2)  # Tolerance to ignore a point as a ratio (if it falls through a window for example)
 
 
+#---------------------------------------------
 # Show message through the GUI, RoboDK and the console
 def ShowMsg(msg):
-    #print(msg)
-    #NotifyGUI.set(msg)
-    #root.update_idletasks()
     RDK = robolink.Robolink()
     RDK.ShowMessage(msg, False)
 
 
+#---------------------------------------------
 def Pose_x_XYZijk(pose, xyzijk):
     """ Function to change the coordinates of a point and a normal given a pose. The point and the normal must be in xyzijk format."""
     new_xyz = pose * xyzijk[0:3]
@@ -21,6 +27,7 @@ def Pose_x_XYZijk(pose, xyzijk):
     return new_xyz + new_ijk
 
 
+#---------------------------------------------
 def GridPoints(ref, size_x, size_y, step_x, step_y, cover_all=False, even_distribution=False, continuous=False, angle_triangle_deg=0.0):
     """
     Generates a list of lines, each containing a list of xyzijk points, from a grid size.
@@ -215,6 +222,7 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
     return points_object
 
 
+#---------------------------------------------
 def CreateProgram(REF, SPEED_OPERATION, ANGLE_TCP_X, ANGLE_TCP_Y):
     # Retrieve the reference name
     REF_NAME = REF.Name()
@@ -242,7 +250,6 @@ def CreateProgram(REF, SPEED_OPERATION, ANGLE_TCP_X, ANGLE_TCP_Y):
     curve_follow.setSpeed(SPEED_OPERATION)
     curve_follow.setPoseTool(robomath.rotx(ANGLE_TCP_X * robomath.pi / 180.0) * robomath.roty(ANGLE_TCP_Y * robomath.pi / 180.0))
 
-    #TODO: This call is causing RoboDK to hang until this process is killed..
     prog, status = curve_follow.setMachiningParameters(part=points_object)
     print(status)
     if status == 0:
@@ -256,6 +263,7 @@ def CreateProgram(REF, SPEED_OPERATION, ANGLE_TCP_X, ANGLE_TCP_Y):
     return None
 
 
+#---------------------------------------------
 def CreateMainProgram(PART, prog_name_list):
 
     # Create a new program that calls the auto generated program

@@ -1,16 +1,12 @@
-# Press F5 to run the script
+# The Surface Pattern Generator (SPG) App let's you generate surface patterns on an object surface, with its associated Curve Follow Project (CFP).
+#
 # Type help("robodk.robolink") or help("robodk.robomath") for more information
-#
-# This script shows an example to create a raster curve that can be added programmatically to a RoboDK station
-# The curve can be optionally projected to an existing object (either along the curve normals or a projection the closest surface)
-#
-# More information about the RoboDK API here:
-# https://robodk.com/doc/en/PythonAPI/index.html
-# https://robodk.com/doc/en/RoboDK-API.html
-#
+# Press F5 to run the script
+# Documentation: https://robodk.com/doc/en/RoboDK-API.html
+# Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 
 from robodk import robolink, roboapps
-from _RasterCurveTools import *
+from _spgtools import *
 
 # Optionally provide a part name to auto select it without asking the user
 PART_NAME = None  # 'Paint Part'
