@@ -63,10 +63,11 @@ public:
 /// Hold the information related to an App (menu) for sorting purposes
 class tAppMenu {
 public:
-    tAppMenu(const QString &name, const QString &parentMenu, double priority, bool active, const QString &apppath, const QString &inipath):
+    tAppMenu(const QString &name, const QString &parentMenu, double priority,  bool visible, bool active, const QString &apppath, const QString &inipath):
         Name(name),
         ParentMenu(parentMenu),
         Priority(priority),
+        Visible(visible),
         Active(active),
         NamePath(apppath),
         IniPath(inipath),
@@ -75,6 +76,7 @@ public:
 
     }
     bool Active;
+    bool Visible;
     QString Name;
     QString ParentMenu;
     QString NamePath;
