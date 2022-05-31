@@ -505,7 +505,7 @@ void AppLoader::AppsSearch(bool install_requirements){
                 continue;
             }
 
-            if (install_requirements && (file.compare("requirements.txt", Qt::CaseSensitive) == 0)){
+            if (appEnabled && install_requirements && (file.compare("requirements.txt", Qt::CaseSensitive) == 0)){
                 // Preload all dependencies to the Python Interpreter
                 qDebug() << "Installing Python dependencies for " + dirApp;
 
