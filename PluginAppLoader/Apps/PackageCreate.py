@@ -5,6 +5,8 @@ import sys
 import zipfile
 import configparser
 
+SKIP_DISABLED_APPS = False
+
 def zipdir(path, ziph):
     # ziph is a zipfile handle
     
@@ -35,7 +37,7 @@ def zipdir(path, ziph):
         
         config = configparser.ConfigParser()
         config.read(path_settings)
-        if path == "." and config["General"]["Enabled"] != """true""":
+        if SKIP_DISABLED_APPS and path == "." and config["General"]["Enabled"] != """true""":
             print("App disabled (skipped): " + app_folder)
             continue
             
