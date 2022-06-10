@@ -439,16 +439,18 @@ void AppLoader::AppsSearch(bool install_requirements){
         QSettings settings(fileSettings, QSettings::IniFormat);
         QString menuName = settings.value("MenuName", dirApp).toString();
         QString menuParent = settings.value("MenuParent", "").toString();
-        bool appEnabled = settings.value("Enabled", true).toBool();
         double menuPriority = settings.value("MenuPriority", 50.0).toDouble();
+        bool menuVisible = settings.value("MenuVisible", true).toBool();
+        bool appEnabled = settings.value("Enabled", true).toBool();
         int toolbarArea = settings.value("ToolbarArea", 2).toInt();
         double toolbarSize = settings.value("ToolbarSizeRatio", 1.5).toDouble();
         QStringList RunCommands = settings.value("RunCommands", QStringList()).toStringList();
 
         settings.setValue("MenuName", menuName);
         settings.setValue("MenuParent", menuParent);
-        settings.setValue("Enabled", appEnabled);
         settings.setValue("MenuPriority", menuPriority);
+        settings.setValue("MenuVisible", menuVisible);
+        settings.setValue("Enabled", appEnabled);
         settings.setValue("ToolbarArea", toolbarArea);
         settings.setValue("ToolbarSizeRatio", toolbarSize);
         settings.setValue("RunCommands", RunCommands);
@@ -456,7 +458,7 @@ void AppLoader::AppsSearch(bool install_requirements){
 
         // Create a new list for menus and toolbars
         tAppToolbar *appToolbar = new tAppToolbar(menuName, menuPriority, toolbarArea, toolbarSize, appEnabled);
-        tAppMenu *appMenu = new tAppMenu(menuName, menuParent, menuPriority, appEnabled, dirApp, fileSettings);
+        tAppMenu *appMenu = new tAppMenu(menuName, menuParent, menuPriority, menuVisible, appEnabled, dirApp, fileSettings);
         appMenu->Toolbar = appToolbar;
         ListMenus.append(appMenu);
         ListToolbars.append(appToolbar);
@@ -770,20 +772,18 @@ void AppLoader::AppsLoadMenus(){
                     menuTools->insertAction(menuTools->actions()[id_action], action_robotpilot);
                 } else {
                 */
-                qDebug() << "Inserting menu action at the end of the utilities menu";
+                qDebug() << "Inserting menu action at the end of the parent menu: " << appmenu->Name;
                 menu_attach->addSeparator();
-                //menuUtilities->addMenu(menu1);
                 menui = menu_attach->addMenu(appmenu->Name);
                 //}
-            } else {
-                // named menu not found: adding action in the main menu
-                qDebug() << "Adding menu in the main menu";
-                menui = MenuBar->addMenu(appmenu->Name);
             }
-        } else {
+        }
+        if (menui == nullptr){
+            qDebug() << "Adding menu in the main menu: " << appmenu->Name;
             menui = MenuBar->addMenu(appmenu->Name);
         }
         menui->addActions(appmenu->Actions);
+        menui->menuAction()->setVisible(appmenu->Visible);
         AllMenus.append(menui);
     }
 
