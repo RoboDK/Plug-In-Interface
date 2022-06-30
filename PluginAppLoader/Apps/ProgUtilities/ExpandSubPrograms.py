@@ -5,7 +5,7 @@
 # Documentation: https://robodk.com/doc/en/RoboDK-API.html
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 
-from robodk import robolink as rlk
+from robodk import robolink
 
 PROG_EXPAND_NAME = "%s Expanded"  # ex: MyProg Expanded
 
@@ -45,8 +45,8 @@ def expandProg(prog_from, prog_to, RDK, recurse=True, root=None):
         instruction_dict = prog_from.setParam(i)
         print(' - Instruction: ' + str(instruction_dict))
 
-        if instruction_dict['Type'] == rlk.INS_TYPE_CODE and recurse:
-            sub_prog = RDK.Item(instruction_dict['Code'], rlk.ITEM_TYPE_PROGRAM)
+        if instruction_dict['Type'] == robolink.INS_TYPE_CODE and recurse:
+            sub_prog = RDK.Item(instruction_dict['Code'], robolink.ITEM_TYPE_PROGRAM)
             if sub_prog.Valid():
                 expandProg(sub_prog, prog_to, RDK, True, prog_from if root is None else root)
                 continue  # continue, as program calls to non-program are valid
@@ -55,10 +55,10 @@ def expandProg(prog_from, prog_to, RDK, recurse=True, root=None):
 
 
 def runmain():
-    RDK = rlk.Robolink()
+    RDK = robolink.Robolink()
 
     # Get the programs to expand
-    programs = list(filter(lambda item: item.Type() == rlk.ITEM_TYPE_PROGRAM, RDK.Selection()))
+    programs = list(filter(lambda item: item.Type() == robolink.ITEM_TYPE_PROGRAM, RDK.Selection()))
     if len(programs) < 1:
         RDK.ShowMessage('Please select at least one program.')
         return

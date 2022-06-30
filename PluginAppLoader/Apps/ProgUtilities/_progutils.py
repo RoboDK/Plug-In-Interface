@@ -48,3 +48,17 @@ def getProgramTargets(program):
 
             targets.append(target)
     return targets
+
+
+def expand(item, progs=True):
+    item.setParam('Tree', 'expand')
+
+    if progs and item.Type() == robolink.ITEM_TYPE_PROGRAM:
+        item.ShowInstructions(True)
+
+
+def collapse(item, progs=True):
+    item.setParam('Tree', 'collapse')
+
+    if progs and item.Type() == robolink.ITEM_TYPE_PROGRAM:
+        item.ShowInstructions(False)

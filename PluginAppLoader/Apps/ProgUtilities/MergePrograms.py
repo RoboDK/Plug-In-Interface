@@ -5,7 +5,7 @@
 # Documentation: https://robodk.com/doc/en/RoboDK-API.html
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 
-from robodk import robolink as rlk
+from robodk import robolink
 
 PROG_MERGE_NAME = "%s Merged"  # ex: MyProg Merged
 
@@ -19,7 +19,7 @@ def getMergedProg(progs, RDK):
         new_prog_name += prog.Name() + " "
     new_prog_name = PROG_MERGE_NAME % new_prog_name.strip()
 
-    new_prog = RDK.Item(new_prog_name, rlk.ITEM_TYPE_PROGRAM)
+    new_prog = RDK.Item(new_prog_name, robolink.ITEM_TYPE_PROGRAM)
     if new_prog.Valid() and new_prog.Name() == new_prog_name:
         new_prog.Delete()
 
@@ -49,10 +49,10 @@ def mergeProgs(progs, prog_to):
 
 
 def runmain():
-    RDK = rlk.Robolink()
+    RDK = robolink.Robolink()
 
     # Get the programs to merge
-    programs = list(filter(lambda item: item.Type() == rlk.ITEM_TYPE_PROGRAM, RDK.Selection()))
+    programs = list(filter(lambda item: item.Type() == robolink.ITEM_TYPE_PROGRAM, RDK.Selection()))
     if len(programs) < 2:
         RDK.ShowMessage('Please select at least two programs.')
         return

@@ -5,7 +5,7 @@
 # Documentation: https://robodk.com/doc/en/RoboDK-API.html
 # Reference:     https://robodk.com/doc/en/PythonAPI/index.html
 
-from robodk import robolink as rlk
+from robodk import robolink
 
 STEP_MM = 1
 STEP_DEG = 1
@@ -17,7 +17,7 @@ def getConvertedProg(prog, RDK):
 
     # Delete previously generated programs of the same name
     new_prog_name = PROG_EXPAND_NAME % prog.Name()
-    new_prog = RDK.Item(new_prog_name, rlk.ITEM_TYPE_PROGRAM)
+    new_prog = RDK.Item(new_prog_name, robolink.ITEM_TYPE_PROGRAM)
     if new_prog.Valid() and new_prog.Name() == new_prog_name:
         new_prog.Delete()
 
@@ -52,13 +52,13 @@ def convertProg(prog_from, prog_to, RDK):
         print(' - Instruction: ' + str(instruction_dict))
 
         # Store movements
-        if instruction_dict['Type'] == rlk.INS_TYPE_MOVE:
+        if instruction_dict['Type'] == robolink.INS_TYPE_MOVE:
             name, instype, movetype, isjointtarget, pose, joints = prog_from.Instruction(i)
             last_pose = pose
 
         # Convert MoveC
-        elif instruction_dict['Type'] == rlk.INS_TYPE_MOVEC:
-            prog_to.RunInstruction(instruction_dict['Name'], rlk.INSTRUCTION_COMMENT)
+        elif instruction_dict['Type'] == robolink.INS_TYPE_MOVEC:
+            prog_to.RunInstruction(instruction_dict['Name'], robolink.INSTRUCTION_COMMENT)
 
             # InstructionListJoints converts all movements in the whole program.
             # Create a temporary program with the last pose and the MoveC, get the linear moves.
@@ -91,10 +91,10 @@ def convertProg(prog_from, prog_to, RDK):
 
 
 def runmain():
-    RDK = rlk.Robolink()
+    RDK = robolink.Robolink()
 
     # Get the programs to convert
-    programs = list(filter(lambda item: item.Type() == rlk.ITEM_TYPE_PROGRAM, RDK.Selection()))
+    programs = list(filter(lambda item: item.Type() == robolink.ITEM_TYPE_PROGRAM, RDK.Selection()))
     if len(programs) < 1:
         RDK.ShowMessage('Please select at least one program.')
         return
