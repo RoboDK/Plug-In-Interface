@@ -15,7 +15,7 @@ def getExpandedProg(prog, RDK):
 
     # Delete previously generated programs of the same name
     new_prog_name = PROG_EXPAND_NAME % prog.Name()
-    new_prog = RDK.Item(new_prog_name, rlk.ITEM_TYPE_PROGRAM)
+    new_prog = RDK.Item(new_prog_name, robolink.ITEM_TYPE_PROGRAM)
     if new_prog.Valid() and new_prog.Name() == new_prog_name:
         new_prog.Delete()
 
