@@ -42,7 +42,7 @@ The main advantages of using the RoboDK API through a Plug-In Inteface are the f
 
 You should pay attention to the following when using the RoboDK API inside a Plug-In:
  * Items are pointers, not objects. You can check if an item is valid or not by checking if it is a null pointer (nullptr).
- * You must provoke a render event every time you want to update the screen (for example, if you change the position of a robot). Updading the screen is not done automatically.
+ * You must provoke a render event every time you want to update the screen (for example, if you change the position of a robot). Updating the screen is not done automatically.
  * Plug-Ins can only be deployed as C++ code using a DLL.
 
 
