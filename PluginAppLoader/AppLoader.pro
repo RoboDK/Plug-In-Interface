@@ -83,11 +83,16 @@ CONFIG(release, debug|release) {
 # This can be modified manually or automatically by Qt Creator
 HEADERS += \
     apploader.h \
-    dialogapplist.h
+    dialogapplist.h \
+    unzipper.h \
+    zip/miniz.h \
+    zip/zip.h
 
 SOURCES += \
     apploader.cpp \
-    dialogapplist.cpp
+    dialogapplist.cpp \
+    unzipper.cpp \
+    zip/zip.c
 
 FORMS += \
     dialogapplist.ui
@@ -108,6 +113,6 @@ SOURCES += \
     ../robodk_interface/robodktools.cpp \
     ../robodk_interface/robodktypes.cpp
 
-INCLUDEPATH += ../robodk_interface
+INCLUDEPATH += ../robodk_interface ./zip
 #--------------------------
 
