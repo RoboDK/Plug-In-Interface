@@ -188,16 +188,12 @@ bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeCl
 
 QString AppLoader::PluginCommand(const QString &command, const QString &value){
     qDebug() << "Received command: " << command << "    With value: " << value;
-    if (command.startsWith("Reload", Qt::CaseInsensitive))
-    {
+    if (command.startsWith("Reload", Qt::CaseInsensitive)) {
         AppsReload();
         return "Apps reloaded";
-    }
-    else if (command.startsWith("OpenFile", Qt::CaseInsensitive))
-    {
+    } else if (command.startsWith("OpenFile", Qt::CaseInsensitive)) {
         QFileInfo appsPathInfo(PathApps);
-        if (!appsPathInfo.isWritable())
-        {
+        if (!appsPathInfo.isWritable()) {
             QMessageBox::critical(MainWindow, tr("Error"),
                 tr("The applications folder is not available for writing.<br>"
                    "Try restarting RoboDK with administrator privileges."),
@@ -206,8 +202,7 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
         }
 
         Unzipper unzipper(value);
-        if (!unzipper.open())
-        {
+        if (!unzipper.open()) {
             QMessageBox::critical(MainWindow, tr("Error"),
                 tr("Unable to open package file:<br><b>%1</b>").arg(value),
                 QMessageBox::Close);
@@ -218,8 +213,7 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
 
         QStringList existingPackages;
 
-        for (quint32 i = 0; i < unzipper.entriesCount(); ++i)
-        {
+        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
             if (!unzipper.selectEntry(i))
                 break;
 
@@ -233,8 +227,7 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
                 existingPackages << name;
         }
 
-        if (!existingPackages.isEmpty())
-        {
+        if (!existingPackages.isEmpty()) {
             QString message = tr("The following packages already exist:<ul>");
             for (int i = 0; i < existingPackages.size(); ++i)
                 message += QString("<li>%1</li>").arg(existingPackages[i]);
@@ -247,8 +240,7 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
                 return "";
         }
 
-        for (quint32 i = 0; i < unzipper.entriesCount(); ++i)
-        {
+        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
             if (!unzipper.selectEntry(i))
                 break;
 
@@ -261,7 +253,6 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
         }
 
         AppsReload();
-
         return "OK";
     }
     return "";
