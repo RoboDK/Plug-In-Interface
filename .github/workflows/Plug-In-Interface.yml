@@ -8,12 +8,12 @@ on:
   #    - "**/PluginAppLoader/Apps/**"
   #    - "**/robodk_interface/**"
 
-  #pull_request:
-  #  branches: [master]
-  #  paths-ignore:
-  #    - "**.md"
-  #    - "**/PluginAppLoader/Apps/**"
-  #    - "**/robodk_interface/**"
+  pull_request:
+   branches: [master]
+   paths-ignore:
+     - "**.md"
+     - "**/PluginAppLoader/Apps/**"
+     - "**/robodk_interface/**"
 
   workflow_dispatch: # Run workflow manually
 
@@ -27,15 +27,15 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2019
             OUTPUT_DIR: C:/RoboDK/bin/plugins
             QT_VERSION: "5.15.2"
 
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             OUTPUT_DIR: ~/RoboDK/bin/plugins
             QT_VERSION: "5.15.2"
 
-          - os: macos-latest
+          - os: macos-11
             OUTPUT_DIR: ~/RoboDK-Dev/Deploy/RoboDK.app/Contents/MacOS/plugins
             QT_VERSION: "5.15.2"
 
@@ -43,12 +43,11 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2.14.0
+        uses: jurplel/install-qt-action@v3
         with:
-          tools: "tools_qtcreator,7.0.2-0,qt.tools.qtcreator"
+          tools: "tools_qtcreator,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
           target: 'desktop'
-          aqtversion: '==2.0.*'
 
       - name: Configure and build Plug-In-Interface on Windows
         if: startsWith(matrix.os, 'windows')
