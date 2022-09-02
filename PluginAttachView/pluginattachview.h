@@ -23,8 +23,7 @@ class IItem;
 class FormRobotPilot;
 
 ///
-/// \brief The PluginLVDT class allows you to simulate a linear gage (such as an LVDT).
-///        It maps the TCP of a robot to the displacement of the linear gage.
+/// \brief The PluginAttachView class allows you to attach a Camera to an Item and vice-versa.
 ///
 class PluginAttachView : public QObject, IAppRoboDK
 {
@@ -78,7 +77,7 @@ public:
     /// Update the pose of the master anchor (view or anchor)
     void updatePose();
 
-    /// Remove deleted or invalid LVDTs
+    /// Remove deleted or invalid Items
     void cleanupRemovedItems();
 
 
@@ -101,8 +100,6 @@ private:
     };
 
     view_anchor_t view_anchor;
-
-    QList<view_anchor_t> view_anchors;
 
     Item last_clicked_item { nullptr };
 
