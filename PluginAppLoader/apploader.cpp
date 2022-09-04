@@ -511,14 +511,25 @@ void AppLoader::AppsSearch(bool install_requirements){
                 // Preload all dependencies to the Python Interpreter
                 qDebug() << "Installing Python dependencies for " + dirApp;
 
+                QProcess process;
+                connect(&process, &QProcess::readyRead, this, &AppLoader::onPipReadyRead);
+                process.setProcessChannelMode(QProcess::MergedChannels);
+
                 // Check if requirements are missing. This is quicker than pip install, thus it does not hang the UI as much.
                 QStringList args;
                 args << "-c" << "import pkg_resources; pkg_resources.require(open('" + dirAppComplete + "/" + file + "',mode='r'))";
-                int status = QProcess::execute(RDK->getParam("PYTHON_EXEC"), args);
-                if (status == 0){ // 1 means something to install
+                process.start(RDK->getParam("PYTHON_EXEC"), args);
+                if (!process.waitForFinished(-1) ||
+                    process.error() == QProcess::FailedToStart ||
+                    process.exitStatus() != QProcess::NormalExit){
+                    qDebug() << "Unable to check Python dependencies for " + dirApp;
+                    continue;
+                }
+                if (process.exitCode() == 0){ // 1 means something to install
                     qDebug() << "All dependencies are installed for " + dirApp;
                     continue;
                 }
+                process.close();
 
                 // Install missing requirements (hangs the UI)
                 RDK->ShowMessage("Installing additionnal Python dependencies for App \"" + dirApp + "\". See requirements.txt in the app folder.\n\nRoboDK might become unresponsive during this process, please wait.", true);
@@ -527,11 +538,13 @@ void AppLoader::AppsSearch(bool install_requirements){
                 // This solution works in all cases, but is time consuming.. do this only when loading the plugin.
                 args.clear();
                 args << "-m" << "pip" << "install" << "--ignore-installed" << "-r" << dirAppComplete + "/" + file;
-                status = QProcess::execute(RDK->getParam("PYTHON_EXEC"), args);
-                if (status < 0){
+                process.start(RDK->getParam("PYTHON_EXEC"), args);
+                if (!process.waitForFinished(-1) ||
+                    process.error() == QProcess::FailedToStart ||
+                    process.exitStatus() != QProcess::NormalExit ||
+                    process.exitCode() < 0){
                     RDK->ShowMessage("Failed to install additional Python dependencies for App \"" + dirApp + "\".", true);
                 }
-                continue;
             }
 
             if (!file.endsWith(".py", Qt::CaseInsensitive) && !file.endsWith(".exe", Qt::CaseInsensitive)){
@@ -1079,6 +1092,22 @@ void AppLoader::onScriptReadyRead(){
         qDebug().noquote() << str_stderr.toUtf8().trimmed();
     }
     qDebug() << "---- done ----";
+}
+
+void AppLoader::onPipReadyRead()
+{
+    QProcess* process = qobject_cast<QProcess*>(QObject::sender());
+    if (!process)
+        return;
+
+    while (true)
+    {
+        QByteArray line = process->readLine();
+        if (line.isEmpty())
+            break;
+
+        qDebug().noquote() << "pip: " << line.trimmed();
+    }
 }
 
 

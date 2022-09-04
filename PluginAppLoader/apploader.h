@@ -175,6 +175,10 @@ public slots:
     /// Called on app output (eg: print to stdout/default)
     void onScriptReadyRead();
 
+    /// Called on pip output (eg: print to stdout/default)
+    void onPipReadyRead();
+
+
 // define your actions: usually, one action per button
 private:
 
