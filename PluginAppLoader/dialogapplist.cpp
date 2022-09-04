@@ -16,7 +16,12 @@ DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
     ui->setupUi(this);
     setModal(true);
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowFlags((windowFlags() | Qt::CustomizeWindowHint | Qt::Window));// & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint));//Qt::WindowCloseButtonHint | // | Qt::WindowStaysOnTopHint
+
+    Qt::WindowFlags flags = windowFlags();
+    flags &= ~Qt::WindowContextHelpButtonHint;
+    flags |= Qt::CustomizeWindowHint;
+    flags |= Qt::Window;
+    setWindowFlags(flags);
 
     UpdateForm();
 }
@@ -72,6 +77,7 @@ void DialogAppList::UpdateForm(){
 
         QTableWidgetItem* itemStorage = new QTableWidgetItem(
             appmenu->Global ? tr("Global") : tr("User"));
+        itemStorage->setTextAlignment(Qt::AlignCenter);
 
         QFileInfo pathInfo(appmenu->IniPath);
 
@@ -81,6 +87,7 @@ void DialogAppList::UpdateForm(){
         QPushButton* buttonFolder = new QPushButton(iconFolder, QString());
         buttonFolder->setToolTip(tr("Open application location"));
         buttonFolder->setProperty("action-path", pathInfo.absolutePath());
+        buttonFolder->setMaximumWidth(25);
         connect(buttonFolder, &QPushButton::clicked,
                 this, &DialogAppList::onButtonFolderClicked);
 
@@ -92,10 +99,11 @@ void DialogAppList::UpdateForm(){
         ui->tableWidget->setCellWidget(i, 5, buttonFolder);
     }
 
+    ui->tableWidget->horizontalHeader()->setMinimumSectionSize(20);
     ui->tableWidget->resizeRowsToContents();
     ui->tableWidget->resizeColumnsToContents();
-    ui->tableWidget->resizeRowsToContents();// needs doubled! otherwise it does not work
-    ui->tableWidget->resizeColumnsToContents();
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
 }
 
 void DialogAppList::on_btnOk_clicked(){
