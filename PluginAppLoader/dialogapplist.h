@@ -35,6 +35,9 @@ private slots:
     /// Enable/Disable application
     void onButtonActionClicked();
 
+    /// Open application location
+    void onButtonFolderClicked();
+
 private:
     AppLoader *pAppLoader;
     Ui::DialogAppList *ui;

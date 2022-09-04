@@ -3,6 +3,9 @@
 #include "apploader.h"
 
 #include <QSettings>
+#include <QFileInfo>
+#include <QDesktopServices>
+#include <QDebug>
 
 
 DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
@@ -24,8 +27,9 @@ DialogAppList::~DialogAppList() {
 
 
 void DialogAppList::UpdateForm(){
-    static QIcon iconEnabled(":img/dot_green.png"); // this is a RoboDK resource
-    static QIcon iconDisabled(":img/dot_red.png"); // this is a RoboDK resource
+    static QIcon iconEnabled(":/img/dot_green.png"); // this is a RoboDK resource
+    static QIcon iconDisabled(":/img/dot_red.png"); // this is a RoboDK resource
+    static QIcon iconFolder(":/img/folder.png"); // this is a RoboDK resource
 
     QStringList header;
     header << tr("Application");
@@ -50,9 +54,6 @@ void DialogAppList::UpdateForm(){
         tAppMenu *appmenu = pAppLoader->ListMenus[i];
         QTableWidgetItem *itemName = new QTableWidgetItem(appmenu->Name);
 
-        QTableWidgetItem *itemPath = new QTableWidgetItem(appmenu->NamePath);
-        // item->setToolTip(appmenu->Name);
-
         QTableWidgetItem *itemStatus = nullptr;
         QPushButton* buttonAction = nullptr;
 
@@ -72,11 +73,23 @@ void DialogAppList::UpdateForm(){
         QTableWidgetItem* itemStorage = new QTableWidgetItem(
             appmenu->Global ? tr("Global") : tr("User"));
 
+        QFileInfo pathInfo(appmenu->IniPath);
+
+        QTableWidgetItem *itemPath = new QTableWidgetItem(appmenu->NamePath);
+        itemPath->setToolTip(pathInfo.absolutePath());
+
+        QPushButton* buttonFolder = new QPushButton(iconFolder, QString());
+        buttonFolder->setToolTip(tr("Open application location"));
+        buttonFolder->setProperty("action-path", pathInfo.absolutePath());
+        connect(buttonFolder, &QPushButton::clicked,
+                this, &DialogAppList::onButtonFolderClicked);
+
         ui->tableWidget->setItem(i, 0, itemName);
         ui->tableWidget->setItem(i, 1, itemStatus);
         ui->tableWidget->setCellWidget(i, 2, buttonAction);
         ui->tableWidget->setItem(i, 3, itemStorage);
         ui->tableWidget->setItem(i, 4, itemPath);
+        ui->tableWidget->setCellWidget(i, 5, buttonFolder);
     }
 
     ui->tableWidget->resizeRowsToContents();
@@ -116,4 +129,17 @@ void DialogAppList::onButtonActionClicked()
 
     pAppLoader->AppsReload();
     UpdateForm();
+}
+
+void DialogAppList::onButtonFolderClicked()
+{
+    QObject* sender = QObject::sender();
+    if (!sender)
+        return;
+
+    QString path = sender->property("action-path").toString();
+    if (path.isEmpty())
+        return;
+
+    QDesktopServices::openUrl(QUrl("file:///" + path));
 }
