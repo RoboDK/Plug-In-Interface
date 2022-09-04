@@ -181,6 +181,9 @@ private:
     /// Path to Apps folder (usually C:/RoboDK/Apps/)
     QString PathApps;
 
+    /// Path to Local User Apps folder (usually C:/Users/<username>/AppData/Roaming/RoboDK/Apps/)
+    QString PathUserApps;
+
     /// List of directories containing enabled Apps (including AppLinks) to add to PYTHONPATH. i.e. C:/RoboDK/Apps/MyApp -> C:/RoboDK/Apps, C:/RoboDK/Apps/MyApp/AppLink.ini -> C:/DirOfMyApp
     QStringList PypathAppsDirs;
 

@@ -20,6 +20,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QProcess>
 #include <QTimer>
 #include <QSysInfo>
@@ -66,6 +67,29 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
     // ---------------------------------------------------
     // We can get some settings from RoboDK
     PathApps = RDK->getParam("PATH_ROBODK") + "/Apps";
+
+    QDir userPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+
+    QString applicationName = QCoreApplication::applicationName();
+    QString organizationName = QCoreApplication::organizationName();
+
+    if (!applicationName.isEmpty() && userPath.dirName() == applicationName)
+        userPath.cdUp();
+
+    if (!organizationName.isEmpty() && userPath.dirName() == organizationName)
+        userPath.cdUp();
+
+    if (!applicationName.isEmpty()){
+        userPath.mkdir(applicationName);
+        userPath.cd(applicationName);
+    } else {
+        userPath.mkdir("RoboDK");
+        userPath.cd("RoboDK");
+    }
+    userPath.mkdir("Apps");
+    userPath.cd("Apps");
+
+    PathUserApps = userPath.absolutePath();
 
     // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
     action_Apps = new QAction(tr("Apps List"));
