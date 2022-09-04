@@ -4,6 +4,7 @@
 #include "robodktools.h"
 #include "irobodk.h"
 #include "iitem.h"
+#include "unzipper.h"
 
 #include <QMainWindow>
 #include <QToolBar>
@@ -20,7 +21,6 @@
 #include <QDir>
 #include <QSettings>
 #include <QProcess>
-#include <QMessageBox>
 #include <QTimer>
 #include <QSysInfo>
 
@@ -188,104 +188,71 @@ bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeCl
 
 QString AppLoader::PluginCommand(const QString &command, const QString &value){
     qDebug() << "Received command: " << command << "    With value: " << value;
-    if (command.startsWith("Reload", Qt::CaseInsensitive)){
+    if (command.startsWith("Reload", Qt::CaseInsensitive)) {
         AppsReload();
         return "Apps reloaded";
-    } else if (command.startsWith("OpenFile", Qt::CaseInsensitive)){
-        // Execute the openfile command (provided by RoboDK when a file with the pattern *.apploader.rdkp is opened in RoboDK)
-        // Since Qt doesn't have great tools for unzipping files we can run Python code to do so
-        const char * python_code_c = R"""(
-import os
-import zipfile
-import sys
-
-def printFlush(msg):
-    print(msg)
-    #sys.stdout.write(str(msg) + '\n')
-    sys.stdout.flush()
-
-# Import tkinter
-if sys.version_info[0] < 3: # Python 2.X only:
-    import Tkinter as tkinter
-    import tkMessageBox as messagebox
-else: # Python 3.x only
-    import tkinter
-    from tkinter import messagebox
-
-# Check if the package exists
-def ExistingPackage(path_zip, path_extract):
-    msg = ''
-    with zipfile.ZipFile(path_zip, 'r') as zip_ref:
-        zip_folders = []
-        for name in zip_ref.namelist():
-            dir = name.split('/')[0]
-            if dir in zip_folders:
-                continue
-            zip_folders.append(dir)
-            if os.path.isdir(path_extract + '/' + dir):
-                msg += '    ' + u"\u2022" + " " + dir + '\n'
-    if len(msg) > 0:
-        msg = 'The following package(s) already exist:\n\n' + msg + '\nOverride?'
-        return True, msg
-    return False, msg
-
-# Unzip a zip file
-def UnZipDir(path_zip, path_extract):
-    with zipfile.ZipFile(path_zip, 'r') as zip_ref:
-        zip_ref.extractall(path_extract)
-
-# Ask the user if we should override
-def DoOverride(display_message):
-    root = tkinter.Tk()
-    root.overrideredirect(1)
-    root.attributes("-topmost", True)
-    root.withdraw()
-    result = messagebox.askquestion('Override?', display_message, icon='warning')#, parent=texto)
-    if result == 'yes':
-        root.destroy()
-        return True
-    else:
-        root.destroy()
-        return False
-
-printFlush("Starting application")
-
-exists, msg = ExistingPackage(file_path, apps_path)
-if exists:
-    if not DoOverride(msg):
-        printFlush("App override cancelled")
-        exit(0)
-    else:
-        printFlush("Overriding existing apps")
-
-UnZipDir(file_path, apps_path)
-printFlush('Done')
-
-from robodk.robolink import Robolink
-RDK = Robolink()
-RDK.PluginCommand("App Loader", "Reload")
-exit(0)
-)""";
-
-        QString python_code;
-        QFileInfo apps_dir(PathApps);
-        if (!apps_dir.isWritable()){
-            // special flag that tells RoboDK to run as administrator
-            qDebug() << "Installing App requires administrator privileges...";
-            python_code.append(QString("#runasadmin\n"));
+    } else if (command.startsWith("OpenFile", Qt::CaseInsensitive)) {
+        QFileInfo appsPathInfo(PathApps);
+        if (!appsPathInfo.isWritable()) {
+            QMessageBox::critical(MainWindow, tr("Error"),
+                tr("The applications folder is not available for writing.<br>"
+                   "Try restarting RoboDK with administrator privileges."),
+                QMessageBox::Close);
+            return "";
         }
-        python_code.append(QString("file_path = r'''" + value + "'''\n"));
-        python_code.append(QString("apps_path = r'''" + PathApps + "'''\n"));
-        python_code.append(python_code_c);
 
-        RDK->Command("PythonRunCode", python_code);
+        Unzipper unzipper(value);
+        if (!unzipper.open()) {
+            QMessageBox::critical(MainWindow, tr("Error"),
+                tr("Unable to open package file:<br><b>%1</b>").arg(value),
+                QMessageBox::Close);
+            return "";
+        }
 
-        /*
-        if (RunPythonShell(RDK->getParam("PYTHON_EXEC"), python_code)){
-            AppsReload();
-        } else {
-            qDebug() << "Something went wrong executing Python code";
-        }*/
+        QDir appsFolder(PathApps);
+
+        QStringList existingPackages;
+
+        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
+            if (!unzipper.selectEntry(i))
+                break;
+
+            QString name = unzipper.entryName();
+
+            int slash = name.indexOf('/');
+            if (slash > -1)
+                name.truncate(slash);
+
+            if (!name.isEmpty() && !existingPackages.contains(name) && appsFolder.exists(name))
+                existingPackages << name;
+        }
+
+        if (!existingPackages.isEmpty()) {
+            QString message = tr("The following packages already exist:<ul>");
+            for (int i = 0; i < existingPackages.size(); ++i)
+                message += QString("<li>%1</li>").arg(existingPackages[i]);
+            message += tr("</ul>Do you want to overwrite them?");
+
+
+            auto button = QMessageBox::question(MainWindow, tr("Confirm"), message,
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (button != QMessageBox::Yes)
+                return "";
+        }
+
+        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
+            if (!unzipper.selectEntry(i))
+                break;
+
+            if (unzipper.entryIsDirectory())
+                continue;
+
+            QFileInfo fileInfo = appsFolder.absoluteFilePath(unzipper.entryName());
+            appsFolder.mkpath(fileInfo.absolutePath());
+            unzipper.entryExtract(fileInfo.absoluteFilePath());
+        }
+
+        AppsReload();
         return "OK";
     }
     return "";
