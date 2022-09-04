@@ -15,8 +15,6 @@ DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowFlags((windowFlags() | Qt::CustomizeWindowHint | Qt::Window));// & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint));//Qt::WindowCloseButtonHint | // | Qt::WindowStaysOnTopHint
 
-    connect( ui->tableWidget, SIGNAL( cellDoubleClicked (int, int) ),  this, SLOT( onCellDoubleClicked( int, int ) ) );
-
     UpdateForm();
 }
 
@@ -56,17 +54,27 @@ void DialogAppList::UpdateForm(){
         // item->setToolTip(appmenu->Name);
 
         QTableWidgetItem *itemStatus = nullptr;
+        QPushButton* buttonAction = nullptr;
+
         if (appmenu->Active){
             itemStatus = new QTableWidgetItem(iconEnabled, tr("Enabled"));
+            buttonAction = new QPushButton(tr("DISABLE"));
+            buttonAction->setProperty("action-enable", false);
         } else {
             itemStatus = new QTableWidgetItem(iconDisabled, tr("Disabled"));
+            buttonAction = new QPushButton(tr("ENABLE"));
+            buttonAction->setProperty("action-enable", true);
         }
+        buttonAction->setProperty("action-ini", appmenu->IniPath);
+        connect(buttonAction, &QPushButton::clicked,
+                this, &DialogAppList::onButtonActionClicked);
 
         QTableWidgetItem* itemStorage = new QTableWidgetItem(
             appmenu->Global ? tr("Global") : tr("User"));
 
         ui->tableWidget->setItem(i, 0, itemName);
         ui->tableWidget->setItem(i, 1, itemStatus);
+        ui->tableWidget->setCellWidget(i, 2, buttonAction);
         ui->tableWidget->setItem(i, 3, itemStorage);
         ui->tableWidget->setItem(i, 4, itemPath);
     }
@@ -75,32 +83,6 @@ void DialogAppList::UpdateForm(){
     ui->tableWidget->resizeColumnsToContents();
     ui->tableWidget->resizeRowsToContents();// needs doubled! otherwise it does not work
     ui->tableWidget->resizeColumnsToContents();
-}
-
-void DialogAppList::onCellDoubleClicked( int a, int b){
-    if (a < 0 || a >= pAppLoader->ListMenus.length()){
-        // this should never happen
-        return;
-    }
-    tAppMenu *appmenu = pAppLoader->ListMenus[a];
-    bool set_enabled = !appmenu->Active;
-    appmenu->Active = set_enabled;
-    if (appmenu->Toolbar != nullptr){
-        appmenu->Toolbar->Active = set_enabled;
-    }
-
-    //--------- set enabled or disabled in the INI file
-    // warning: this may not work depending on where we installed RoboDK
-    QSettings settings(appmenu->IniPath, QSettings::IniFormat);
-    settings.setValue("Enabled", set_enabled);
-    //------------------------------------------
-
-    // clean up apps from the User Interface and load them again
-    // pAppLoader->AppsSearch(); // this is not needed (it may not work if we don't have rights to change the INI files)
-    pAppLoader->AppsReload();
-
-    // update the list of apps
-    UpdateForm();
 }
 
 void DialogAppList::on_btnOk_clicked(){
@@ -115,5 +97,23 @@ void DialogAppList::on_btnReload_clicked(){
     pAppLoader->AppsReload();
 
     // update the list of apps
+    UpdateForm();
+}
+
+void DialogAppList::onButtonActionClicked()
+{
+    QObject* sender = QObject::sender();
+    if (!sender)
+        return;
+
+    bool enable = sender->property("action-enable").toBool();
+    QString pathIni = sender->property("action-ini").toString();
+    if (pathIni.isEmpty())
+        return;
+
+    QSettings settings(pathIni, QSettings::IniFormat);
+    settings.setValue("Enabled", enable);
+
+    pAppLoader->AppsReload();
     UpdateForm();
 }
