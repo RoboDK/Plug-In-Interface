@@ -26,45 +26,49 @@ DialogAppList::~DialogAppList() {
 
 
 void DialogAppList::UpdateForm(){
+    static QIcon iconEnabled(":img/dot_green.png"); // this is a RoboDK resource
+    static QIcon iconDisabled(":img/dot_red.png"); // this is a RoboDK resource
+
+    QStringList header;
+    header << tr("Application");
+    header << tr("Status");
+    header << tr("Action");
+    header << tr("Storage");
+    header << tr("Folder");
+    header << QString();
+
     ui->tableWidget->clear();
-
     ui->tableWidget->setRowCount(pAppLoader->ListMenus.length());
-    ui->tableWidget->setColumnCount(3);
+    ui->tableWidget->setColumnCount(header.size());
+    ui->tableWidget->setHorizontalHeaderLabels(header);
 
-    ui->tableWidget->setHorizontalHeaderLabels(QStringList() << tr("App") << tr("Enabled") << tr("Folder") );
-
-    //////////////////////////////////////
-    static QIcon icnY(":img/dot_green.png"); // this is a RoboDK resource
-    static QIcon icnN(":img/dot_red.png"); // this is a RoboDK resource
-    QTableWidgetItem *todelete;
-    for (int i=0; i<pAppLoader->ListMenus.length(); i++){
-        tAppMenu *appmenu = pAppLoader->ListMenus[i];
-        QTableWidgetItem *item = new QTableWidgetItem(appmenu->Name);
-        // item->setToolTip(appmenu->Name);
-        item->setFlags(item->flags() & (~Qt::ItemIsEditable));
-        QTableWidgetItem *item_path = new QTableWidgetItem(appmenu->NamePath);
-        // item->setToolTip(appmenu->Name);
-        item_path->setFlags(item_path->flags() & (~Qt::ItemIsEditable));
-
-        QTableWidgetItem *item_loaded = nullptr;
-        if (appmenu->Active){
-            item_loaded = new QTableWidgetItem(QIcon(icnY), tr("Yes"));
-            item_loaded->setToolTip(tr("Double click to load %1 App").arg(appmenu->Name));
-        } else {
-            item_loaded = new QTableWidgetItem(QIcon(icnN), tr("No"));
-            item_loaded->setToolTip(tr("Double click to unload %1 App").arg(appmenu->Name));
+    for (int i = 0; i < pAppLoader->ListMenus.length(); i++){
+        for (int column = 0; column < ui->tableWidget->columnCount(); ++column){
+            QTableWidgetItem* item = ui->tableWidget->takeItem(i, column);
+            if (item)
+                delete item;
         }
-        item_loaded->setFlags(item->flags() & (~Qt::ItemIsEditable));
-        todelete = ui->tableWidget->takeItem(i,0);
-        if (todelete != NULL){ delete todelete; }
-        todelete = ui->tableWidget->takeItem(i,1);
-        if (todelete != NULL){ delete todelete; }
-        todelete = ui->tableWidget->takeItem(i,2);
-        if (todelete != NULL){ delete todelete; }
 
-        ui->tableWidget->setItem(i, 0, item);
-        ui->tableWidget->setItem(i, 1, item_loaded);
-        ui->tableWidget->setItem(i, 2, item_path);
+        tAppMenu *appmenu = pAppLoader->ListMenus[i];
+        QTableWidgetItem *itemName = new QTableWidgetItem(appmenu->Name);
+
+        QTableWidgetItem *itemPath = new QTableWidgetItem(appmenu->NamePath);
+        // item->setToolTip(appmenu->Name);
+
+        QTableWidgetItem *itemStatus = nullptr;
+        if (appmenu->Active){
+            itemStatus = new QTableWidgetItem(iconEnabled, tr("Enabled"));
+        } else {
+            itemStatus = new QTableWidgetItem(iconDisabled, tr("Disabled"));
+        }
+
+        QTableWidgetItem* itemStorage = new QTableWidgetItem(
+            appmenu->Global ? tr("Global") : tr("User"));
+
+        ui->tableWidget->setItem(i, 0, itemName);
+        ui->tableWidget->setItem(i, 1, itemStatus);
+        ui->tableWidget->setItem(i, 3, itemStorage);
+        ui->tableWidget->setItem(i, 4, itemPath);
     }
 
     ui->tableWidget->resizeRowsToContents();

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>334</width>
+    <width>500</width>
     <height>362</height>
    </rect>
   </property>
@@ -32,7 +32,14 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableWidget" name="tableWidget"/>
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

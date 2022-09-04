@@ -325,7 +325,7 @@ void AppLoader::AppsDelete(){
 
     // Remove App paths from RoboDK's PYTHONPATH
     if (!PypathAppsDirs.empty()){
-#ifdef WIN32
+#ifdef Q_OS_WIN
         QString path_sep(";");
 #else
         QString path_sep(":");
@@ -365,10 +365,15 @@ void AppLoader::AppsSearch(bool install_requirements){
     QDir userPath(PathUserApps);
 
     QFileInfoList directories = globalPath.entryInfoList(QDir::Dirs);
+    int globalCount = directories.size();
     directories.append(userPath.entryInfoList(QDir::Dirs));
 
     int appsenabled_count = 0;
-    foreach (QFileInfo directoryInfo, directories) {
+    for (int dindex = 0; dindex < directories.size(); ++dindex) {
+        const QFileInfo& directoryInfo = directories.at(dindex);
+
+        bool global = (dindex < globalCount);
+
         QString dirApp = directoryInfo.fileName();
 
         // Ignore folders that start with an underscore
@@ -416,25 +421,13 @@ void AppLoader::AppsSearch(bool install_requirements){
              fileSettings = dirAppComplete + "/AppConfig.ini"; // Use default INI file name
         }
 
-        // Make sure we can write to the same location if the file does not exist, otherwise, save to app data location
-        if (false && !QFile::exists(fileSettings)){
-            qDebug() << "Checking if file does not exist and is not writtable: " + fileSettings;
-            QFileInfo fileInfo(fileSettings);
-            fileInfo.dir().path();
-
-            //QFile(fileSettings).isWritable()
-            QString newFileSettings = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Apps/" + dirApp + ".ini";
-            if (!QFile::exists(newFileSettings)){
-                RDK->ShowMessage(tr("Creating settings file for your new App <strong>%1</strong>:<br>%2<br><br>Location %3 is not writable").arg(dirApp).arg(newFileSettings).arg(fileSettings));
-            }
-            fileSettings = newFileSettings;
-        }
         RDK->ShowMessage(tr("Loading App ") + dirApp + tr(". Using settings file: ") + fileSettings, false);
 
         // Load settings and save them (default settings will be set)
         QSettings settings(fileSettings, QSettings::IniFormat);
         QString menuName = settings.value("MenuName", dirApp).toString();
         QString menuParent = settings.value("MenuParent", "").toString();
+        QString version = settings.value("Version", "1.0.0").toString();
         double menuPriority = settings.value("MenuPriority", 50.0).toDouble();
         bool menuVisible = settings.value("MenuVisible", true).toBool();
         bool appEnabled = settings.value("Enabled", true).toBool();
@@ -444,6 +437,7 @@ void AppLoader::AppsSearch(bool install_requirements){
 
         settings.setValue("MenuName", menuName);
         settings.setValue("MenuParent", menuParent);
+        settings.setValue("Version", version);
         settings.setValue("MenuPriority", menuPriority);
         settings.setValue("MenuVisible", menuVisible);
         settings.setValue("Enabled", appEnabled);
@@ -453,16 +447,13 @@ void AppLoader::AppsSearch(bool install_requirements){
 
 
         // Create a new list for menus and toolbars
-        tAppToolbar *appToolbar = new tAppToolbar(menuName, menuPriority, toolbarArea, toolbarSize, appEnabled);
-        tAppMenu *appMenu = new tAppMenu(menuName, menuParent, menuPriority, menuVisible, appEnabled, dirApp, fileSettings);
+        tAppToolbar *appToolbar = new tAppToolbar(menuName, menuPriority, toolbarArea,
+                                                  toolbarSize, appEnabled);
+        tAppMenu *appMenu = new tAppMenu(menuName, menuParent, menuPriority, menuVisible,
+                                         appEnabled, global, version, dirApp, fileSettings);
         appMenu->Toolbar = appToolbar;
         ListMenus.append(appMenu);
         ListToolbars.append(appToolbar);
-
-        // skip if we don't want this app (menu) visible. Toolbar won't be displayed either
-        //if (!appEnabled){
-        //    continue;
-        //}
 
         // Run commands specified by each app (there could be conflicts/contradictions)
         if (appEnabled){
@@ -732,7 +723,7 @@ void AppLoader::AppsSearch(bool install_requirements){
 
     // Append Apps directories to RoboDK's PYTHONPATH
     if (!PypathAppsDirs.empty()){
-#ifdef WIN32
+#ifdef Q_OS_WIN
         QString path_sep(";");
 #else
         QString path_sep(":");
@@ -975,7 +966,7 @@ void AppLoader::onRunScript(){
     }
 
     // Add RoboDK's environnement to the process
-#ifdef WIN32
+#ifdef Q_OS_WIN
     QString path_sep(";");
 #else
     QString path_sep(":");
