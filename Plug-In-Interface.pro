@@ -25,3 +25,4 @@ SUBDIRS += PluginOpenGL-Shaders/PluginChip8Opengl.pro
 }
 SUBDIRS += PluginRealTime/PluginRealTime.pro
 SUBDIRS += PluginRobotPilot/PluginRobotPilot.pro
+SUBDIRS += PluginCollisionSensor/PluginCollisionSensor.pro

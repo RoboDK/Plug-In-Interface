@@ -9,11 +9,11 @@ on:
   #    - "**/robodk_interface/**"
 
   pull_request:
-   branches: [master]
-   paths-ignore:
-     - "**.md"
-     - "**/PluginAppLoader/Apps/**"
-     - "**/robodk_interface/**"
+    branches: [master]
+    paths-ignore:
+      - "**.md"
+      - "**/PluginAppLoader/Apps/**"
+      - "**/robodk_interface/**"
 
   workflow_dispatch: # Run workflow manually
 
@@ -47,7 +47,7 @@ jobs:
         with:
           tools: "tools_qtcreator,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
-          target: 'desktop'
+          target: "desktop"
 
       - name: Configure and build Plug-In-Interface on Windows
         if: startsWith(matrix.os, 'windows')
