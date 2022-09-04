@@ -361,18 +361,23 @@ void AppLoader::AppsSearch(bool install_requirements){
     AppsDelete();
 
     // Get path to apps folder
-    QString dir_apps_path = PathApps;
-    QDir dir_apps(dir_apps_path);
-    QStringList AppsDirList(dir_apps.entryList(QDir::Dirs));
+    QDir globalPath(PathApps);
+    QDir userPath(PathUserApps);
+
+    QFileInfoList directories = globalPath.entryInfoList(QDir::Dirs);
+    directories.append(userPath.entryInfoList(QDir::Dirs));
+
     int appsenabled_count = 0;
-    foreach (QString dirApp, AppsDirList) {
+    foreach (QFileInfo directoryInfo, directories) {
+        QString dirApp = directoryInfo.fileName();
+
         // Ignore folders that start with an underscore
         if (dirApp.startsWith("_") || dirApp.startsWith(".")){
             continue;
         }
         qDebug() << "Loading App dir: " << dirApp;
 
-        QString dirAppComplete = dir_apps_path + "/" + dirApp;
+        QString dirAppComplete = directoryInfo.absoluteFilePath();
 
         // Retrieve and/or create the INI file related to this app
         QString fileSettings = dirAppComplete + "/AppConfig.ini";
