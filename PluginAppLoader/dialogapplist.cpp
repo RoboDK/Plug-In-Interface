@@ -38,6 +38,7 @@ void DialogAppList::UpdateForm(){
 
     QStringList header;
     header << tr("Application");
+    header << tr("Version");
     header << tr("Status");
     header << tr("Action");
     header << tr("Storage");
@@ -45,6 +46,7 @@ void DialogAppList::UpdateForm(){
     header << QString();
 
     ui->tableWidget->clear();
+    ui->tableWidget->setSortingEnabled(false);
     ui->tableWidget->setRowCount(pAppLoader->ListMenus.length());
     ui->tableWidget->setColumnCount(header.size());
     ui->tableWidget->setHorizontalHeaderLabels(header);
@@ -58,6 +60,9 @@ void DialogAppList::UpdateForm(){
 
         tAppMenu *appmenu = pAppLoader->ListMenus[i];
         QTableWidgetItem *itemName = new QTableWidgetItem(appmenu->Name);
+
+        QTableWidgetItem *itemVersion = new QTableWidgetItem(appmenu->Version);
+        itemVersion->setTextAlignment(Qt::AlignCenter);
 
         QTableWidgetItem *itemStatus = nullptr;
         QPushButton* buttonAction = nullptr;
@@ -92,18 +97,20 @@ void DialogAppList::UpdateForm(){
                 this, &DialogAppList::onButtonFolderClicked);
 
         ui->tableWidget->setItem(i, 0, itemName);
-        ui->tableWidget->setItem(i, 1, itemStatus);
-        ui->tableWidget->setCellWidget(i, 2, buttonAction);
-        ui->tableWidget->setItem(i, 3, itemStorage);
-        ui->tableWidget->setItem(i, 4, itemPath);
-        ui->tableWidget->setCellWidget(i, 5, buttonFolder);
+        ui->tableWidget->setItem(i, 1, itemVersion);
+        ui->tableWidget->setItem(i, 2, itemStatus);
+        ui->tableWidget->setCellWidget(i, 3, buttonAction);
+        ui->tableWidget->setItem(i, 4, itemStorage);
+        ui->tableWidget->setItem(i, 5, itemPath);
+        ui->tableWidget->setCellWidget(i, 6, buttonFolder);
     }
 
+    ui->tableWidget->setSortingEnabled(true);
     ui->tableWidget->horizontalHeader()->setMinimumSectionSize(20);
     ui->tableWidget->resizeRowsToContents();
     ui->tableWidget->resizeColumnsToContents();
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
 }
 
 void DialogAppList::on_btnOk_clicked(){
