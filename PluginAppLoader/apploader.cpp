@@ -430,7 +430,6 @@ void AppLoader::AppsSearch(bool install_requirements){
         QString version = settings.value("Version", "1.0.0").toString();
         double menuPriority = settings.value("MenuPriority", 50.0).toDouble();
         bool menuVisible = settings.value("MenuVisible", true).toBool();
-        bool appEnabled = settings.value("Enabled", true).toBool();
         int toolbarArea = settings.value("ToolbarArea", 2).toInt();
         double toolbarSize = settings.value("ToolbarSizeRatio", 1.5).toDouble();
         QStringList RunCommands = settings.value("RunCommands", QStringList()).toStringList();
@@ -440,10 +439,38 @@ void AppLoader::AppsSearch(bool install_requirements){
         settings.setValue("Version", version);
         settings.setValue("MenuPriority", menuPriority);
         settings.setValue("MenuVisible", menuVisible);
-        settings.setValue("Enabled", appEnabled);
+
+        // Remove obsoleted key
+        if (settings.contains("Enabled"))
+            settings.remove("Enabled");
+
         settings.setValue("ToolbarArea", toolbarArea);
         settings.setValue("ToolbarSizeRatio", toolbarSize);
         settings.setValue("RunCommands", RunCommands);
+
+
+        QString applicationName = QCoreApplication::applicationName();
+        if (applicationName.isEmpty())
+            applicationName = "RoboDK";
+
+        QString pluginName = PluginName().remove(' ');
+
+        QSettings pluginSettings(QSettings::IniFormat, QSettings::UserScope,
+                                 applicationName, pluginName);
+
+        QStringList enabledApps;
+        pluginSettings.beginGroup("Enabled");
+        int count = pluginSettings.value("count", 0).toInt();
+        enabledApps.reserve(count);
+        for (int eindex = 0; eindex < count; ++eindex)
+            enabledApps << pluginSettings.value(QString::number(eindex)).toString();
+        pluginSettings.endGroup();
+
+#ifdef Q_OS_WIN
+        bool appEnabled = enabledApps.contains(fileSettings, Qt::CaseInsensitive);
+#else
+        bool appEnabled = enabledApps.contains(fileSettings);
+#endif
 
 
         // Create a new list for menus and toolbars
