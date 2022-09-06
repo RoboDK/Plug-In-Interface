@@ -23,7 +23,7 @@ PluginCollisionSensor::PluginCollisionSensor() {}
 
 
 QString PluginCollisionSensor::PluginName() {
-    return "Plugin Sensor Emulator";
+    return "Plugin Collision Sensor";
 }
 
 
@@ -101,21 +101,37 @@ bool PluginCollisionSensor::PluginItemClick(Item item, QMenu *menu, TypeClick cl
 
 QString PluginCollisionSensor::PluginCommand(const QString &command, const QString &value) {
 
-    // Expected format: "Activate", "Sensor Item Name"
-    //                  "Deactivate", "Sensor Item Name"
+    // Expected format: "Activate", "Sensor Item.Name() or Python's Item.item pointer"
+    //                  "Deactivate", "Sensor Item.Name() or Python's Item.item pointer"
 
     last_clicked_item = nullptr;
 
     bool activate = true;
     if (command.compare("Activate", Qt::CaseInsensitive) == 0) {
         activate = true;
-    } else if (command.compare("Detach", Qt::CaseInsensitive) == 0) {
+    } else if (command.compare("Deactivate", Qt::CaseInsensitive) == 0) {
         activate = false;
     } else {
-        return "";
+        return "Unknown Command";
     }
 
-    Item candidate = RDK->getItem(value);
+    Item candidate = nullptr;
+
+    // Passing by pointer
+    bool is_pointer;
+    qulonglong item_ptr = value.toULongLong(&is_pointer);
+    if (is_pointer) {
+        candidate = reinterpret_cast<Item>(item_ptr + QT_POINTER_SIZE * 8);
+        if (!RDK->Valid(candidate)) {
+            candidate = nullptr;
+        }
+    }
+
+    // Passing by name
+    if (candidate == nullptr) {
+        candidate = RDK->getItem(value);
+    }
+
     if (!processItem(candidate)) {
         return "Invalid Item";
     }
@@ -171,6 +187,10 @@ void PluginCollisionSensor::callback_set_as_sensor(bool activate) {
 
 bool PluginCollisionSensor::processItem(Item item) {
     if (item == nullptr) {
+        return false;
+    }
+
+    if (!RDK->Valid(item)) {
         return false;
     }
 
