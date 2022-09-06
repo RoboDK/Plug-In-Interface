@@ -84,6 +84,7 @@ CONFIG(release, debug|release) {
 HEADERS += \
     apploader.h \
     dialogapplist.h \
+    tableheader.h \
     unzipper.h \
     zip/miniz.h \
     zip/zip.h

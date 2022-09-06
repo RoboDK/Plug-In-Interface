@@ -1,11 +1,11 @@
 #include "dialogapplist.h"
 #include "ui_dialogapplist.h"
 #include "apploader.h"
+#include "tableheader.h"
 
 #include <QSettings>
 #include <QFileInfo>
 #include <QDesktopServices>
-#include <QDebug>
 
 
 DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
@@ -22,6 +22,8 @@ DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
     flags |= Qt::CustomizeWindowHint;
     flags |= Qt::Window;
     setWindowFlags(flags);
+
+    ui->tableWidget->setHorizontalHeader(new TableHeader(Qt::Horizontal));
 
     UpdateForm();
 }
