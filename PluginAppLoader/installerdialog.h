@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QVersionNumber>
 #include <QList>
+#include <QDir>
 
 
 class AppLoader;
@@ -41,6 +42,11 @@ public:
     ~InstallerDialog();
 
     bool processPackage(const QString& package);
+    bool addExistingApp(ApplicationRecord& record, const QDir& folder, bool global);
+    void populateTable(int limit, bool installed);
+
+private slots:
+    void on_buttonBox_accepted();
 
 private:
     Ui::InstallerDialog* ui;

@@ -6,7 +6,6 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QStringList>
-#include <QDir>
 #include <QTemporaryFile>
 #include <QSettings>
 #include <QComboBox>
@@ -29,13 +28,17 @@ InstallerDialog::InstallerDialog(AppLoader* apploader, QWidget* parent) :
 
     QStringList header;
     header << tr("Application");
-    header << tr("Installed Version");
     header << tr("Storage");
+    header << tr("Installed Version");
     header << tr("Proposed Version");
     header << tr("Action");
 
     ui->tableWidget->setColumnCount(header.size());
     ui->tableWidget->setHorizontalHeaderLabels(header);
+    ui->tableWidget->verticalHeader()->setMinimumWidth(25);
+
+    ui->buttonBox->addButton(tr("Install"), QDialogButtonBox::AcceptRole);
+    ui->buttonBox->addButton(QDialogButtonBox::Cancel);
 }
 
 InstallerDialog::~InstallerDialog(){
@@ -92,145 +95,179 @@ bool InstallerDialog::processPackage(const QString& package){
         record.name = name;
         record.proposedVersion = QVersionNumber::fromString(manifest.value("Version").toString());
 
-        bool exist = false;
+        bool installed = false;
 
-        if (globalFolder.exists(name)) {
-            record.global = true;
-            record.path = globalFolder.filePath(name + "/AppConfig.ini");
-            if (!QFile::exists(record.path)) {
-                record.path = globalFolder.filePath(name + "/Settings.ini");
-                if (!QFile::exists(record.path))
-                    record.path.clear();
-            }
-            if (!record.path.isEmpty()) {
-                installedCount++;
-                QSettings currentManifest(record.path, QSettings::IniFormat);
-                record.installedVersion = QVersionNumber::fromString(
-                                             currentManifest.value("Version").toString());
-                records.append(record);
-                exist = true;
-            }
+        if (addExistingApp(record, globalFolder, true)) {
+            installedCount++;
+            installed = true;
         }
 
-        if (userFolder.exists(name)) {
-            record.global = false;
-            record.path = userFolder.filePath(name + "/AppConfig.ini");
-            if (!QFile::exists(record.path)) {
-                record.path = userFolder.filePath(name + "/Settings.ini");
-                if (!QFile::exists(record.path))
-                    record.path.clear();
-            }
-            if (!record.path.isEmpty()) {
-                installedCount++;
-                QSettings currentManifest(record.path, QSettings::IniFormat);
-                record.installedVersion = QVersionNumber::fromString(
-                                             currentManifest.value("Version").toString());
-                records.append(record);
-                exist = true;
-            }
+        if (addExistingApp(record, userFolder, false)) {
+            installedCount++;
+            installed = true;
         }
 
-        if (!exist) {
+        if (!installed) {
             record.path.clear();
             newCount++;
             records.append(record);
         }
     }
 
-    if (installedCount > 0) {
-        int row = ui->tableWidget->rowCount();
-        ui->tableWidget->setRowCount(row + installedCount + 1);
-        QTableWidgetItem* item = new QTableWidgetItem();
-        item->setText(tr("Already installed (%1)").arg(installedCount));
-        item->setTextAlignment(Qt::AlignCenter);
-        QFont font = item->font();
-        font.setBold(true);
-        item->setFont(font);
-        ui->tableWidget->setItem(row, 0, item);
-        ui->tableWidget->setSpan(row, 0, 1, ui->tableWidget->columnCount());
-        row++;
-        for (int i = 0; i < records.count(); ++i) {
-            const ApplicationRecord& entity = records.at(i);
-            if (entity.path.isEmpty())
-                continue;
+    populateTable(installedCount, true);
+    populateTable(newCount, false);
 
-            item = new QTableWidgetItem(entity.name);
-            ui->tableWidget->setItem(row, 0, item);
-            item = new QTableWidgetItem(entity.installedVersion.toString());
-            item->setTextAlignment(Qt::AlignCenter);
-            if (entity.installedVersion.isNull()) {
-                item->setText(tr("unknown"));
-                QFont font = item->font();
-                font.setItalic(true);
-                item->setFont(font);
-            }
-            ui->tableWidget->setItem(row, 1, item);
-            item = new QTableWidgetItem(entity.global ? tr("Global") : tr("User"));
-            item->setTextAlignment(Qt::AlignCenter);
-            ui->tableWidget->setItem(row, 2, item);
-            item = new QTableWidgetItem(entity.proposedVersion.toString());
-            item->setTextAlignment(Qt::AlignCenter);
-            if (entity.proposedVersion.isNull()) {
-                item->setText(tr("unknown"));
-                QFont font = item->font();
-                font.setItalic(true);
-                item->setFont(font);
-            }
-            ui->tableWidget->setItem(row, 3, item);
-            QComboBox* comboBox = new QComboBox();
-            comboBox->addItem(tr("Do nothing"));
-            comboBox->addItem(tr("Update"));
-            comboBox->addItem(tr("Install for user"));
-            ui->tableWidget->setCellWidget(row, 4, comboBox);
-            row++;
-        }
-    }
-
-    if (newCount > 0) {
-        int row = ui->tableWidget->rowCount();
-        ui->tableWidget->setRowCount(row + newCount + 1);
-        QTableWidgetItem* item = new QTableWidgetItem();
-        item->setText(tr("Newly installed (%1)").arg(newCount));
-        item->setTextAlignment(Qt::AlignCenter);
-        QFont font = item->font();
-        font.setBold(true);
-        item->setFont(font);
-        ui->tableWidget->setItem(row, 0, item);
-        ui->tableWidget->setSpan(row, 0, 1, ui->tableWidget->columnCount());
-        row++;
-        for (int i = 0; i < records.count(); ++i) {
-            const ApplicationRecord& entity = records.at(i);
-            if (!entity.path.isEmpty())
-                continue;
-
-            item = new QTableWidgetItem(entity.name);
-            ui->tableWidget->setItem(row, 0, item);
-            item = new QTableWidgetItem(tr("not installed"));
-            item->setTextAlignment(Qt::AlignCenter);
-            QFont font = item->font();
-            font.setItalic(true);
-            item->setFont(font);
-            ui->tableWidget->setItem(row, 1, item);
-            ui->tableWidget->setSpan(row, 1, 1, 2);
-            item = new QTableWidgetItem(entity.global ? tr("Global") : tr("User"));
-            ui->tableWidget->setItem(row, 2, item);
-            item = new QTableWidgetItem(entity.proposedVersion.toString());
-            item->setTextAlignment(Qt::AlignCenter);
-            if (entity.proposedVersion.isNull()) {
-                item->setText(tr("unknown"));
-                QFont font = item->font();
-                font.setItalic(true);
-                item->setFont(font);
-            }
-            ui->tableWidget->setItem(row, 3, item);
-            QComboBox* comboBox = new QComboBox();
-            comboBox->addItem(tr("Do nothing"));
-            comboBox->addItem(tr("Install for everyone"));
-            comboBox->addItem(tr("Install for user"));
-            ui->tableWidget->setCellWidget(row, 4, comboBox);
-            row++;
-        }
-    }
+    ui->tableWidget->resizeRowsToContents();
+    ui->tableWidget->resizeColumnsToContents();
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
     return true;
 }
+
+bool InstallerDialog::addExistingApp(ApplicationRecord& record, const QDir& folder, bool global)
+{
+    if (!folder.exists(record.name))
+        return false;
+
+    record.path = folder.filePath(record.name + "/AppConfig.ini");
+    if (!QFile::exists(record.path)) {
+        record.path = folder.filePath(record.name + "/Settings.ini");
+        if (!QFile::exists(record.path)) {
+            record.path.clear();
+            return false;
+        }
+    }
+
+    QSettings currentManifest(record.path, QSettings::IniFormat);
+    QString version = currentManifest.value("Version").toString();
+    record.installedVersion = QVersionNumber::fromString(version);
+    record.global = global;
+    records.append(record);
+
+    return true;
+}
+
+void InstallerDialog::populateTable(int limit, bool installed)
+{
+    if (limit < 1)
+        return;
+
+#ifdef Q_OS_WIN
+    extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
+    qt_ntfs_permission_lookup++; // turn checking on
+#endif
+
+    QFileInfo globalFolderInfo(pAppLoader->PathApps);
+    bool isGlobalWritable = globalFolderInfo.isWritable();
+
+#ifdef Q_OS_WIN
+    qt_ntfs_permission_lookup--; // turn it off again
+#endif
+
+    int row = ui->tableWidget->rowCount();
+    ui->tableWidget->setRowCount(row + limit + 1);
+
+    QTableWidgetItem* itemGroup = new QTableWidgetItem();
+    if (installed) {
+        itemGroup->setText(tr("Already installed (%1)").arg(limit));
+    } else {
+        itemGroup->setText(tr("Newly installed (%1)").arg(limit));
+    }
+    itemGroup->setTextAlignment(Qt::AlignCenter);
+    QFont font = itemGroup->font();
+    font.setBold(true);
+    itemGroup->setFont(font);
+
+    ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem());
+    ui->tableWidget->setItem(row, 0, itemGroup);
+    ui->tableWidget->setSpan(row, 0, 1, ui->tableWidget->columnCount());
+    row++;
+
+    int line = 1;
+
+    for (int i = 0; i < records.count() && line <= limit; ++i) {
+        const ApplicationRecord& entity = records.at(i);
+        if ((installed && entity.path.isEmpty()) ||
+            (!installed && !entity.path.isEmpty()))
+            continue;
+
+        QTableWidgetItem* itemNumber = new QTableWidgetItem(QString::number(line));
+        itemNumber->setTextAlignment(Qt::AlignCenter);
+
+        QTableWidgetItem* itemName = new QTableWidgetItem(entity.name);
+        QTableWidgetItem* itemStorage = new QTableWidgetItem(
+                                            entity.global ? tr("Global") : tr("User"));
+        itemStorage->setTextAlignment(Qt::AlignCenter);
+        if (!installed) {
+            itemStorage->setText(tr("not installed"));
+            QFont font = itemStorage->font();
+            font.setItalic(true);
+            itemStorage->setFont(font);
+        }
+
+        QTableWidgetItem* itemIVersion = new QTableWidgetItem(entity.installedVersion.toString());
+        itemIVersion->setTextAlignment(Qt::AlignCenter);
+        if (entity.installedVersion.isNull()) {
+            itemIVersion->setText(tr("unknown"));
+            QFont font = itemIVersion->font();
+            font.setItalic(true);
+            itemIVersion->setFont(font);
+        }
+
+        QTableWidgetItem* itemPVersion = new QTableWidgetItem(entity.proposedVersion.toString());
+        itemPVersion->setTextAlignment(Qt::AlignCenter);
+        if (entity.proposedVersion.isNull()) {
+            itemPVersion->setText(tr("unknown"));
+            QFont font = itemPVersion->font();
+            font.setItalic(true);
+            itemPVersion->setFont(font);
+        }
+
+        QComboBox* comboBox = new QComboBox();
+        comboBox->addItem(tr("Do nothing"));
+        if (entity.global || entity.path.isEmpty()) {
+            comboBox->addItem(tr("Install (user)"));
+        } else {
+            comboBox->addItem(tr("Update (user)"));
+        }
+        comboBox->setCurrentIndex(1);
+
+        if (isGlobalWritable) {
+            if (entity.global && !entity.path.isEmpty()) {
+                comboBox->addItem(tr("Update (global)"));
+                comboBox->setCurrentIndex(2);
+            } else {
+                comboBox->addItem(tr("Install (global)"));
+            }
+            if (entity.path.isEmpty())
+                comboBox->setCurrentIndex(2);
+        }
+
+        if (!entity.path.isEmpty() &&
+            ((!entity.installedVersion.isNull() && entity.proposedVersion.isNull()) ||
+             (entity.installedVersion >= entity.proposedVersion))) {
+            comboBox->setCurrentIndex(0);
+        }
+
+        ui->tableWidget->setVerticalHeaderItem(row, itemNumber);
+        ui->tableWidget->setItem(row, 0, itemName);
+        ui->tableWidget->setItem(row, 1, itemStorage);
+        if (!installed) {
+            ui->tableWidget->setSpan(row, 1, 1, 2);
+        } else {
+            ui->tableWidget->setItem(row, 2, itemIVersion);
+        }
+        ui->tableWidget->setItem(row, 3, itemPVersion);
+        ui->tableWidget->setCellWidget(row, 4, comboBox);
+
+        row++;
+        line++;
+    }
+}
+
+void InstallerDialog::on_buttonBox_accepted()
+{
+
+}
+
