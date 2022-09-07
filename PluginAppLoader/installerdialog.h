@@ -51,6 +51,7 @@ private slots:
 private:
     Ui::InstallerDialog* ui;
     AppLoader* pAppLoader;
+    QString packageName;
     QList<ApplicationRecord> records;
 };
 

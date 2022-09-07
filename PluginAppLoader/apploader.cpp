@@ -217,52 +217,12 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
         AppsReload();
         return "Apps reloaded";
     } else if (command.startsWith("OpenFile", Qt::CaseInsensitive)) {
+        AppsDelete();
+
         InstallerDialog* installer = new InstallerDialog(this, MainWindow);
         if (installer->processPackage(value))
             installer->exec();
-        return "";
 
-
-        QFileInfo appsPathInfo(PathApps);
-        if (!appsPathInfo.isWritable()) {
-            QMessageBox::critical(MainWindow, tr("Error"),
-                tr("The applications folder is not available for writing.<br>"
-                   "Try restarting RoboDK with administrator privileges."),
-                QMessageBox::Close);
-            return "";
-        }
-
-
-/*
-        QDir appsFolder(PathApps);
-
-        QStringList existingPackages;
-
-        if (!existingPackages.isEmpty()) {
-            QString message = tr("The following packages already exist:<ul>");
-            for (int i = 0; i < existingPackages.size(); ++i)
-                message += QString("<li>%1</li>").arg(existingPackages[i]);
-            message += tr("</ul>Do you want to overwrite them?");
-
-
-            auto button = QMessageBox::question(MainWindow, tr("Confirm"), message,
-                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-            if (button != QMessageBox::Yes)
-                return "";
-        }
-
-        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
-            if (!unzipper.selectEntry(i))
-                break;
-
-            if (unzipper.entryIsDirectory())
-                continue;
-
-            QFileInfo fileInfo = appsFolder.absoluteFilePath(unzipper.entryName());
-            appsFolder.mkpath(fileInfo.absolutePath());
-            unzipper.entryExtract(fileInfo.absoluteFilePath());
-        }
-*/
         AppsReload();
         return "OK";
     }

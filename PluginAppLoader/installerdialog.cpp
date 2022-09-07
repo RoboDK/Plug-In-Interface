@@ -9,6 +9,7 @@
 #include <QTemporaryFile>
 #include <QSettings>
 #include <QComboBox>
+#include <QDebug>
 
 
 InstallerDialog::InstallerDialog(AppLoader* apploader, QWidget* parent) :
@@ -46,15 +47,16 @@ InstallerDialog::~InstallerDialog(){
 }
 
 bool InstallerDialog::processPackage(const QString& package){
-    Unzipper unzipper(package);
+    packageName = package;
+    Unzipper unzipper(packageName);
     if (!unzipper.open()){
         QMessageBox::critical(parentWidget(), tr("Error"),
-            tr("Unable to open package file:<br><b>%1</b>").arg(package),
+            tr("Unable to open package file:<br><b>%1</b>").arg(packageName),
             QMessageBox::Close);
         return false;
     }
 
-    QFileInfo fileInfo(package);
+    QFileInfo fileInfo(packageName);
     ui->labelPackage->setText(tr("Package Name: <b>%1</b>").arg(fileInfo.fileName()));
 
     QDir globalFolder(pAppLoader->PathApps);
@@ -125,8 +127,7 @@ bool InstallerDialog::processPackage(const QString& package){
     return true;
 }
 
-bool InstallerDialog::addExistingApp(ApplicationRecord& record, const QDir& folder, bool global)
-{
+bool InstallerDialog::addExistingApp(ApplicationRecord& record, const QDir& folder, bool global){
     if (!folder.exists(record.name))
         return false;
 
@@ -148,8 +149,7 @@ bool InstallerDialog::addExistingApp(ApplicationRecord& record, const QDir& fold
     return true;
 }
 
-void InstallerDialog::populateTable(int limit, bool installed)
-{
+void InstallerDialog::populateTable(int limit, bool installed){
     if (limit < 1)
         return;
 
@@ -225,6 +225,7 @@ void InstallerDialog::populateTable(int limit, bool installed)
         }
 
         QComboBox* comboBox = new QComboBox();
+        comboBox->setProperty("action-record", i);
         comboBox->addItem(tr("Do nothing"));
         if (entity.global || entity.path.isEmpty()) {
             comboBox->addItem(tr("Install (user)"));
@@ -266,8 +267,52 @@ void InstallerDialog::populateTable(int limit, bool installed)
     }
 }
 
-void InstallerDialog::on_buttonBox_accepted()
-{
+void InstallerDialog::on_buttonBox_accepted(){
+    Unzipper unzipper(packageName);
+    if (!unzipper.open()) {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Unable to open package file:<br><b>%1</b>").arg(packageName),
+            QMessageBox::Close);
+        reject();
+        return;
+    }
 
+    for (int row = 0; row < ui->tableWidget->rowCount(); ++row) {
+        QComboBox* comboBox = qobject_cast<QComboBox*>(ui->tableWidget->cellWidget(row, 4));
+        if (!comboBox || !comboBox->property("action-record").isValid())
+            continue;
+
+        // 0 - Do nothing
+        // 1 - Install/Update (user)
+        // 2 - Install/Update (global)
+        if (comboBox->currentIndex() < 1)
+            continue;
+
+        QDir folder;
+        if (comboBox->currentIndex() < 2) {
+            folder.setPath(pAppLoader->PathUserApps);
+        } else {
+            folder.setPath(pAppLoader->PathApps);
+        }
+
+        const ApplicationRecord& entity = records.at(comboBox->property("action-record").toInt());
+
+        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
+            if (!unzipper.selectEntry(i))
+                break;
+
+            if (unzipper.entryIsDirectory())
+                continue;
+
+            QString name = unzipper.entryName();
+            if (!name.startsWith(entity.name + "/"))
+                continue;
+
+            QFileInfo fileInfo = folder.absoluteFilePath(name);
+            folder.mkpath(fileInfo.absolutePath());
+            unzipper.entryExtract(fileInfo.absoluteFilePath());
+        }
+    }
+    accept();
 }
 
