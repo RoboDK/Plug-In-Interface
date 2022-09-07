@@ -157,6 +157,7 @@ bool InstallerDialog::processPackage(const QString& package){
             item = new QTableWidgetItem(entity.name);
             ui->tableWidget->setItem(row, 0, item);
             item = new QTableWidgetItem(entity.installedVersion.toString());
+            item->setTextAlignment(Qt::AlignCenter);
             if (entity.installedVersion.isNull()) {
                 item->setText(tr("unknown"));
                 QFont font = item->font();
@@ -165,8 +166,10 @@ bool InstallerDialog::processPackage(const QString& package){
             }
             ui->tableWidget->setItem(row, 1, item);
             item = new QTableWidgetItem(entity.global ? tr("Global") : tr("User"));
+            item->setTextAlignment(Qt::AlignCenter);
             ui->tableWidget->setItem(row, 2, item);
             item = new QTableWidgetItem(entity.proposedVersion.toString());
+            item->setTextAlignment(Qt::AlignCenter);
             if (entity.proposedVersion.isNull()) {
                 item->setText(tr("unknown"));
                 QFont font = item->font();
@@ -202,17 +205,17 @@ bool InstallerDialog::processPackage(const QString& package){
 
             item = new QTableWidgetItem(entity.name);
             ui->tableWidget->setItem(row, 0, item);
-            item = new QTableWidgetItem(entity.installedVersion.toString());
-            if (entity.installedVersion.isNull()) {
-                item->setText(tr("unknown"));
-                QFont font = item->font();
-                font.setItalic(true);
-                item->setFont(font);
-            }
+            item = new QTableWidgetItem(tr("not installed"));
+            item->setTextAlignment(Qt::AlignCenter);
+            QFont font = item->font();
+            font.setItalic(true);
+            item->setFont(font);
             ui->tableWidget->setItem(row, 1, item);
+            ui->tableWidget->setSpan(row, 1, 1, 2);
             item = new QTableWidgetItem(entity.global ? tr("Global") : tr("User"));
             ui->tableWidget->setItem(row, 2, item);
             item = new QTableWidgetItem(entity.proposedVersion.toString());
+            item->setTextAlignment(Qt::AlignCenter);
             if (entity.proposedVersion.isNull()) {
                 item->setText(tr("unknown"));
                 QFont font = item->font();
