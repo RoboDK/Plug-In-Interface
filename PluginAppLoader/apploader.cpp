@@ -4,6 +4,7 @@
 #include "robodktools.h"
 #include "irobodk.h"
 #include "iitem.h"
+#include "installerdialog.h"
 #include "unzipper.h"
 
 #include <QMainWindow>
@@ -216,6 +217,12 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
         AppsReload();
         return "Apps reloaded";
     } else if (command.startsWith("OpenFile", Qt::CaseInsensitive)) {
+        InstallerDialog* installer = new InstallerDialog(this, MainWindow);
+        if (installer->processPackage(value))
+            installer->exec();
+        return "";
+
+
         QFileInfo appsPathInfo(PathApps);
         if (!appsPathInfo.isWritable()) {
             QMessageBox::critical(MainWindow, tr("Error"),
@@ -225,31 +232,11 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
             return "";
         }
 
-        Unzipper unzipper(value);
-        if (!unzipper.open()) {
-            QMessageBox::critical(MainWindow, tr("Error"),
-                tr("Unable to open package file:<br><b>%1</b>").arg(value),
-                QMessageBox::Close);
-            return "";
-        }
 
+/*
         QDir appsFolder(PathApps);
 
         QStringList existingPackages;
-
-        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
-            if (!unzipper.selectEntry(i))
-                break;
-
-            QString name = unzipper.entryName();
-
-            int slash = name.indexOf('/');
-            if (slash > -1)
-                name.truncate(slash);
-
-            if (!name.isEmpty() && !existingPackages.contains(name) && appsFolder.exists(name))
-                existingPackages << name;
-        }
 
         if (!existingPackages.isEmpty()) {
             QString message = tr("The following packages already exist:<ul>");
@@ -275,7 +262,7 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
             appsFolder.mkpath(fileInfo.absolutePath());
             unzipper.entryExtract(fileInfo.absoluteFilePath());
         }
-
+*/
         AppsReload();
         return "OK";
     }

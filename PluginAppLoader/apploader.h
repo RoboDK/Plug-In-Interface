@@ -120,6 +120,7 @@ public:
 
     //----------------------------------------------------------------------------------
     friend class DialogAppList;
+    friend class InstallerDialog;
 
 public:
     /// Reload all apps

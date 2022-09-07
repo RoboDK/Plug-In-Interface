@@ -28,7 +28,7 @@ DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
     UpdateForm();
 }
 
-DialogAppList::~DialogAppList() {
+DialogAppList::~DialogAppList(){
     delete ui;
 }
 
