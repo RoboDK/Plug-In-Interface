@@ -1,11 +1,9 @@
 #include "apploader.h"
 #include "dialogapplist.h"
 
-#include "robodktools.h"
 #include "irobodk.h"
 #include "iitem.h"
 #include "installerdialog.h"
-#include "unzipper.h"
 
 #include <QMainWindow>
 #include <QToolBar>
@@ -236,6 +234,60 @@ void AppLoader::PluginEvent(TypeEvent event_type){
         showErrors = false;
         emit stop_process();
     }
+}
+
+void AppLoader::EnableApp(const QString& path, bool enable)
+{
+    qDebug() << "AppLoader::EnableApp(" << path << ", " << enable << ")";
+
+    Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#ifdef Q_OS_WIN
+    caseSensitivity = Qt::CaseInsensitive;
+#endif
+
+    QString fullPath = path;
+    if (!fullPath.endsWith(".ini", caseSensitivity)) {
+        fullPath = path + "/AppConfig.ini";
+        if (!QFile::exists(fullPath)) {
+            fullPath = path + "/Settings.ini";
+            if (!QFile::exists(fullPath))
+                return;
+        }
+    }
+
+    QString applicationName = QCoreApplication::applicationName();
+    if (applicationName.isEmpty())
+        applicationName = "RoboDK";
+
+    QString pluginName = PluginName().remove(' ');
+
+    QSettings pluginSettings(QSettings::IniFormat, QSettings::UserScope,
+                             applicationName, pluginName);
+
+    QStringList enabledApps;
+    pluginSettings.beginGroup("Enabled");
+    int count = pluginSettings.value("count", 0).toInt();
+    enabledApps.reserve(count);
+    for (int eindex = 0; eindex < count; ++eindex)
+        enabledApps << pluginSettings.value(QString::number(eindex)).toString();
+    pluginSettings.endGroup();
+
+    if (enabledApps.contains(fullPath, caseSensitivity) == enable)
+        return;
+
+    if (enable){
+        enabledApps.append(fullPath);
+    } else {
+        enabledApps.removeAll(fullPath);
+    }
+
+    pluginSettings.beginGroup("Enabled");
+    pluginSettings.remove("");
+    pluginSettings.setValue("count", enabledApps.count());
+    for (int eindex = 0; eindex < enabledApps.count(); ++eindex)
+        pluginSettings.setValue(QString::number(eindex), enabledApps[eindex]);
+    pluginSettings.endGroup();
+    pluginSettings.sync();
 }
 
 //----------------------------------------------------------------------------------

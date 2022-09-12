@@ -141,45 +141,7 @@ void DialogAppList::onButtonActionClicked()
     if (pathIni.isEmpty())
         return;
 
-    QString applicationName = QCoreApplication::applicationName();
-    if (applicationName.isEmpty())
-        applicationName = "RoboDK";
-
-    QString pluginName = pAppLoader->PluginName().remove(' ');
-
-    QSettings pluginSettings(QSettings::IniFormat, QSettings::UserScope,
-                             applicationName, pluginName);
-
-    QStringList enabledApps;
-    pluginSettings.beginGroup("Enabled");
-    int count = pluginSettings.value("count", 0).toInt();
-    enabledApps.reserve(count);
-    for (int eindex = 0; eindex < count; ++eindex)
-        enabledApps << pluginSettings.value(QString::number(eindex)).toString();
-    pluginSettings.endGroup();
-
-#ifdef Q_OS_WIN
-    if (enabledApps.contains(pathIni, Qt::CaseInsensitive) == enable)
-        return;
-#else
-    if (enabledApps.contains(pathIni) == enable)
-        return;
-#endif
-
-    if (enable){
-        enabledApps.append(pathIni);
-    } else {
-        enabledApps.removeAll(pathIni);
-    }
-
-    pluginSettings.beginGroup("Enabled");
-    pluginSettings.remove("");
-    pluginSettings.setValue("count", enabledApps.count());
-    for (int eindex = 0; eindex < enabledApps.count(); ++eindex)
-        pluginSettings.setValue(QString::number(eindex), enabledApps[eindex]);
-    pluginSettings.endGroup();
-    pluginSettings.sync();
-
+    pAppLoader->EnableApp(pathIni, enable);
     pAppLoader->AppsReload();
     UpdateForm();
 }

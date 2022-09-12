@@ -123,6 +123,9 @@ public:
     friend class InstallerDialog;
 
 public:
+    /// Enable/Disable an application
+    void EnableApp(const QString& path, bool enable);
+
     /// Reload all apps
     void AppsReload();
 

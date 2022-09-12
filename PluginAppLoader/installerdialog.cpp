@@ -312,6 +312,9 @@ void InstallerDialog::on_buttonBox_accepted(){
             folder.mkpath(fileInfo.absolutePath());
             unzipper.entryExtract(fileInfo.absoluteFilePath());
         }
+
+        if (entity.path.isEmpty())
+            pAppLoader->EnableApp(folder.absoluteFilePath(entity.name), true);
     }
     accept();
 }
