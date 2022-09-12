@@ -105,14 +105,17 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
     QMenu *menuTools = mw->findChild<QMenu *>("menu-Tools");
     QAction *actionPlugins = mw->findChild<QAction *>("action-Plugins");
 
-    if (actionPlugins != nullptr){//menuTools != nullptr &&
+    if (menuTools != nullptr && actionPlugins != nullptr){
         qDebug() << "Inserting App List menu action";
         int id = menuTools->actions().indexOf(actionPlugins);
-        if (id >= 0 && (id+1) < menuTools->actions().length()){ // insert after action-Plugins
-            menuTools->insertAction(menuTools->actions()[id+1], action_Apps);
-        }
+        QAction* referenceAction = nullptr;
+        if (id >= 0 && (id + 1) < menuTools->actions().length())
+            referenceAction = menuTools->actions().at(id + 1);
+
+        // insert after action-Plugins
+        menuTools->insertAction(referenceAction, action_Apps);
     } else {
-        qDebug() << "Warning! Plugins action not found: App List action not added to the menu";
+        qDebug() << "Warning! Tools menu or Plugins action not found: App List action not added to the menu";
     }
 
     // return string is reserverd for future compatibility
@@ -147,6 +150,8 @@ void AppLoader::PluginUnload(){
 }
 
 void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
+    Q_UNUSED(mw)
+
     // this function may be called more than once, RoboDK may delete all the toolbars when it is reset or the window state changes
     IconSize = icon_size;
 
@@ -325,9 +330,9 @@ void AppLoader::AppsDelete(){
     // Remove App paths from RoboDK's PYTHONPATH
     if (!PypathAppsDirs.empty()){
 #ifdef Q_OS_WIN
-        QString path_sep(";");
+        QChar path_sep(';');
 #else
-        QString path_sep(":");
+        QChar path_sep(':');
 #endif
 
         QStringList pypathList = RDK->getParam("PYTHONPATH").split(path_sep);
@@ -338,14 +343,7 @@ void AppLoader::AppsDelete(){
             pypathList.removeAll(i.next());
         }
 
-        QString pypath = "";
-        for (const QString& path : pypathList){
-            if (pypath != ""){
-                pypath += path_sep;
-            }
-            pypath += path;
-        }
-        RDK->Command("PYTHONPATH", pypath);
+        RDK->Command("PYTHONPATH", pypathList.join(path_sep));
 
         PypathAppsDirs.clear();
     }
@@ -955,7 +953,7 @@ void AppLoader::onRunScript(){
 
                 QActionGroup *grp = action->actionGroup();
                 if (grp != nullptr && grp->checkedAction() == action){
-                    grp->triggered(action); // important to reset the group lastaction static variable
+                    emit grp->triggered(action); // important to reset the group lastaction static variable
                 } else {
                     action->blockSignals(true); // the process stopped naturally: do not trigger a process
                     action->setChecked(false);
@@ -972,12 +970,12 @@ void AppLoader::onRunScript(){
                 if (checked){
                     // this means we unchecked and checked again (another process is starting). So delete the previous process
                     qDebug() << "Action selected but process didn't stop. Sending kill signal";
-                    emit proc->kill();
+                    proc->kill();
                     //QObject::disconnect(proc);
                 } else {
                     QObject::disconnect(proc, SIGNAL(finished(int)), nullptr, nullptr);   // make sure we don't notify about the process crash or finish due to this provoked stop
                     qDebug() << "Sending terminate signal";
-                    emit proc->terminate();                                           // send the terminate signal
+                    proc->terminate();                                           // send the terminate signal
                     connect(proc, SIGNAL(finished(int)), proc, SLOT(deleteLater()));  // make sure we delete the process object when it is done
                     if (!this->Process_SkipKill_List.contains(proc)){
                         QTimer::singleShot(time_to_stop_ms, proc, SLOT(kill()));          // schedule the stop in 2 seconds if the application does not stop
