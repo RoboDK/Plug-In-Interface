@@ -243,8 +243,6 @@ void AppLoader::PluginEvent(TypeEvent event_type){
 
 void AppLoader::EnableApp(const QString& path, bool enable)
 {
-    qDebug() << "AppLoader::EnableApp(" << path << ", " << enable << ")";
-
     Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
 #ifdef Q_OS_WIN
     caseSensitivity = Qt::CaseInsensitive;
