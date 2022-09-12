@@ -10,7 +10,7 @@ from robodk.robodialogs import *
 from robodk.robofileio import *
 
 # List of files from the source app to NEVER copy and ALWAYS ignore. Use glob patterns.
-COPY_IGNORE = ['.git', '.gitignore', 'env', '__pycache__', '*.pyc', '*.bat']
+COPY_IGNORE = ['.git', '.gitignore', 'env', '__pycache__', '*.pyc', '*.bat', '*.code-workspace']
 
 # Prevent compiling the following .py files (Important: name in filename will be used as a check)
 SKIP_COMPILE = ['_config']
@@ -38,18 +38,18 @@ LIBRARY_LOADER = """# Load Python library from your App folder and run the custo
 import sys
 import os
 
-# Detect Python version and post processor
+# Detect Python version and App
 print("Using Python version: " + str(sys.version_info))
 path_app = os.path.dirname(__file__).replace(os.sep,"/")
 print("Running RoboDK App compiled action " + path_app)
 
-# Check if the post is compatible with the Python version
+# Check if the App is compatible with the Python version
 version_str = str(sys.version_info[0]) + str(sys.version_info[1])
 path_library = path_app + '/v' + version_str
 if not os.path.isdir(path_library):
-    raise Exception("Post Processor not found. Make sure you are using a supported Python version: " + path_library)
+    raise Exception("RoboDK App not found. Make sure you are using a supported Python version: " + path_library)
 
-# Load the post processor
+# Load the App
 exec("from v" + version_str + ".%s import *")
 
 if __name__== "__main__":
