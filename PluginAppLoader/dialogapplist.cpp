@@ -36,7 +36,7 @@ DialogAppList::~DialogAppList(){
 void DialogAppList::UpdateForm(){
     static QIcon iconEnabled(":/img/dot_green.png"); // this is a RoboDK resource
     static QIcon iconDisabled(":/img/dot_red.png"); // this is a RoboDK resource
-    static QIcon iconFolder(":/img/folder.png"); // this is a RoboDK resource
+    static QIcon iconFolder(":/img/newfile.png"); // this is a RoboDK resource
 
     QStringList header;
     header << tr("Application");
