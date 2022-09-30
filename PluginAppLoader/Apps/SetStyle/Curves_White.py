@@ -11,13 +11,12 @@ RDK = Robolink()
 selected = RDK.ItemUserPick('Select an object to change the appearance', ITEM_TYPE_OBJECT)
 
 # Check if the user cancelled object selection
-if not selected.Valid():    
+if not selected.Valid():
     exit()
 
 # Example to change the curve colors
 # Set to Orange color (255, 255, 255)
-selected.setColorCurve([1,1,1,1])
+selected.setColorCurve([1, 1, 1, 1])
 
 # Change the size of displayed curves:
-selected.setParam('Display','LINEW=3')
-
+selected.setParam('Display', 'LINEW=3')

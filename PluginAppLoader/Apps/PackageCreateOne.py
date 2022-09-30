@@ -15,12 +15,8 @@ if not folder:
 # Get the app name
 app_name = os.path.basename(os.path.normpath(folder))
 
-
 print("Creating package " + app_name)
 print(folder)
 os.system(sys.executable + ' "%s/PackageCreate.py" "%s"' % (ROOT_PATH, folder))
 print("DONE!")
 quit(0)
-  
-  
-

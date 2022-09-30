@@ -7,5 +7,5 @@ from robodk.robolink import Robolink  # RoboDK API
 import ObjectDeleterTools as odt
 
 RDK = Robolink()
-script = RDK.AddFile(odt.LOCAL_PATH + '\ObjectDeleter.py')
+script = RDK.AddFile(odt.LOCAL_PATH + '\ObjectDeleterOnce.py')
 script.setName('Object Deleter')

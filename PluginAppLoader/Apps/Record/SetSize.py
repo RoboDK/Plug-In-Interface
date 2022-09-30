@@ -1,6 +1,6 @@
 # This script will promt the user to enter the size of the screen and update the main window of RoboDK accordingly
 
-from robodk.robolink import *   # RoboDK API
+from robodk.robolink import *  # RoboDK API
 from robodk.robodialogs import mbox
 
 
