@@ -35,10 +35,10 @@ TARGET          = PluginAttachView
 
 #-----------------------------------------------------
 # Define the location to place the plugin library (release and/or debug binaries)
-#exists( "$$PWD/../../destdir_rdk_plugins.pri" ) {
-#include("$$PWD/../../destdir_rdk_plugins.pri")
-#DESTDIR = $$DESTDIR_RDK_PLUGINS
-#} else {
+exists( "$$PWD/../../destdir_rdk_plugins.pri" ) {
+include("$$PWD/../../destdir_rdk_plugins.pri")
+DESTDIR = $$DESTDIR_RDK_PLUGINS
+} else {
 CONFIG(release, debug|release) {
 
     message("Using release binaries.")
@@ -75,7 +75,7 @@ CONFIG(release, debug|release) {
     }
 
 }
-#}
+}
 
 
 #--------------------------
