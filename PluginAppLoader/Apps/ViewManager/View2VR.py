@@ -8,7 +8,7 @@ RDK = Robolink()
 vp = RDK.ViewPose()
 
 result = RDK.Command("VR")
-strpose = str(Pose_2_TxyzRxyz(transl(0,0,+2000)*vp))[1:-1]
+strpose = str(Pose_2_TxyzRxyz(transl(0, 0, +2000) * vp))[1:-1]
 result = RDK.Command("ViewPoseVR", strpose)
 print(strpose)
 

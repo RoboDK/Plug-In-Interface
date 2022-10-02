@@ -8,17 +8,17 @@
 #
 
 from _config import *
-from robodk.robolink import *    # RoboDK API
-from robodk.robomath import *    # Robot toolbox
+from robodk.robolink import *  # RoboDK API
+from robodk.robomath import *  # Robot toolbox
 
 
 # Define the ranges to test
 def MainAction():
     # Start the RoboDK API
     RDK = Robolink()
-        
+
     # Load this app settings
-    S = Settings()    
+    S = Settings()
     S.Load(RDK)
 
     # Calculate ranges based on input
@@ -30,7 +30,7 @@ def MainAction():
     Range_RZ = eval(S.Range_RZ)
 
     # Reachable display timeouts in milliseconds
-    timeout_reachable = 60*60*1000
+    timeout_reachable = 60 * 60 * 1000
 
     # Non reachable display timeout in milliseconds
     timeout_unreachable = S.Unreachable_Timeout * 1000
@@ -56,8 +56,8 @@ def MainAction():
                 for rx in Range_RX:
                     for ry in Range_RY:
                         for rz in Range_RZ:
-                            print("Testing translation/rotation: " + str([tx,ty,tz,rx,ry,rz]))
-                            pose_add = transl(tx,ty,tz) * rotx(rx*pi/180) * roty(ry*pi/180) * rotz(rz*pi/180)
+                            print("Testing translation/rotation: " + str([tx, ty, tz, rx, ry, rz]))
+                            pose_add = transl(tx, ty, tz) * rotx(rx * pi / 180) * roty(ry * pi / 180) * rotz(rz * pi / 180)
                             pose_test = robot_pose_ref * pose_add
                             jnts_sol = robot.SolveIK(pose_test, None, robot_tool, robot_base)
                             #print(jnts_sol.list())
@@ -70,7 +70,7 @@ def MainAction():
                                 reachable_poses.append(pose_test)
 
     # Display settings
-    Display_Default = 1 # Display "ghost" tools in RoboDK
+    Display_Default = 1  # Display "ghost" tools in RoboDK
     Display_Normal = 2
     Display_Green = 3
     Display_Red = 4
@@ -85,28 +85,28 @@ def MainAction():
     #Display_Options += Display_Invisible # Show invisible tools
     #Display_Options += Display_NotActive # Show non active tools
     if S.ShowRobotPoses:
-        Display_Options += Display_RobotPoses # Show robot joints if reachable
+        Display_Options += Display_RobotPoses  # Show robot joints if reachable
     #Display_Options += Display_RobotPosesRotZ # Show robot joints if reachable (tests rotating around the Z axis)
     #Display_Options += Display_Reset # Reset flag (clears the trace)
 
-
     # Force reset
-    robot.ShowSequence([]) 
-    
+    robot.ShowSequence([])
+
     # Show reachable poses:
-    robot.ShowSequence(reachable_poses,   Display_Options+Display_Default, timeout_reachable)
-    
+    robot.ShowSequence(reachable_poses, Display_Options + Display_Default, timeout_reachable)
+
     # Show unreachable poses:
-    robot.ShowSequence(unreachable_poses, Display_Options+Display_Red,     timeout_unreachable)
-    
+    robot.ShowSequence(unreachable_poses, Display_Options + Display_Red, timeout_unreachable)
+
     # Example that shows how to wait for the Terminate signal (SIGINT sent by RoboDK uncheck or Ctrl+C)
     run = RunApplication()
-    while run.run:
+    while run.Run():
         import time
         time.sleep(0.2)
 
-    robot.ShowSequence([]) # Force reset
-        
+    robot.ShowSequence([])  # Force reset
+
+
 def MainActionOff():
     """Turn off the display of all sequence previews"""
     # Get the list of all robots:
@@ -114,22 +114,22 @@ def MainActionOff():
     robot_list = RDK.ItemList(ITEM_TYPE_ROBOT)
     for robot in robot_list:
         # Force reset preview
-        robot.ShowSequence([]) 
-    
+        robot.ShowSequence([])
+
+
 def runmain():
     # For checkable actions: this will tell RoboDK to never force stop (kill) this app
     #SkipKill()
-    
+
     # Verify if this is an action that was just unchecked
     if Unchecked():
         MainActionOff()
-    
-    else:   
+
+    else:
         # Checked (or checkable status not applicable)
         MainAction()
-    
+
+
 # Important: leave the main function as runmain if you want to compile this app
 if __name__ == "__main__":
     runmain()
-        
-

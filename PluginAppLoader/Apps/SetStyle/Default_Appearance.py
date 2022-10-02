@@ -11,10 +11,9 @@ RDK = Robolink()
 selected = RDK.ItemUserPick('Select an object', ITEM_TYPE_OBJECT)
 
 # Check if the user cancelled object selection
-if not selected.Valid():    
+if not selected.Valid():
     exit()
 
 # Reset apprearance (default point color)
 # This applies to points only
 selected.setParam('Display', '')
-

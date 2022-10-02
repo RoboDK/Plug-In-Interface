@@ -11,9 +11,9 @@ RDK = Robolink()
 selected = RDK.ItemUserPick('Select an object to change the appearance', ITEM_TYPE_OBJECT)
 
 # Check if the user cancelled object selection
-if not selected.Valid():    
+if not selected.Valid():
     exit()
 
-# Display each point as a cube of a given size in mm. 
+# Display each point as a cube of a given size in mm.
 # Cube size along (x,y,z)
-selected.setParam('Display','PARTICLE=CUBE(2,2,2) COLOR=#FF4444FF')
+selected.setParam('Display', 'PARTICLE=CUBE(2,2,2) COLOR=#FF4444FF')

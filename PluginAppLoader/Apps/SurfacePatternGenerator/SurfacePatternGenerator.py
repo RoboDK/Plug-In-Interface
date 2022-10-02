@@ -11,9 +11,6 @@ from _spgtools import *
 # Optionally provide a part name to auto select it without asking the user
 PART_NAME = None  # 'Paint Part'
 
-# Set this to False to force tkinter
-roboapps.ENABLE_QT = True
-
 
 def runmain():
 
@@ -133,6 +130,11 @@ def runmain():
 
     #---------------------------------------------
     # First: Retrieve the part item
+    if not RDK.ItemList(robolink.ITEM_TYPE_OBJECT, True):
+        RDK.ShowMessage("A least one object is required for projection. Please add an Object.")
+        quit()
+
+    PART = None
     if PART_NAME is None:
         RDK.setSelection([])
         PART = RDK.ItemUserPick("Select a part", robolink.ITEM_TYPE_OBJECT)
@@ -141,9 +143,8 @@ def runmain():
             quit()
     else:
         PART = RDK.Item(PART_NAME, robolink.ITEM_TYPE_OBJECT)
-
-    if not PART.Valid():
-        raise Exception("The selected part is not valid or not available")
+        if not PART.Valid():
+            raise Exception("The selected part is not valid or not available")
 
     #---------------------------------------------
     # List all the reference frames that we want to use to create

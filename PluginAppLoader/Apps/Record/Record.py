@@ -41,7 +41,7 @@ def RecordProgram():
     #SNAPSHOT_STYLE = "SnapshotWhiteNoText"
     #SNAPSHOT_STYLE = "SnapshotNoTextNoFrames"
 
-    PREFER_SOCKET = True # If available, prefer socket (usually faster) over temporary file to retrieve the image
+    PREFER_SOCKET = True  # If available, prefer socket (usually faster) over temporary file to retrieve the image
 
     #-------------------------------------------------------------------
     # Use a temporary folder
@@ -53,7 +53,7 @@ def RecordProgram():
 
         video = None
         frame = None
-        use_socket = PREFER_SOCKET  
+        use_socket = PREFER_SOCKET
         render_time_last = 0
         time_per_frame = 1 / FRAMES_PER_SECOND
 
@@ -97,7 +97,7 @@ def RecordProgram():
             # Write the frame to the video file
             if video is None:
                 # Requires at least one frame to extract the frame size.
-                height, width = frame.shape[:2] 
+                height, width = frame.shape[:2]
                 video = cv2.VideoWriter(file_video_temp, FOURCC, FRAMES_PER_SECOND, (width, height))
             video.write(frame)
 

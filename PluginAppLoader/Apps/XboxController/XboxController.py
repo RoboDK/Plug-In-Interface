@@ -15,7 +15,7 @@
 from robodk.robolink import *  # API to communicate with RoboDK
 from robodk.robomath import *
 from robodk.robodialogs import *
-from _tools import *  # "Apps" tools for RoboDK. Can be reused with other apps.
+from robodk.roboapps import *
 
 import_install('inputs')
 from inputs import get_gamepad

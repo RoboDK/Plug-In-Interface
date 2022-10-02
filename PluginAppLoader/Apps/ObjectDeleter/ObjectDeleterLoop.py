@@ -5,10 +5,9 @@
 # Note: It is not required to keep a copy of this file, your python script is saved with the station
 from robodk.robolink import Robolink  # RoboDK API
 from robodk.robomath import pause
-import ObjectDeleterTools as odt
+from ObjectDeleter import ObjectDeleterTools as odt
 
 RDK = Robolink()
-
 while True:
     odt.loadParameters(RDK)
     objects = odt.objectsInZone(RDK)

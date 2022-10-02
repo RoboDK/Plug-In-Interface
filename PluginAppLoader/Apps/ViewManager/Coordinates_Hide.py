@@ -4,4 +4,4 @@ from robodk.robolink import *
 #RDK = Robolink(args=["-SKIPINI", "-TREE_STATE=0"])
 RDK = Robolink()
 
-RDK.Command("ShowCoords","0") # Detached and hidden
+RDK.Command("ShowCoords", "0")  # Detached and hidden
