@@ -136,7 +136,7 @@ void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 
 bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
     qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
-
+    bool success = false;
     for (int i=0; i<ListActions.length(); i++){
         if (ListActions[i]->AppMenu != nullptr && !ListActions[i]->AppMenu->Active){
             continue;
@@ -148,6 +148,7 @@ bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
             for (const int& type_show : types_show){
                 if ((item->Type() == type_show) || (type_show == -1)){
                     menu->addAction(ListActions[i]->Action); // add action at the end
+                    success = true;
                     break;
                 }
             }
@@ -160,12 +161,13 @@ bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
             for (const int& type_trigger : types_trigger){
                 if ((item->Type() == type_trigger) || (type_trigger == -1)){
                     ListActions[i]->Action->trigger();
+                    success = true;
                     break;
                 }
             }
         }
     }
-    return false;
+    return success;
 }
 
 bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeClick click_type){
