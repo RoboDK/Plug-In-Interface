@@ -23,6 +23,7 @@
 #include <QProcess>
 #include <QTimer>
 #include <QSysInfo>
+#include <QBuffer>
 
 // Function to check and sort priority of apps
 struct CheckPriority {
@@ -254,6 +255,26 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
 
         AppsReload();
         return "OK";
+    } else if (command.startsWith("StyleSheet", Qt::CaseInsensitive)) {
+        // RoboDK current Qt stylesheet
+        return qApp->styleSheet();
+    } else if (command.startsWith("IconGet", Qt::CaseInsensitive)) {
+        // RoboDK built-in icons
+        QString file = ":/img/" + value + ".svg";
+        if (!QFile::exists(file)) {
+            file = ":/img/" + value + ".png";
+        }
+        if (QFile::exists(file)) {
+            qDebug() << "IconGet: loading " << file;
+            QIcon icn = QIcon(file);
+            QByteArray bytes;
+            QPixmap pxmap(icn.pixmap(icn.actualSize(QSize(256, 256))));
+            QBuffer buffer(&bytes);
+            buffer.open(QIODevice::WriteOnly);
+            pxmap.save(&buffer, "png");
+            return bytes.toHex();
+        }
+        qDebug() << "IconGet: unable to retrieve " << value;
     }
     return "";
 }
