@@ -63,24 +63,29 @@ public:
 /// Hold the information related to an App (menu) for sorting purposes
 class tAppMenu {
 public:
-    tAppMenu(const QString &name, const QString &parentMenu, double priority,  bool visible, bool active, const QString &apppath, const QString &inipath):
+    tAppMenu(const QString &name, const QString &parentMenu, double priority,
+             bool visible, bool active, bool global, const QString& version,
+             const QString &apppath, const QString &inipath):
+        Active(active),
+        Visible(visible),
+        Global(global),
         Name(name),
         ParentMenu(parentMenu),
-        Priority(priority),
-        Visible(visible),
-        Active(active),
         NamePath(apppath),
         IniPath(inipath),
+        Version(version),
+        Priority(priority),
         Toolbar(nullptr)
     {
-
     }
     bool Active;
     bool Visible;
+    bool Global;
     QString Name;
     QString ParentMenu;
     QString NamePath;
     QString IniPath;
+    QString Version;
     double Priority;
     QList<QAction*> Actions;
     tAppToolbar *Toolbar;
@@ -115,8 +120,12 @@ public:
 
     //----------------------------------------------------------------------------------
     friend class DialogAppList;
+    friend class InstallerDialog;
 
 public:
+    /// Enable/Disable an application
+    void EnableApp(const QString& path, bool enable);
+
     /// Reload all apps
     void AppsReload();
 
@@ -184,6 +193,9 @@ private:
 
     /// Path to Apps folder (usually C:/RoboDK/Apps/)
     QString PathApps;
+
+    /// Path to Local User Apps folder (usually C:/Users/<username>/AppData/Roaming/RoboDK/Apps/)
+    QString PathUserApps;
 
     /// List of directories containing enabled Apps (including AppLinks) to add to PYTHONPATH. i.e. C:/RoboDK/Apps/MyApp -> C:/RoboDK/Apps, C:/RoboDK/Apps/MyApp/AppLink.ini -> C:/DirOfMyApp
     QStringList PypathAppsDirs;

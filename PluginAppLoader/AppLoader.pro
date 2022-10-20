@@ -84,6 +84,8 @@ CONFIG(release, debug|release) {
 HEADERS += \
     apploader.h \
     dialogapplist.h \
+    installerdialog.h \
+    tableheader.h \
     unzipper.h \
     zip/miniz.h \
     zip/zip.h
@@ -91,11 +93,13 @@ HEADERS += \
 SOURCES += \
     apploader.cpp \
     dialogapplist.cpp \
+    installerdialog.cpp \
     unzipper.cpp \
     zip/zip.c
 
 FORMS += \
-    dialogapplist.ui
+    dialogapplist.ui \
+    installerdialog.ui
 
 
 

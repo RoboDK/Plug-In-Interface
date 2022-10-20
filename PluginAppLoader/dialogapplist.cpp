@@ -1,8 +1,11 @@
 #include "dialogapplist.h"
 #include "ui_dialogapplist.h"
 #include "apploader.h"
+#include "tableheader.h"
 
 #include <QSettings>
+#include <QFileInfo>
+#include <QDesktopServices>
 
 
 DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
@@ -13,90 +16,103 @@ DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
     ui->setupUi(this);
     setModal(true);
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowFlags((windowFlags() | Qt::CustomizeWindowHint | Qt::Window));// & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint));//Qt::WindowCloseButtonHint | // | Qt::WindowStaysOnTopHint
 
-    connect( ui->tableWidget, SIGNAL( cellDoubleClicked (int, int) ),  this, SLOT( onCellDoubleClicked( int, int ) ) );
+    Qt::WindowFlags flags = windowFlags();
+    flags &= ~Qt::WindowContextHelpButtonHint;
+    flags |= Qt::CustomizeWindowHint;
+    flags |= Qt::Window;
+    setWindowFlags(flags);
+
+    ui->tableWidget->setHorizontalHeader(new TableHeader(Qt::Horizontal));
 
     UpdateForm();
 }
 
-DialogAppList::~DialogAppList() {
+DialogAppList::~DialogAppList(){
     delete ui;
 }
 
 
 void DialogAppList::UpdateForm(){
+    static QIcon iconEnabled(":/img/dot_green.png"); // this is a RoboDK resource
+    static QIcon iconDisabled(":/img/dot_red.png"); // this is a RoboDK resource
+    static QIcon iconFolder(":/img/newfile.png"); // this is a RoboDK resource
+
+    QStringList header;
+    header << tr("Application");
+    header << tr("Version");
+    header << tr("Status");
+    header << tr("Action");
+    header << tr("Storage");
+    header << tr("Folder");
+    header << QString();
+
     ui->tableWidget->clear();
-
+    ui->tableWidget->setSortingEnabled(false);
     ui->tableWidget->setRowCount(pAppLoader->ListMenus.length());
-    ui->tableWidget->setColumnCount(3);
+    ui->tableWidget->setColumnCount(header.size());
+    ui->tableWidget->setHorizontalHeaderLabels(header);
 
-    ui->tableWidget->setHorizontalHeaderLabels(QStringList() << tr("App") << tr("Enabled") << tr("Folder") );
-
-    //////////////////////////////////////
-    static QIcon icnY(":img/dot_green.png"); // this is a RoboDK resource
-    static QIcon icnN(":img/dot_red.png"); // this is a RoboDK resource
-    QTableWidgetItem *todelete;
-    for (int i=0; i<pAppLoader->ListMenus.length(); i++){
-        tAppMenu *appmenu = pAppLoader->ListMenus[i];
-        QTableWidgetItem *item = new QTableWidgetItem(appmenu->Name);
-        // item->setToolTip(appmenu->Name);
-        item->setFlags(item->flags() & (~Qt::ItemIsEditable));
-        QTableWidgetItem *item_path = new QTableWidgetItem(appmenu->NamePath);
-        // item->setToolTip(appmenu->Name);
-        item_path->setFlags(item_path->flags() & (~Qt::ItemIsEditable));
-
-        QTableWidgetItem *item_loaded = nullptr;
-        if (appmenu->Active){
-            item_loaded = new QTableWidgetItem(QIcon(icnY), tr("Yes"));
-            item_loaded->setToolTip(tr("Double click to load %1 App").arg(appmenu->Name));
-        } else {
-            item_loaded = new QTableWidgetItem(QIcon(icnN), tr("No"));
-            item_loaded->setToolTip(tr("Double click to unload %1 App").arg(appmenu->Name));
+    for (int i = 0; i < pAppLoader->ListMenus.length(); i++){
+        for (int column = 0; column < ui->tableWidget->columnCount(); ++column){
+            QTableWidgetItem* item = ui->tableWidget->takeItem(i, column);
+            if (item)
+                delete item;
         }
-        item_loaded->setFlags(item->flags() & (~Qt::ItemIsEditable));
-        todelete = ui->tableWidget->takeItem(i,0);
-        if (todelete != NULL){ delete todelete; }
-        todelete = ui->tableWidget->takeItem(i,1);
-        if (todelete != NULL){ delete todelete; }
-        todelete = ui->tableWidget->takeItem(i,2);
-        if (todelete != NULL){ delete todelete; }
 
-        ui->tableWidget->setItem(i, 0, item);
-        ui->tableWidget->setItem(i, 1, item_loaded);
-        ui->tableWidget->setItem(i, 2, item_path);
+        tAppMenu *appmenu = pAppLoader->ListMenus[i];
+        QTableWidgetItem *itemName = new QTableWidgetItem(appmenu->Name);
+
+        QTableWidgetItem *itemVersion = new QTableWidgetItem(appmenu->Version);
+        itemVersion->setTextAlignment(Qt::AlignCenter);
+
+        QTableWidgetItem *itemStatus = nullptr;
+        QPushButton* buttonAction = nullptr;
+
+        if (appmenu->Active){
+            itemStatus = new QTableWidgetItem(iconEnabled, tr("Enabled"));
+            buttonAction = new QPushButton(tr("DISABLE"));
+            buttonAction->setProperty("action-enable", false);
+        } else {
+            itemStatus = new QTableWidgetItem(iconDisabled, tr("Disabled"));
+            buttonAction = new QPushButton(tr("ENABLE"));
+            buttonAction->setProperty("action-enable", true);
+        }
+        buttonAction->setProperty("action-ini", appmenu->IniPath);
+        connect(buttonAction, &QPushButton::clicked,
+                this, &DialogAppList::onButtonActionClicked);
+
+        QTableWidgetItem* itemStorage = new QTableWidgetItem(
+            appmenu->Global ? tr("Global") : tr("User"));
+        itemStorage->setTextAlignment(Qt::AlignCenter);
+
+        QFileInfo pathInfo(appmenu->IniPath);
+
+        QTableWidgetItem *itemPath = new QTableWidgetItem(appmenu->NamePath);
+        itemPath->setToolTip(pathInfo.absolutePath());
+
+        QPushButton* buttonFolder = new QPushButton(iconFolder, QString());
+        buttonFolder->setToolTip(tr("Open application location"));
+        buttonFolder->setProperty("action-path", pathInfo.absolutePath());
+        buttonFolder->setMaximumWidth(25);
+        connect(buttonFolder, &QPushButton::clicked,
+                this, &DialogAppList::onButtonFolderClicked);
+
+        ui->tableWidget->setItem(i, 0, itemName);
+        ui->tableWidget->setItem(i, 1, itemVersion);
+        ui->tableWidget->setItem(i, 2, itemStatus);
+        ui->tableWidget->setCellWidget(i, 3, buttonAction);
+        ui->tableWidget->setItem(i, 4, itemStorage);
+        ui->tableWidget->setItem(i, 5, itemPath);
+        ui->tableWidget->setCellWidget(i, 6, buttonFolder);
     }
 
+    ui->tableWidget->setSortingEnabled(true);
+    ui->tableWidget->horizontalHeader()->setMinimumSectionSize(20);
     ui->tableWidget->resizeRowsToContents();
     ui->tableWidget->resizeColumnsToContents();
-    ui->tableWidget->resizeRowsToContents();// needs doubled! otherwise it does not work
-    ui->tableWidget->resizeColumnsToContents();
-}
-
-void DialogAppList::onCellDoubleClicked( int a, int b){
-    if (a < 0 || a >= pAppLoader->ListMenus.length()){
-        // this should never happen
-        return;
-    }
-    tAppMenu *appmenu = pAppLoader->ListMenus[a];
-    bool set_enabled = !appmenu->Active;
-    appmenu->Active = set_enabled;
-    if (appmenu->Toolbar != nullptr){
-        appmenu->Toolbar->Active = set_enabled;
-    }
-
-    //--------- set enabled or disabled in the INI file
-    // warning: this may not work depending on where we installed RoboDK
-    QSettings settings(appmenu->IniPath, QSettings::IniFormat);
-    settings.setValue("Enabled", set_enabled);
-    //------------------------------------------
-
-    // clean up apps from the User Interface and load them again
-    // pAppLoader->AppsSearch(); // this is not needed (it may not work if we don't have rights to change the INI files)
-    pAppLoader->AppsReload();
-
-    // update the list of apps
-    UpdateForm();
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
 }
 
 void DialogAppList::on_btnOk_clicked(){
@@ -112,4 +128,33 @@ void DialogAppList::on_btnReload_clicked(){
 
     // update the list of apps
     UpdateForm();
+}
+
+void DialogAppList::onButtonActionClicked()
+{
+    QObject* sender = QObject::sender();
+    if (!sender)
+        return;
+
+    bool enable = sender->property("action-enable").toBool();
+    QString pathIni = sender->property("action-ini").toString();
+    if (pathIni.isEmpty())
+        return;
+
+    pAppLoader->EnableApp(pathIni, enable);
+    pAppLoader->AppsReload();
+    UpdateForm();
+}
+
+void DialogAppList::onButtonFolderClicked()
+{
+    QObject* sender = QObject::sender();
+    if (!sender)
+        return;
+
+    QString path = sender->property("action-path").toString();
+    if (path.isEmpty())
+        return;
+
+    QDesktopServices::openUrl(QUrl("file:///" + path));
 }

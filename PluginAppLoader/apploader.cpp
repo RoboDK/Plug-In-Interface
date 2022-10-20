@@ -1,10 +1,9 @@
 #include "apploader.h"
 #include "dialogapplist.h"
 
-#include "robodktools.h"
 #include "irobodk.h"
 #include "iitem.h"
-#include "unzipper.h"
+#include "installerdialog.h"
 
 #include <QMainWindow>
 #include <QToolBar>
@@ -20,6 +19,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QProcess>
 #include <QTimer>
 #include <QSysInfo>
@@ -68,6 +68,29 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
     // We can get some settings from RoboDK
     PathApps = RDK->getParam("PATH_ROBODK") + "/Apps";
 
+    QDir userPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+
+    QString applicationName = QCoreApplication::applicationName();
+    QString organizationName = QCoreApplication::organizationName();
+
+    if (!applicationName.isEmpty() && userPath.dirName() == applicationName)
+        userPath.cdUp();
+
+    if (!organizationName.isEmpty() && userPath.dirName() == organizationName)
+        userPath.cdUp();
+
+    if (!applicationName.isEmpty()){
+        userPath.mkdir(applicationName);
+        userPath.cd(applicationName);
+    } else {
+        userPath.mkdir("RoboDK");
+        userPath.cd("RoboDK");
+    }
+    userPath.mkdir("Apps");
+    userPath.cd("Apps");
+
+    PathUserApps = userPath.absolutePath();
+
     // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
     action_Apps = new QAction(tr("Apps List"));
     action_Apps->setShortcut(QKeySequence("Shift+A"));
@@ -83,14 +106,17 @@ QString AppLoader::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *st
     QMenu *menuTools = mw->findChild<QMenu *>("menu-Tools");
     QAction *actionPlugins = mw->findChild<QAction *>("action-Plugins");
 
-    if (actionPlugins != nullptr){//menuTools != nullptr &&
+    if (menuTools != nullptr && actionPlugins != nullptr){
         qDebug() << "Inserting App List menu action";
         int id = menuTools->actions().indexOf(actionPlugins);
-        if (id >= 0 && (id+1) < menuTools->actions().length()){ // insert after action-Plugins
-            menuTools->insertAction(menuTools->actions()[id+1], action_Apps);
-        }
+        QAction* referenceAction = nullptr;
+        if (id >= 0 && (id + 1) < menuTools->actions().length())
+            referenceAction = menuTools->actions().at(id + 1);
+
+        // insert after action-Plugins
+        menuTools->insertAction(referenceAction, action_Apps);
     } else {
-        qDebug() << "Warning! Plugins action not found: App List action not added to the menu";
+        qDebug() << "Warning! Tools menu or Plugins action not found: App List action not added to the menu";
     }
 
     // return string is reserverd for future compatibility
@@ -125,6 +151,8 @@ void AppLoader::PluginUnload(){
 }
 
 void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
+    Q_UNUSED(mw)
+
     // this function may be called more than once, RoboDK may delete all the toolbars when it is reset or the window state changes
     IconSize = icon_size;
 
@@ -195,65 +223,11 @@ QString AppLoader::PluginCommand(const QString &command, const QString &value){
         AppsReload();
         return "Apps reloaded";
     } else if (command.startsWith("OpenFile", Qt::CaseInsensitive)) {
-        QFileInfo appsPathInfo(PathApps);
-        if (!appsPathInfo.isWritable()) {
-            QMessageBox::critical(MainWindow, tr("Error"),
-                tr("The applications folder is not available for writing.<br>"
-                   "Try restarting RoboDK with administrator privileges."),
-                QMessageBox::Close);
-            return "";
-        }
+        AppsDelete();
 
-        Unzipper unzipper(value);
-        if (!unzipper.open()) {
-            QMessageBox::critical(MainWindow, tr("Error"),
-                tr("Unable to open package file:<br><b>%1</b>").arg(value),
-                QMessageBox::Close);
-            return "";
-        }
-
-        QDir appsFolder(PathApps);
-
-        QStringList existingPackages;
-
-        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
-            if (!unzipper.selectEntry(i))
-                break;
-
-            QString name = unzipper.entryName();
-
-            int slash = name.indexOf('/');
-            if (slash > -1)
-                name.truncate(slash);
-
-            if (!name.isEmpty() && !existingPackages.contains(name) && appsFolder.exists(name))
-                existingPackages << name;
-        }
-
-        if (!existingPackages.isEmpty()) {
-            QString message = tr("The following packages already exist:<ul>");
-            for (int i = 0; i < existingPackages.size(); ++i)
-                message += QString("<li>%1</li>").arg(existingPackages[i]);
-            message += tr("</ul>Do you want to overwrite them?");
-
-
-            auto button = QMessageBox::question(MainWindow, tr("Confirm"), message,
-                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-            if (button != QMessageBox::Yes)
-                return "";
-        }
-
-        for (quint32 i = 0; i < unzipper.entriesCount(); ++i) {
-            if (!unzipper.selectEntry(i))
-                break;
-
-            if (unzipper.entryIsDirectory())
-                continue;
-
-            QFileInfo fileInfo = appsFolder.absoluteFilePath(unzipper.entryName());
-            appsFolder.mkpath(fileInfo.absolutePath());
-            unzipper.entryExtract(fileInfo.absoluteFilePath());
-        }
+        InstallerDialog* installer = new InstallerDialog(this, MainWindow);
+        if (installer->processPackage(value))
+            installer->exec();
 
         AppsReload();
         return "OK";
@@ -290,6 +264,58 @@ void AppLoader::PluginEvent(TypeEvent event_type){
     }
 }
 
+void AppLoader::EnableApp(const QString& path, bool enable)
+{
+    Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#ifdef Q_OS_WIN
+    caseSensitivity = Qt::CaseInsensitive;
+#endif
+
+    QString fullPath = path;
+    if (!fullPath.endsWith(".ini", caseSensitivity)) {
+        fullPath = path + "/AppConfig.ini";
+        if (!QFile::exists(fullPath)) {
+            fullPath = path + "/Settings.ini";
+            if (!QFile::exists(fullPath))
+                return;
+        }
+    }
+
+    QString applicationName = QCoreApplication::applicationName();
+    if (applicationName.isEmpty())
+        applicationName = "RoboDK";
+
+    QString pluginName = PluginName().remove(' ');
+
+    QSettings pluginSettings(QSettings::IniFormat, QSettings::UserScope,
+                             applicationName, pluginName);
+
+    QStringList enabledApps;
+    pluginSettings.beginGroup("Enabled");
+    int count = pluginSettings.value("count", 0).toInt();
+    enabledApps.reserve(count);
+    for (int eindex = 0; eindex < count; ++eindex)
+        enabledApps << pluginSettings.value(QString::number(eindex)).toString();
+    pluginSettings.endGroup();
+
+    if (enabledApps.contains(fullPath, caseSensitivity) == enable)
+        return;
+
+    if (enable){
+        enabledApps.append(fullPath);
+    } else {
+        enabledApps.removeAll(fullPath);
+    }
+
+    pluginSettings.beginGroup("Enabled");
+    pluginSettings.remove("");
+    pluginSettings.setValue("count", enabledApps.count());
+    for (int eindex = 0; eindex < enabledApps.count(); ++eindex)
+        pluginSettings.setValue(QString::number(eindex), enabledApps[eindex]);
+    pluginSettings.endGroup();
+    pluginSettings.sync();
+}
+
 //----------------------------------------------------------------------------------
 void AppLoader::AppsReload(){
     // Navigate files
@@ -324,10 +350,10 @@ void AppLoader::AppsDelete(){
 
     // Remove App paths from RoboDK's PYTHONPATH
     if (!PypathAppsDirs.empty()){
-#ifdef WIN32
-        QString path_sep(";");
+#ifdef Q_OS_WIN
+        QChar path_sep(';');
 #else
-        QString path_sep(":");
+        QChar path_sep(':');
 #endif
 
         QStringList pypathList = RDK->getParam("PYTHONPATH").split(path_sep);
@@ -338,14 +364,7 @@ void AppLoader::AppsDelete(){
             pypathList.removeAll(i.next());
         }
 
-        QString pypath = "";
-        for (const QString& path : pypathList){
-            if (pypath != ""){
-                pypath += path_sep;
-            }
-            pypath += path;
-        }
-        RDK->Command("PYTHONPATH", pypath);
+        RDK->Command("PYTHONPATH", pypathList.join(path_sep));
 
         PypathAppsDirs.clear();
     }
@@ -360,18 +379,28 @@ void AppLoader::AppsSearch(bool install_requirements){
     AppsDelete();
 
     // Get path to apps folder
-    QString dir_apps_path = PathApps;
-    QDir dir_apps(dir_apps_path);
-    QStringList AppsDirList(dir_apps.entryList(QDir::Dirs));
+    QDir globalPath(PathApps);
+    QDir userPath(PathUserApps);
+
+    QFileInfoList directories = globalPath.entryInfoList(QDir::Dirs);
+    int globalCount = directories.size();
+    directories.append(userPath.entryInfoList(QDir::Dirs));
+
     int appsenabled_count = 0;
-    foreach (QString dirApp, AppsDirList) {
+    for (int dindex = 0; dindex < directories.size(); ++dindex) {
+        const QFileInfo& directoryInfo = directories.at(dindex);
+
+        bool global = (dindex < globalCount);
+
+        QString dirApp = directoryInfo.fileName();
+
         // Ignore folders that start with an underscore
         if (dirApp.startsWith("_") || dirApp.startsWith(".")){
             continue;
         }
         qDebug() << "Loading App dir: " << dirApp;
 
-        QString dirAppComplete = dir_apps_path + "/" + dirApp;
+        QString dirAppComplete = directoryInfo.absoluteFilePath();
 
         // Retrieve and/or create the INI file related to this app
         QString fileSettings = dirAppComplete + "/AppConfig.ini";
@@ -410,53 +439,66 @@ void AppLoader::AppsSearch(bool install_requirements){
              fileSettings = dirAppComplete + "/AppConfig.ini"; // Use default INI file name
         }
 
-        // Make sure we can write to the same location if the file does not exist, otherwise, save to app data location
-        if (false && !QFile::exists(fileSettings)){
-            qDebug() << "Checking if file does not exist and is not writtable: " + fileSettings;
-            QFileInfo fileInfo(fileSettings);
-            fileInfo.dir().path();
-
-            //QFile(fileSettings).isWritable()
-            QString newFileSettings = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Apps/" + dirApp + ".ini";
-            if (!QFile::exists(newFileSettings)){
-                RDK->ShowMessage(tr("Creating settings file for your new App <strong>%1</strong>:<br>%2<br><br>Location %3 is not writable").arg(dirApp).arg(newFileSettings).arg(fileSettings));
-            }
-            fileSettings = newFileSettings;
-        }
         RDK->ShowMessage(tr("Loading App ") + dirApp + tr(". Using settings file: ") + fileSettings, false);
 
         // Load settings and save them (default settings will be set)
         QSettings settings(fileSettings, QSettings::IniFormat);
         QString menuName = settings.value("MenuName", dirApp).toString();
         QString menuParent = settings.value("MenuParent", "").toString();
+        QString version = settings.value("Version", "1.0.0").toString();
         double menuPriority = settings.value("MenuPriority", 50.0).toDouble();
         bool menuVisible = settings.value("MenuVisible", true).toBool();
-        bool appEnabled = settings.value("Enabled", true).toBool();
         int toolbarArea = settings.value("ToolbarArea", 2).toInt();
         double toolbarSize = settings.value("ToolbarSizeRatio", 1.5).toDouble();
         QStringList RunCommands = settings.value("RunCommands", QStringList()).toStringList();
 
         settings.setValue("MenuName", menuName);
         settings.setValue("MenuParent", menuParent);
+        settings.setValue("Version", version);
         settings.setValue("MenuPriority", menuPriority);
         settings.setValue("MenuVisible", menuVisible);
-        settings.setValue("Enabled", appEnabled);
+
+        // Remove obsoleted key
+        if (settings.contains("Enabled"))
+            settings.remove("Enabled");
+
         settings.setValue("ToolbarArea", toolbarArea);
         settings.setValue("ToolbarSizeRatio", toolbarSize);
         settings.setValue("RunCommands", RunCommands);
 
 
+        QString applicationName = QCoreApplication::applicationName();
+        if (applicationName.isEmpty())
+            applicationName = "RoboDK";
+
+        QString pluginName = PluginName().remove(' ');
+
+        QSettings pluginSettings(QSettings::IniFormat, QSettings::UserScope,
+                                 applicationName, pluginName);
+
+        QStringList enabledApps;
+        pluginSettings.beginGroup("Enabled");
+        int count = pluginSettings.value("count", 0).toInt();
+        enabledApps.reserve(count);
+        for (int eindex = 0; eindex < count; ++eindex)
+            enabledApps << pluginSettings.value(QString::number(eindex)).toString();
+        pluginSettings.endGroup();
+
+#ifdef Q_OS_WIN
+        bool appEnabled = enabledApps.contains(fileSettings, Qt::CaseInsensitive);
+#else
+        bool appEnabled = enabledApps.contains(fileSettings);
+#endif
+
+
         // Create a new list for menus and toolbars
-        tAppToolbar *appToolbar = new tAppToolbar(menuName, menuPriority, toolbarArea, toolbarSize, appEnabled);
-        tAppMenu *appMenu = new tAppMenu(menuName, menuParent, menuPriority, menuVisible, appEnabled, dirApp, fileSettings);
+        tAppToolbar *appToolbar = new tAppToolbar(menuName, menuPriority, toolbarArea,
+                                                  toolbarSize, appEnabled);
+        tAppMenu *appMenu = new tAppMenu(menuName, menuParent, menuPriority, menuVisible,
+                                         appEnabled, global, version, dirApp, fileSettings);
         appMenu->Toolbar = appToolbar;
         ListMenus.append(appMenu);
         ListToolbars.append(appToolbar);
-
-        // skip if we don't want this app (menu) visible. Toolbar won't be displayed either
-        //if (!appEnabled){
-        //    continue;
-        //}
 
         // Run commands specified by each app (there could be conflicts/contradictions)
         if (appEnabled){
@@ -726,7 +768,7 @@ void AppLoader::AppsSearch(bool install_requirements){
 
     // Append Apps directories to RoboDK's PYTHONPATH
     if (!PypathAppsDirs.empty()){
-#ifdef WIN32
+#ifdef Q_OS_WIN
         QString path_sep(";");
 #else
         QString path_sep(":");
@@ -932,7 +974,7 @@ void AppLoader::onRunScript(){
 
                 QActionGroup *grp = action->actionGroup();
                 if (grp != nullptr && grp->checkedAction() == action){
-                    grp->triggered(action); // important to reset the group lastaction static variable
+                    emit grp->triggered(action); // important to reset the group lastaction static variable
                 } else {
                     action->blockSignals(true); // the process stopped naturally: do not trigger a process
                     action->setChecked(false);
@@ -949,12 +991,12 @@ void AppLoader::onRunScript(){
                 if (checked){
                     // this means we unchecked and checked again (another process is starting). So delete the previous process
                     qDebug() << "Action selected but process didn't stop. Sending kill signal";
-                    emit proc->kill();
+                    proc->kill();
                     //QObject::disconnect(proc);
                 } else {
                     QObject::disconnect(proc, SIGNAL(finished(int)), nullptr, nullptr);   // make sure we don't notify about the process crash or finish due to this provoked stop
                     qDebug() << "Sending terminate signal";
-                    emit proc->terminate();                                           // send the terminate signal
+                    proc->terminate();                                           // send the terminate signal
                     connect(proc, SIGNAL(finished(int)), proc, SLOT(deleteLater()));  // make sure we delete the process object when it is done
                     if (!this->Process_SkipKill_List.contains(proc)){
                         QTimer::singleShot(time_to_stop_ms, proc, SLOT(kill()));          // schedule the stop in 2 seconds if the application does not stop
@@ -969,7 +1011,7 @@ void AppLoader::onRunScript(){
     }
 
     // Add RoboDK's environnement to the process
-#ifdef WIN32
+#ifdef Q_OS_WIN
     QString path_sep(";");
 #else
     QString path_sep(":");

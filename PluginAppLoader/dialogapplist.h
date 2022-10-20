@@ -26,14 +26,17 @@ private slots:
     /// OK button selected
     void on_btnOk_clicked();
 
-    /// App double clicked
-    void onCellDoubleClicked( int a, int b);
-
     /// Stop actions started by apps
     void on_btnStopAppActions_clicked();
 
     /// Scan for app changes and reload all
     void on_btnReload_clicked();
+
+    /// Enable/Disable application
+    void onButtonActionClicked();
+
+    /// Open application location
+    void onButtonFolderClicked();
 
 private:
     AppLoader *pAppLoader;
