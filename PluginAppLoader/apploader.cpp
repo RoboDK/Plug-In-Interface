@@ -378,6 +378,9 @@ void AppLoader::AppsSearch(bool install_requirements){
 
     AppsDelete();
 
+    QString value = RDK->Command("DeveloperMode");
+    bool isDeveloperMode = (!value.isEmpty() && value != "0");
+
     // Get path to apps folder
     QDir globalPath(PathApps);
     QDir userPath(PathUserApps);
@@ -597,6 +600,7 @@ void AppLoader::AppsSearch(bool install_requirements){
             QString displayName = settings.value(keyName + "/DisplayName", name_guess).toString();
             QString comment = settings.value(keyName + "/Description", name_guess).toString();
             bool visible = settings.value(keyName + "/Visible", true).toBool();
+            bool developerOnly = settings.value(keyName + "/DeveloperOnly", false).toBool();
             QString shortcutstr = settings.value(keyName + "/Shortcut", "").toString();
             bool checkable = settings.value(keyName + "/Checkable", false).toBool();
             int checkable_group = settings.value(keyName + "/CheckableGroup", -1).toInt();
@@ -619,6 +623,7 @@ void AppLoader::AppsSearch(bool install_requirements){
             settings.setValue(keyName + "/DisplayName", displayName);
             settings.setValue(keyName + "/Description", comment);
             settings.setValue(keyName + "/Visible", visible);
+            settings.setValue(keyName + "/DeveloperOnly", developerOnly);
             settings.setValue(keyName + "/Shortcut", shortcutstr);
             settings.setValue(keyName + "/Checkable", checkable);
             settings.setValue(keyName + "/CheckableGroup", checkable_group);
@@ -629,7 +634,7 @@ void AppLoader::AppsSearch(bool install_requirements){
             settings.setValue(keyName + "/TypeOnDoubleClick",  types_doubleclick_str);
 
             // Forget about this action if it is set to non visible
-            if (!visible){
+            if (!visible || (!isDeveloperMode && developerOnly)){
                 continue;
             }
 
