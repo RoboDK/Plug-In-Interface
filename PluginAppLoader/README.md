@@ -127,9 +127,11 @@ Each action will also have some settings to customize the appearance. For exampl
 DisplayName=Record                  # Name displayed in the app menu
 Description=Start/stop recording    # Description to display on hover
 Visible=true                        # Set to false to disable this action (not show it)
+DeveloperOnly=false                 # Set to true to make this action enabled in Developer Mode only
 Shortcut=                           # Set a keyboard shortcut to trigger this action, Ctrl+M for instance
 Checkable=true                      # Set to true if we want this to be checkable
 CheckableGroup=1                    # Set to a number greater than zero if you want to group this action with other actions having the same group index
+AddToMenu=true                      # Set to false to not show this action in the main menu
 AddToToolbar=true                   # Set to false to not show this action in the toolbar
 Priority=1                          # Set the priority within the same app (lower shows first)
 TypeOnContextMenu=                  # Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API). -1 means any type, and you can use commas to specify multiple items
