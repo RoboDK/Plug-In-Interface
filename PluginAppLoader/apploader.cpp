@@ -600,7 +600,8 @@ void AppLoader::AppsSearch(bool install_requirements){
             QString shortcutstr = settings.value(keyName + "/Shortcut", "").toString();
             bool checkable = settings.value(keyName + "/Checkable", false).toBool();
             int checkable_group = settings.value(keyName + "/CheckableGroup", -1).toInt();
-            bool addToolBar = settings.value(keyName + "/AddToToolbar", true).toBool();
+            bool addToMenu = settings.value(keyName + "/AddToMenu", true).toBool();
+            bool addToToolBar = settings.value(keyName + "/AddToToolbar", true).toBool();
             double priority = settings.value(keyName + "/Priority", 50.0f).toDouble();
             QStringList types_rightclick_str = settings.value(keyName + "/TypeOnContextMenu", QStringList("")).toStringList(); // Multiple item support. Format can be "TypeOnContextMenu=int" or "TypeOnContextMenu=int, int, .."
             QStringList types_doubleclick_str = settings.value(keyName + "/TypeOnDoubleClick", QStringList("")).toStringList(); // Multiple item support. Format can be "TypeOnDoubleClick=int" or "TypeOnDoubleClick=int, int, .."
@@ -621,7 +622,8 @@ void AppLoader::AppsSearch(bool install_requirements){
             settings.setValue(keyName + "/Shortcut", shortcutstr);
             settings.setValue(keyName + "/Checkable", checkable);
             settings.setValue(keyName + "/CheckableGroup", checkable_group);
-            settings.setValue(keyName + "/AddToToolbar", addToolBar);
+            settings.setValue(keyName + "/AddToMenu", addToMenu);
+            settings.setValue(keyName + "/AddToToolbar", addToToolBar);
             settings.setValue(keyName + "/Priority", priority);
             settings.setValue(keyName + "/TypeOnContextMenu",  types_rightclick_str);
             settings.setValue(keyName + "/TypeOnDoubleClick",  types_doubleclick_str);
@@ -717,10 +719,11 @@ void AppLoader::AppsSearch(bool install_requirements){
             ListActions.append(new tAppAction(action, priority, appMenu, types_rightclick, types_doubleclick));
 
             // Add the actions to the menu and toolbar
-            menuActions.append(new tAppAction(action, priority, appMenu));
-            if (addToolBar){
+            if (addToMenu)
+                menuActions.append(new tAppAction(action, priority, appMenu));
+
+            if (addToToolBar)
                 toolbarActions.append(new tAppAction(action, priority, appMenu));
-            }
 
             // Create a slot connection to trigger the script, use the object name to remember the file script that we need to run
             QString fileScript(dirAppComplete + "/" + file);
@@ -828,7 +831,7 @@ void AppLoader::AppsLoadMenus(){
             menui = MenuBar->addMenu(appmenu->Name);
         }
         menui->addActions(appmenu->Actions);
-        menui->menuAction()->setVisible(appmenu->Visible);
+        menui->menuAction()->setVisible(appmenu->Visible && !appmenu->Actions.isEmpty());
         AllMenus.append(menui);
     }
 
