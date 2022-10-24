@@ -212,14 +212,6 @@ bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeCl
     if (!menu || item_list.isEmpty() || click_type != ClickRight)
         return false;
 
-    int commonType = item_list.front()->Type();
-    for (const Item& item : item_list) {
-        if (item->Type() != commonType) {
-            commonType = IItem::ITEM_TYPE_ANY;
-            break;
-        }
-    }
-
     bool result = false;
 
     for (int i = 0; i < ListActions.count(); ++i) {
@@ -228,12 +220,23 @@ bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeCl
             continue;
 
         const QList<int>& typesList = appAction->TypesShowOnContextMenu;
-        for (const int& typeToShow : typesList) {
-            if (typeToShow == commonType) {
-                menu->addAction(appAction->Action);
-                result = true;
-                break;
+
+        bool addAction = false;
+        if (typesList.contains(IItem::ITEM_TYPE_ANY)) {
+            addAction = true;
+        } else if (!typesList.isEmpty()) {
+            addAction = true;
+            for (const Item& item : item_list) {
+                if (!typesList.contains(item->Type())) {
+                    addAction = false;
+                    break;
+                }
             }
+        }
+
+        if (addAction) {
+            menu->addAction(appAction->Action);
+            result = true;
         }
     }
 
