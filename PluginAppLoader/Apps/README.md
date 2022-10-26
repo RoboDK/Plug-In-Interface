@@ -35,6 +35,8 @@ More information about the RoboDK API for Python here:
 Example
 =======
 
+For a detailed example / template of a RoboDK App, see the [App Template](./AppTemplate/README.md).
+
 The following tree shows the sample tree structure inside the Apps folder. The sample apps provided are:
 * Recorder: Tools to record a video from your simulations.
 * Style: Tools to change the appearance of objects and tools (change the color and appearance of surfaces, points and curves). Among other things you can change the appearance of points if you use a large point cloud.
