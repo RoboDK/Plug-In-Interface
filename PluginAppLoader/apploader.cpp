@@ -35,15 +35,21 @@ struct CheckPriority {
 
 // Function to parse a string list of ITEM_TYPE
 static QList<int> ParseStringList(const QStringList& l){
-    QList<int> nl;
+    QList<int> result;
     for (const QString& s : l){
         bool ok = false;
-        int v = s.trimmed().toInt(&ok);
-        if (ok && (v != 0) && (v >= -1) && (v < 50)){
-           nl.append(v);
+        int value = s.trimmed().toInt(&ok);
+        if (ok) {
+            if (value == IItem::ITEM_TYPE_ANY) {
+                result.clear();
+                result.append(value);
+                break;
+            } else if (value > 0 && value < 50) {
+                result.append(value);
+            }
         }
     }
-    return nl;
+    return result;
 }
 
 //------------------------------- RoboDK Plug-in commands ------------------------------
@@ -164,57 +170,77 @@ void AppLoader::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 }
 
 bool AppLoader::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
-    qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
-    bool success = false;
-    for (int i=0; i<ListActions.length(); i++){
-        if (ListActions[i]->AppMenu != nullptr && !ListActions[i]->AppMenu->Active){
-            continue;
-        }
+    if (!menu && click_type == ClickRight)
+        return false;
 
-        // Check for right click menu. -1 Means any type.
-        if ((menu != nullptr) && (click_type == ClickRight)){
-            const QList<int>& types_show = ListActions[i]->TypesShowOnContextMenu;
-            for (const int& type_show : types_show){
-                if ((item->Type() == type_show) || (type_show == -1)){
-                    menu->addAction(ListActions[i]->Action); // add action at the end
-                    success = true;
+    bool result = false;
+
+    for (int i = 0; i < ListActions.count(); i++) {
+        auto appAction = ListActions.at(i);
+        if (!appAction->AppMenu || !appAction->AppMenu->Active)
+            continue;
+
+        if (click_type == ClickRight) {
+            // Check for right click menu. -1 Means any type.
+            const QList<int>& typesList = appAction->TypesShowOnContextMenu;
+            for (const int& typeToShow : typesList) {
+                if (typeToShow == item->Type() || typeToShow == IItem::ITEM_TYPE_ANY) {
+                    menu->addAction(appAction->Action);
+                    result = true;
                     break;
                 }
             }
         }
-
-        // Check for double clicks. -1 Means any type.
-        // Currently, this will only work for ITEM_TYPE_GENERIC, and will not prevent multiple triggers
-        else if (click_type == ClickDouble){
-            const QList<int>& types_trigger = ListActions[i]->TypesDoubleClick;
-            for (const int& type_trigger : types_trigger){
-                if ((item->Type() == type_trigger) || (type_trigger == -1)){
-                    ListActions[i]->Action->trigger();
-                    success = true;
+        else if (click_type == ClickDouble) {
+            // Check for double clicks. -1 Means any type.
+            // Currently, this will only work for ITEM_TYPE_GENERIC, and will not prevent multiple triggers
+            const QList<int>& typesList = appAction->TypesDoubleClick;
+            for (const int& typeToTrigger : typesList) {
+                if (typeToTrigger == item->Type() || typeToTrigger == IItem::ITEM_TYPE_ANY) {
+                    appAction->Action->trigger();
+                    result = true;
                     break;
                 }
             }
         }
     }
-    return success;
+
+    return result;
 }
 
 bool AppLoader::PluginItemClickMulti(QList<Item> &item_list, QMenu *menu, TypeClick click_type){
-    if (item_list.isEmpty()){
+    if (!menu || item_list.isEmpty() || click_type != ClickRight)
         return false;
-    }
 
-    if (menu == nullptr){
-        return false; // Generic types will send null menus
-    }
+    bool result = false;
 
-    int common_type = item_list.front()->Type();
-    for (const Item& item : item_list){
-        if (item->Type() != common_type){
-            return false;
+    for (int i = 0; i < ListActions.count(); ++i) {
+        auto appAction = ListActions.at(i);
+        if (!appAction->AppMenu || !appAction->AppMenu->Active)
+            continue;
+
+        const QList<int>& typesList = appAction->TypesShowOnContextMenu;
+
+        bool addAction = false;
+        if (typesList.contains(IItem::ITEM_TYPE_ANY)) {
+            addAction = true;
+        } else if (!typesList.isEmpty()) {
+            addAction = true;
+            for (const Item& item : item_list) {
+                if (!typesList.contains(item->Type())) {
+                    addAction = false;
+                    break;
+                }
+            }
+        }
+
+        if (addAction) {
+            menu->addAction(appAction->Action);
+            result = true;
         }
     }
-    return PluginItemClick(item_list.front(), menu, click_type);
+
+    return result;
 }
 
 QString AppLoader::PluginCommand(const QString &command, const QString &value){
