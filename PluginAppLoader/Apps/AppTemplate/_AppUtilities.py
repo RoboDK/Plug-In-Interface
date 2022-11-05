@@ -1,9 +1,18 @@
-# Sharable modules, ignored by the AppLoader when prefixed with '_'
-from robodk import robolink
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
+# Sharable module, ignored by the AppLoader when prefixed with '_'.
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
 
-APP_OPTION_KEY = 'APP_OPTION'
-APP_OPTION_A_KEY = 'APP_OPTION_A'
-APP_OPTION_B_KEY = 'APP_OPTION_B'
+from robodk import robolink
 
 
 def ShowMessage(RDK, action_name, message, popup):

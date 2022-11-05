@@ -1,9 +1,9 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# This file adds the Box Spawner script to your RoboDK station.
+# This file adds the Object Deleter script to your RoboDK station.
 # You can then call it programmatically from a RoboDK program call.
-# To use the spawner ID #2, call SpawnBox(2).
+# To use the zone ID #2, call DeleteObjects(2).
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -14,9 +14,9 @@
 #
 # --------------------------------------------
 
-from robodk.robolink import Robolink  # RoboDK API
+from robodk.robolink import Robolink
 import os
 
 RDK = Robolink()
-script = RDK.AddFile(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/SpawnBox.py'))
-script.setName('SpawnBox')
+script = RDK.AddFile(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/DeleteObjects.py'))
+script.setName('DeleteObjects')

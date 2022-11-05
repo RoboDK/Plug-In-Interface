@@ -1,4 +1,17 @@
-# Context action example (right-click a tree item of a specific type)
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
+# Context action example (right-click a tree item of a specific type).
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
+
 from robodk import robolink, roboapps
 from _AppUtilities import ShowMessage
 import os

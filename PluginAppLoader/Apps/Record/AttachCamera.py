@@ -4,6 +4,7 @@
 
 from robodk.robolink import *  # RoboDK API
 from robodk.robomath import *  # Robot toolbox
+from robodk.roboapps import *
 
 
 def AttachCamera():
@@ -49,72 +50,6 @@ def AttachCamera():
                     view_pose_last = view_pose
                     RDK.setViewPose(view_pose)
                     RDK.Render()
-
-
-class RunApplication:
-    """Class to detect when the terminate signal is emited to stop an action.
-
-    .. code-block:: python
-
-        run = RunApplication()
-        while run.Run():
-            # your main loop to run until the terminate signal is detected
-            ...
-
-    """
-    time_last = -1
-    param_name = None
-    RDK = None
-
-    def __init__(self, rdk=None):
-        if rdk is None:
-            from robodk.robolink import Robolink
-            self.RDK = Robolink()
-        else:
-            self.RDK = rdk
-
-        self.time_last = time.time()
-        if len(sys.argv) > 0:
-            path = sys.argv[0]
-            folder = os.path.basename(os.path.dirname(path))
-            file = os.path.basename(path)
-            if file.endswith(".py"):
-                file = file[:-3]
-            elif file.endswith(".exe"):
-                file = file[:-4]
-
-            self.param_name = file + "_" + folder
-            self.RDK.setParam(self.param_name, "1")  # makes sure we can run the file separately in debug mode
-
-    def Run(self):
-        time_now = time.time()
-        if time_now - self.time_last < 0.25:
-            return True
-        self.time_last = time_now
-        if self.param_name is None:
-            # Unknown start
-            return True
-
-        keep_running = not (self.RDK.getParam(self.param_name) == 0)
-        return keep_running
-
-
-def Unchecked():
-    """Verify if the command "Unchecked" is present. In this case it means the action was just unchecked from RoboDK (applicable to checkable actions only)."""
-    if len(sys.argv) >= 2:
-        if "Unchecked" in sys.argv[1:]:
-            return True
-
-    return False
-
-
-def Checked():
-    """Verify if the command "Checked" is present. In this case it means the action was just checked from RoboDK (applicable to checkable actions only)."""
-    if len(sys.argv) >= 2:
-        if "Checked" in sys.argv[1:]:
-            return True
-
-    return False
 
 
 def runmain():

@@ -12,20 +12,27 @@
 #
 # --------------------------------------------
 
-from robodk.robolink import *  # API to communicate with RoboDK
-from robodk.robomath import *
-from robodk.robodialogs import *
-from robodk.roboapps import *
+from Settings import Settings
 
-import_install('inputs')
+from robodk import robolink
+from robodk import robomath
+from robodk.robodialogs import ShowMessageYesNo
+from robodk import roboapps
+
+robolink.import_install('inputs')
 from inputs import get_gamepad
 from inputs import devices
 
-import_install('numpy')
+robolink.import_install('numpy')
 from numpy import allclose
 
 
 def MainAction():
+
+    RDK = robolink.Robolink()
+
+    S = Settings()
+    S.Load(RDK)
 
     print('Press and hold X (X axis), Y (Z axis) or B (Z axis) to select an axis.')
     print('Use the D-pad up or down to move the robot along the selected axis.')
@@ -37,33 +44,12 @@ def MainAction():
     print('To run on the real robot: RoboDK->Connect->Connect robot->Connect.')
     print('Ensure the robot speeds are adequate: RoboDK->Right-click your robot->Options->Parameters.')
 
-    # Global flag for debugging. Setting this to false will never run on robot.
-    RUN_ON_ROBOT = True
-
-    # You might want to change the parameters below based on your needs.
-
-    # Robot speeds
-    MAX_LINEAR_SPEED = 25.0  # mm/s
-    MAX_JOINT_SPEED = 20.0  # deg/s
-
-    # Linear move
-    LINEAR_STEPS_MAX = 50  # mm/step
-    LINEAR_STEPS_MIN = 0.5  # mm/step
-    LINEAR_STEPS_INIT = 10  # mm/step
-
-    # Angular move
-    ANGULAR_STEPS_MAX = 30  # deg/step
-    ANGULAR_STEPS_MIN = 1  # deg/step
-    ANGULAR_STEPS_INIT = 5  # deg/step
-    DEG_TO_RAD = pi / 180.0
-
-    # Steps
-    STEPS_INC_FACTOR = 0.25  # % of step increase/decrease
+    DEG_TO_RAD = robomath.pi / 180.0
 
     # Simulation parameters
     move_steps = {
-        "Translate": LINEAR_STEPS_INIT,
-        "Rotate": ANGULAR_STEPS_INIT,
+        "Translate": S.LINEAR_STEPS_INIT,
+        "Rotate": S.ANGULAR_STEPS_INIT,
     }
 
     move_type = {
@@ -119,8 +105,6 @@ def MainAction():
     left_stick_prev = left_stick.copy()
     right_stick_prev = right_stick.copy()
 
-    RDK = Robolink()
-
     # Get the controller
     gamepads = devices.gamepads
     if len(gamepads) < 1:
@@ -132,30 +116,30 @@ def MainAction():
         RDK.ShowMessage("Multiple controllers found. Defaulting to %s." % gamepad.name)
 
     # Get a robot. Will not ask the user if there's only one.
-    robot = RDK.ItemUserPick("Select a robot", ITEM_TYPE_ROBOT)
+    robot = RDK.ItemUserPick("Select a robot", robolink.ITEM_TYPE_ROBOT)
     if not robot.Valid():
         RDK.ShowMessage("No robot in the station. Load a robot first, then run this program.")
         quit(0)
     print('Using robot: %s' % robot.Name())
     robot.setPoseFrame(robot.PoseFrame())
     robot.setPoseTool(robot.PoseTool())
-    robot.setSpeed(MAX_LINEAR_SPEED, MAX_JOINT_SPEED)
+    robot.setSpeed(S.MAX_LINEAR_SPEED, S.MAX_JOINT_SPEED)
 
     # Ensure we are in a simulated environnement
-    if RDK.RunMode() != RUNMODE_SIMULATE:
+    if RDK.RunMode() != robolink.RUNMODE_SIMULATE:
         RUN_ON_ROBOT = False
 
     if RUN_ON_ROBOT:
         # Check if the robot is already connected
         status, status_msg = robot.ConnectedState()
-        if (status == ROBOTCOM_READY) and not ShowMessageYesNo("You are about to control the connected robot using the controller.\n\nWould you like to run in simulation mode instead?", ""):
-            RDK.setRunMode(RUNMODE_RUN_ROBOT)
+        if (status == robolink.ROBOTCOM_READY) and not ShowMessageYesNo("You are about to control the connected robot using the controller.\n\nWould you like to run in simulation mode instead?", ""):
+            RDK.setRunMode(robolink.RUNMODE_RUN_ROBOT)
             print('Controlling connected robot: %s' % robot.Name())
 
     # Retrieve the degrees of freedom or axes (num_dofs = 6 for a 6 axis robot)
     num_dofs = len(robot.JointsHome().list())
 
-    run = RunApplication()
+    run = roboapps.RunApplication()
     while run.Run():
         # At the begining in case of "continue"
         keys_prev = keys.copy()
@@ -171,9 +155,9 @@ def MainAction():
             quit(0)
 
         # Ensure robot is still connected
-        if RDK.RunMode() == RUNMODE_RUN_ROBOT:
+        if RDK.RunMode() == robolink.RUNMODE_RUN_ROBOT:
             status, status_msg = robot.ConnectedState()
-            if status < ROBOTCOM_READY:
+            if status < robolink.ROBOTCOM_READY:
                 # Stop if the connection was lost
                 RDK.ShowMessage("Robot connection lost. Connect a robot and try again.")
                 quit(0)
@@ -289,16 +273,16 @@ def MainAction():
         # Move steps
         dpad_sign = 0
         if not dpad_prev["Right"] and dpad["Right"]:  # Only change on "rising edge"
-            dpad_sign = 1.0 + STEPS_INC_FACTOR
+            dpad_sign = 1.0 + S.STEPS_INC_FACTOR
         if not dpad_prev["Left"] and dpad["Left"]:  # Only change on "rising edge"
-            dpad_sign = 1.0 / (1.0 + STEPS_INC_FACTOR)
+            dpad_sign = 1.0 / (1.0 + S.STEPS_INC_FACTOR)
 
         if dpad_sign != 0:
             if move_type["Rotate"]:
-                move_steps["Rotate"] = min(ANGULAR_STEPS_MAX, max(ANGULAR_STEPS_MIN, move_steps["Rotate"] * dpad_sign))
+                move_steps["Rotate"] = min(S.ANGULAR_STEPS_MAX, max(S.ANGULAR_STEPS_MIN, move_steps["Rotate"] * dpad_sign))
                 RDK.ShowMessage('Rotation steps (deg): %.2f' % move_steps["Rotate"], False)
             else:
-                move_steps["Translate"] = min(LINEAR_STEPS_MAX, max(LINEAR_STEPS_MIN, move_steps["Translate"] * dpad_sign))
+                move_steps["Translate"] = min(S.LINEAR_STEPS_MAX, max(S.LINEAR_STEPS_MIN, move_steps["Translate"] * dpad_sign))
                 RDK.ShowMessage('Translation steps (mm): %.2f' % move_steps["Translate"], False)
 
         # Translation / Rotation
@@ -317,15 +301,15 @@ def MainAction():
             move_mtx[2] = dpad_move
 
         # Make sure that a movement command is specified
-        if norm(move_mtx) <= 0:
+        if robomath.norm(move_mtx) <= 0:
             continue
 
         # Calculate the new robot position
         x, y, z, rx, ry, rz = 0, 0, 0, 0, 0, 0
         if move_type["Translate"]:
-            x, y, z = mult3(move_mtx, move_steps["Translate"])
+            x, y, z = robomath.mult3(move_mtx, move_steps["Translate"])
         elif move_type["Rotate"]:
-            rx, ry, rz = mult3(move_mtx, move_steps["Rotate"] * DEG_TO_RAD)
+            rx, ry, rz = robomath.mult3(move_mtx, move_steps["Rotate"] * DEG_TO_RAD)
 
         # Get the current robot joints
         robot_joints = robot.Joints()
@@ -337,7 +321,7 @@ def MainAction():
         robot_config = robot.JointsConfig(robot_joints)
 
         # Calculate the new robot position
-        new_robot_position = transl(x, y, z) * rotx(rx) * roty(ry) * rotz(rz) * robot_position
+        new_robot_position = robomath.transl(x, y, z) * robomath.rotx(rx) * robomath.roty(ry) * robomath.rotz(rz) * robot_position
 
         # Calculate the new robot joints
         new_robot_joints = robot.SolveIK(new_robot_position)
@@ -365,21 +349,23 @@ def MainAction():
                 robot.MoveJ(new_robot_joints)
             elif robot_move_type["MoveL"]:
                 robot.MoveL(new_robot_joints)
-        except TargetReachError as e:
+        except robolink.TargetReachError as e:
             RDK.ShowMessage('Warning!\n\nTarget unreachable. Try using MoveJ or another command.', True)
             print(e)
             continue
 
 
 def runmain():
-    # Verify if this is an action that was just unchecked
-    if Unchecked():
-        quit(0)
+    """
+    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
+    Important: Use the function name 'runmain()' if you want to compile this action.
+    """
+
+    if roboapps.Unchecked():
+        roboapps.Exit()
     else:
-        # Checked (or checkable status not applicable)
         MainAction()
 
 
-# Important: leave the main function as runmain if you want to compile this app
-if __name__ == "__main__":
+if __name__ == '__main__':
     runmain()

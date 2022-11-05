@@ -157,9 +157,9 @@ A checkable action also includes the additional behavior compared to non-checkab
 * An icon can be provided for the checked state by adding the Checked keyword (as shown with the RecordChecked.svg example) 
 
 
-Importing Apps
-=================
+Importing Apps from other Apps or Python scripts
+===================================================
 
-RoboDK will automatically add your App's directories to the environnement variable `PYTHONPATH` when executing python scripts, allowing you to import and reuse Apps in your own scripts.
+RoboDK will automatically add your App's directories to the environnement variable `PYTHONPATH` when executing python scripts, allowing you to import and reuse Apps in your own scripts. Simply add a `__init__.py` file in you App folder (this file can be left empty).
 
 If you are developing or debugging in your IDE, you might want to manually add your App's directories to the system environnement variable `PYTHONPATH`. The system environnement variable will precede on RoboDK's.

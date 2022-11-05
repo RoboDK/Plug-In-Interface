@@ -1,6 +1,20 @@
-# Checkable option example
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
+# Checkable option example.
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
+
 from robodk import robolink, roboapps
-from _AppUtilities import ShowMessage, APP_OPTION_KEY
+from _AppUtilities import ShowMessage
+from AppSettings import Settings
 import os
 
 ACTION_NAME = os.path.basename(__file__)
@@ -10,16 +24,22 @@ def ActionChecked():
     """Action to perform when the action is checked in RoboDK."""
 
     RDK = robolink.Robolink()
-    RDK.setParam(APP_OPTION_KEY, 1.0)
-    ShowMessage(RDK, ACTION_NAME, str(RDK.getParam(APP_OPTION_KEY)), False)
+    S = Settings()
+    S = S.Load(RDK)
+
+    RDK.setParam(S.APP_OPTION_KEY, 1.0)
+    ShowMessage(RDK, ACTION_NAME, str(RDK.getParam(S.APP_OPTION_KEY)), False)
 
 
 def ActionUnchecked():
     """Action to perform when the action is unchecked in RoboDK."""
 
     RDK = robolink.Robolink()
-    RDK.setParam(APP_OPTION_KEY, 0.0)
-    ShowMessage(RDK, ACTION_NAME, str(RDK.getParam(APP_OPTION_KEY)), False)
+    S = Settings()
+    S = S.Load(RDK)
+
+    RDK.setParam(S.APP_OPTION_KEY, 0.0)
+    ShowMessage(RDK, ACTION_NAME, str(RDK.getParam(S.APP_OPTION_KEY)), False)
 
 
 def runmain():
