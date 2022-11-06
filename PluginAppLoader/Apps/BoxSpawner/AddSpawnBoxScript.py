@@ -14,7 +14,7 @@
 #
 # --------------------------------------------
 
-from robodk.robolink import Robolink  # RoboDK API
+from robodk.robolink import Robolink
 import os
 
 RDK = Robolink()
