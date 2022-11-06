@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Paint surfaces with preset #2 (orange by default).
+# Paint points as spheres (white by default) for specified objects.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -17,9 +17,9 @@ from robodk import robolink, roboapps
 import Settings
 
 
-def PaintSurfacesPreset2(RDK=None, S=None, objects=None):
+def PaintPointsAsSpheres(RDK=None, S=None, objects=None):
     """
-    Paint surfaces with preset #2 (orange by default) for specified objects.
+    Paint points as spheres (white by default) for specified objects.
     """
     if RDK is None:
         RDK = robolink.Robolink()
@@ -45,9 +45,9 @@ def PaintSurfacesPreset2(RDK=None, S=None, objects=None):
             return
 
     for obj in objects:
-        # Display each point as a cube of a given size in mm.
-        r, g, b, a = S.SURFACE_COLOR_2
-        obj.setColor(Settings.rgba2f(r, g, b, a))
+        # Display as a sphere (size,rings):
+        r, g, b, a = S.POINTS_SPHERE_COLOR
+        obj.setParam('Display', f'PARTICLE=SPHERE({S.POINTS_SPHERE_SIZE},{S.POINTS_SPHERE_RINGS}) COLOR={Settings.rgba2hex(r,g,b,a)}')
 
 
 def runmain():
@@ -59,7 +59,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        PaintSurfacesPreset2()
+        PaintPointsAsSpheres()
 
 
 if __name__ == '__main__':

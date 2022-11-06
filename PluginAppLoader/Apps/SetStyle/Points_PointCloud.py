@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Paint surfaces with preset #2 (orange by default).
+# Paint points as a point cloud (red by default) for specified objects.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -17,9 +17,9 @@ from robodk import robolink, roboapps
 import Settings
 
 
-def PaintSurfacesPreset2(RDK=None, S=None, objects=None):
+def PaintPointsAsPointCloud(RDK=None, S=None, objects=None):
     """
-    Paint surfaces with preset #2 (orange by default) for specified objects.
+    Paint points as a point cloud (red by default) for specified objects.
     """
     if RDK is None:
         RDK = robolink.Robolink()
@@ -45,9 +45,10 @@ def PaintSurfacesPreset2(RDK=None, S=None, objects=None):
             return
 
     for obj in objects:
-        # Display each point as a cube of a given size in mm.
-        r, g, b, a = S.SURFACE_COLOR_2
-        obj.setColor(Settings.rgba2f(r, g, b, a))
+        # Display points as simple dots given a certain size (suitable for fast rendering)
+        # Color is defined as AARRGGBB. It can also be a named color
+        r, g, b, a = S.POINTS_CLOUD_COLOR
+        obj.setParam('Display', f'POINTSIZE={S.POINTS_CLOUD_SIZE} COLOR={Settings.rgba2hex(r,g,b,a)}')
 
 
 def runmain():
@@ -59,7 +60,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        PaintSurfacesPreset2()
+        PaintPointsAsPointCloud()
 
 
 if __name__ == '__main__':

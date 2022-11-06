@@ -35,6 +35,8 @@ More information about the RoboDK API for Python here:
 Example
 =======
 
+For a detailed example / template of a RoboDK App, see the [App Template](./Apps/AppTemplate/README.md).
+
 The following tree shows the sample tree structure inside the Apps folder. The sample apps provided are:
 * Recorder: Tools to record a video from your simulations.
 * Style: Tools to change the appearance of objects and tools (change the color and appearance of surfaces, points and curves). Among other things you can change the appearance of points if you use a large point cloud.
@@ -57,13 +59,13 @@ C:/RoboDK/
 │   │
 │   ├───SetStyle
 │   │      AppConfig.ini
-│   │      Default_Appearance.py
-│   │      Points_RedPointCloud.py
-│   │      Points_RedPointCloud.svg
-│   │      Points_BlueCubes.py
-│   │      Points_BlueCubes.svg
-│   │      Points_WhiteSpheres.py
-│   │      Points_WhiteSpheres.svg
+│   │      Points_Default.py
+│   │      Points_PointCloud.py
+│   │      Points_PointCloud.svg
+│   │      Points_Cubes.py
+│   │      Points_Cubes.svg
+│   │      Points_Spheres.py
+│   │      Points_Spheres.svg
 │   │      Curves_Orange.py
 │   │      Curves_Orange.svg
 │   │      Curves_White.py
@@ -72,6 +74,8 @@ C:/RoboDK/
 │   │      Surfaces_Green.svg
 │   │      Surfaces_Orange.py
 │   │      Surfaces_Orange.svg
+│   │      Settings.py
+│   │      Settings.svg
 │   │
 ├───bin
 ...
@@ -164,6 +168,6 @@ A checkable action also includes the additional behavior compared to non-checkab
 Importing Apps
 =================
 
-RoboDK will automatically add your App's directories to the environnement variable `PYTHONPATH` when executing python scripts, allowing you to import and reuse Apps in your own scripts.
+RoboDK will automatically add your App's directories to the environnement variable `PYTHONPATH` when executing python scripts, allowing you to import and reuse Apps in your own scripts. Simply add a `__init__.py` file in you App folder (this file can be left empty).
 
 If you are developing or debugging in your IDE, you might want to manually add your App's directories to the system environnement variable `PYTHONPATH`. The system environnement variable will precede on RoboDK's.
