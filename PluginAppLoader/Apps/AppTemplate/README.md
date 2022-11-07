@@ -10,6 +10,7 @@ It includes:
     * Checkable
     * Momentary
     * Contextual
+    * Double-click (for generic items)
 
 * Options
     * Individual

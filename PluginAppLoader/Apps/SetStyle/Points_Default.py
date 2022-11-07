@@ -46,7 +46,7 @@ def PointsResetStyle(RDK=None, S=None, objects=None):
 
     for obj in objects:
         # Reset appearance (default point color)
-        obj.setParam('Display', '')
+        obj.setParam('Display', ' ')
 
 
 def runmain():
