@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Set the current view in the RoboDK main window to the VR headset.
+# Prompt the user to enter the size of the screen and update the main window of RoboDK accordingly.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -12,29 +12,27 @@
 #
 # --------------------------------------------
 
-from robodk import robolink, robomath, roboapps
+from robodk import robolink, roboapps, robodialogs
 
 
-def View2VR(RDK=None):
-    """
-    Set the current view in the RoboDK main window to the VR headset.
-    """
+def SetSize(RDK=None):
+    """Prompt the user to enter the size of the screen and update the main window of RoboDK accordingly."""
     if RDK is None:
         RDK = robolink.Robolink()
 
-    vp = RDK.ViewPose()
+    # Get the desired screen size from the user
+    entry = '1920x1080'
 
-    result = RDK.Command("VR")  # open the VR view
+    # If available, use the current size
+    current_size = RDK.Command('SetSize3D')
+    if len(current_size.split('x', maxsplit=2)) == 2:
+        entry = current_size
 
-    strpose = str(robomath.Pose_2_TxyzRxyz(robomath.transl(0, 0, +2000) * vp))[1:-1]
-    result = RDK.Command("ViewPoseVR", strpose)
-    print(strpose)
-
-    if result != "OK":
-        RDK.ShowMessage("Problems setting VR view: " + result, False)
+    newsize = robodialogs.mbox("Set the screen size (size of the 3D window).\nEnter ' ' to unlock the screen\nWidth x Height:", entry=entry)
+    if newsize == False:
         return
 
-    RDK.ShowMessage("Window view sent to VR headset", False)
+    RDK.Command("SetSize3D", newsize.strip())
 
 
 def runmain():
@@ -46,7 +44,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        View2VR()
+        SetSize()
 
 
 if __name__ == '__main__':

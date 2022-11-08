@@ -161,9 +161,6 @@ def NavigateTo(poses_to):
 
 
 if __name__ == "__main__":
-    # Define the station parameter name
-    #VIEW_NAME = "SavedView"
-    #LoadView(VIEW_NAME)
 
     # Name of the view we can use with the first button of the toolbar
     MAIN_VIEW_NAME = "Main View"

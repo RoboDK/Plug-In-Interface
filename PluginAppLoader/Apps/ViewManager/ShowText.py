@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Save the 3D view point as a station parameter.
+# Show/hide the text in the 3D view.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -12,27 +12,21 @@
 #
 # --------------------------------------------
 
-from robodk import robolink, robomath, roboapps
+from robodk import robolink, roboapps
 
 
-def SaveView(view_name):
-    """
-    Save the 3D view point as a station parameter.
-    """
+def ActionChecked():
+    """Hide the text in the 3D view."""
 
-    # Start the RoboDK API
     RDK = robolink.Robolink()
+    RDK.Command("ShowText", "0")
 
-    # Get the 3D view pose
-    vp = RDK.ViewPose()
 
-    # Convert to a string as XYZABC
-    vp_str = str(robomath.Pose_2_KUKA(vp))
+def ActionUnchecked():
+    """Show the text in the 3D view."""
 
-    # Save it as a station parameter (saved with the RDK file)
-    RDK.setParam(view_name, vp_str)
-
-    RDK.ShowMessage("Current view point saved: " + vp_str, False)
+    RDK = robolink.Robolink()
+    RDK.Command("ShowText", "1")
 
 
 def runmain():
@@ -42,9 +36,10 @@ def runmain():
     """
 
     if roboapps.Unchecked():
-        roboapps.Exit()
+        ActionUnchecked()
     else:
-        SaveView("ViewManager-View-0")
+        roboapps.KeepChecked()
+        ActionChecked()
 
 
 if __name__ == '__main__':

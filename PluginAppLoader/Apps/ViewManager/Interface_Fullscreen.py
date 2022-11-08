@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Save the 3D view point as a station parameter.
+# Set the interface to Fullscreen.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -12,27 +12,33 @@
 #
 # --------------------------------------------
 
-from robodk import robolink, robomath, roboapps
+from robodk import robolink, roboapps
+
+import InterfaceSettings
 
 
-def SaveView(view_name):
+def SetInterfaceFullscreen():
     """
-    Save the 3D view point as a station parameter.
+    Set the interface to Fullscreen.
     """
 
-    # Start the RoboDK API
-    RDK = robolink.Robolink()
+    S = InterfaceSettings.InterfaceSettings()
 
-    # Get the 3D view pose
-    vp = RDK.ViewPose()
+    S.DISPLAY_THRESHOLD = 2.0
+    S.SHOW_CURVES = False
+    S.SHOW_POINTS = False
+    S.ENABLE_MOUSE_FEEDBACK = False
 
-    # Convert to a string as XYZABC
-    vp_str = str(robomath.Pose_2_KUKA(vp))
+    S.FLAG_ROBODK_TREE_VISIBLE = False
+    S.FLAG_ROBODK_REFERENCES_VISIBLE = False
+    S.FLAG_ROBODK_LEFT_CLICK = False
+    S.FLAG_ROBODK_RIGHT_CLICK = False
+    S.FLAG_ROBODK_DOUBLE_CLICK = False
 
-    # Save it as a station parameter (saved with the RDK file)
-    RDK.setParam(view_name, vp_str)
+    S.WINDOW_STATE[0] = 5  # Cinema
+    S.TOOLBAR_LAYOUT[0] = 0  # Default
 
-    RDK.ShowMessage("Current view point saved: " + vp_str, False)
+    S.Apply()
 
 
 def runmain():
@@ -44,7 +50,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        SaveView("ViewManager-View-0")
+        SetInterfaceFullscreen()
 
 
 if __name__ == '__main__':
