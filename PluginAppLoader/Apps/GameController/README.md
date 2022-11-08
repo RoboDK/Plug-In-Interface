@@ -1,12 +1,12 @@
-Xbox Controller App for RoboDK
+Game Controller App for RoboDK
 ===========================
 
-The Xbox Controller App allows you to control your robot arm using an Xbox Controller.
+The Game Controller App allows you to control your robot arm using an Game Controller.
 
 To use this app, ensure the app is available in your RoboDK App folder. If not manually copy the contents of this folder in your RoboDK Apps folder:
 
 ``` bash
-C:/RoboDK/Apps/XboxController
+C:/RoboDK/Apps/GameController
 ```
 
 Then, make sure the AppLoader is enabled (Shift+I) and this app is enabled (Shift+A).
@@ -31,6 +31,7 @@ More information on RoboDK Apps here:
 
 Controller mapping
 ==================
+The default mapping was created for an Xbox One controller.
 * Press and hold X (X axis), Y (Z axis) or B (Z axis) to select an axis.
 * Use the D-pad up or down to move the robot along the selected axis.
 * Use the D-pad left or right to increase/decrease the steps.
@@ -41,4 +42,5 @@ Controller mapping
 
 Settings
 ========
-You can edit the XboxController.py script to suit your needs, such as robot speeds, step size, step range, initial settings, etc.
+
+You can edit the settings to suit your needs, such as robot speeds, step size, step range, initial settings, etc.

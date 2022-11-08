@@ -16,9 +16,9 @@ from robodk import roboapps
 
 
 class Settings(roboapps.AppSettings):
-    """Xbox Controller's App Settings"""
+    """Game Controller's App Settings"""
 
-    def __init__(self, settings_param='Xbox-Controller-Settings'):
+    def __init__(self, settings_param='Game-Controller-Settings'):
         super().__init__(settings_param)
 
         from collections import OrderedDict
@@ -65,7 +65,7 @@ def runmain():
     else:
         S = Settings()
         S.Load()
-        S.ShowUI('Xbox Controller Settings')
+        S.ShowUI('Game Controller Settings')
 
 
 if __name__ == '__main__':
