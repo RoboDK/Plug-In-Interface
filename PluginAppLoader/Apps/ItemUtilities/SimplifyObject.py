@@ -30,9 +30,9 @@ class SimplifySettings(roboapps.AppSettings):
         self._FIELDS_UI['SHAPE_RADIUS'] = "Minimum object size/radius [mm]"
         self._FIELDS_UI['TRIANGLE_AREA'] = "Minimum triangle surface [mm^2]"
         self._FIELDS_UI['TRIANGLE_ANGLE'] = "Minimum triangle angle [deg]"
-        self.SHAPE_RADIUS = 1.
-        self.TRIANGLE_AREA = 1.
-        self.TRIANGLE_ANGLE = 1.
+        self.SHAPE_RADIUS = 0.1
+        self.TRIANGLE_AREA = 0.1
+        self.TRIANGLE_ANGLE = 0.02
 
 
 def SimplifyObject(RDK=None, S=None, objects=None):

@@ -24,7 +24,7 @@ def ActionChecked():
 
     RDK = robolink.Robolink()
     S = Settings()
-    S = S.Load(RDK)
+    S.Load(RDK)
 
     RDK.setParam(S.APP_OPTION_B_KEY, 1.0)
     ShowMessage(RDK, ACTION_NAME, str(RDK.getParam(S.APP_OPTION_B_KEY)), False)
@@ -35,7 +35,7 @@ def ActionUnchecked():
 
     RDK = robolink.Robolink()
     S = Settings()
-    S = S.Load(RDK)
+    S.Load(RDK)
 
     RDK.setParam(S.APP_OPTION_B_KEY, 0.0)
     ShowMessage(RDK, ACTION_NAME, str(RDK.getParam(S.APP_OPTION_B_KEY)), False)
