@@ -26,7 +26,7 @@ def AttachCamera(RDK=None, S=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     item2station_pose = robomath.eye(4)
     view_pose_last = robomath.eye(4)

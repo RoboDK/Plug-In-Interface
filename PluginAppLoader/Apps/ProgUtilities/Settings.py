@@ -18,7 +18,7 @@ from robodk import roboapps
 class Settings(roboapps.AppSettings):
     """ProgUtilities App Settings."""
 
-    def __init__(self, settings_param='ProgUtilities-Settings'):
+    def __init__(self, settings_param='Prog-Utilities-Settings'):
         super().__init__(settings_param)
 
         from collections import OrderedDict

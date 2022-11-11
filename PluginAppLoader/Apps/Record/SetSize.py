@@ -24,7 +24,7 @@ def SetSize(RDK=None, S=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get the desired screen size from the user
     w, h = S.DEFAULT_SCREEN_SIZE

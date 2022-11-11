@@ -54,12 +54,8 @@ def runmain():
         SPEED_OPERATION = 20.0
 
         def __init__(self):
-            super(SurfaceSettings, self).__init__('Surface-Settings')
+            super(SurfaceSettings, self).__init__('Surface-Pattern-Generator-Settings')
             self._FIELDS_UI = self.__FIELDS_UI
-
-        def SetDefaults(self):
-            defaults = SurfaceSettings()
-            self.CopyFrom(defaults)
 
         def ShowUI(self):
 
@@ -87,15 +83,8 @@ def runmain():
 
                 def custom_frame(w):
 
-                    def set_defaults():
-                        w.destroy()
-                        self.SetDefaults()
-                        self.ShowUI()
-
                     import tkinter as tk
                     row = tk.Frame(w)
-                    b_defaults = tk.Button(row, text='Set defaults', command=set_defaults, width=8)
-                    b_defaults.pack(side=tk.LEFT, padx=5, pady=5)
                     b_update = tk.Button(row, text='Update Pattern', command=update_pattern, width=8)
                     b_update.pack(side=tk.LEFT, padx=5, pady=5)
                     row.pack(side=tk.TOP, fill=tk.X, padx=1, pady=1)
@@ -106,20 +95,11 @@ def runmain():
 
                 def custom_frame(w: QtWidgets.QWidget):
 
-                    def set_defaults():
-                        w.window().close()
-                        w.deleteLater()
-                        self.SetDefaults()
-                        self.ShowUI()
-
                     layout = w.layout()
 
-                    b_default = QtWidgets.QPushButton('Set defaults')
-                    b_default.clicked.connect(set_defaults)
                     b_update = QtWidgets.QPushButton('Update Pattern')
                     b_update.clicked.connect(update_pattern)
 
-                    layout.addWidget(b_default)
                     layout.addWidget(b_update)
 
             super(SurfaceSettings, self).ShowUI(windowtitle=windowtitle, callback_frame=custom_frame)
@@ -168,8 +148,8 @@ def runmain():
     #---------------------------------------------
     # Load GUI tools
     S = SurfaceSettings()
-    S.Load()
-    S.ShowUI()
+    S.Load(RDK)
+    S.ShowUI('Surface Pattern Generator Settings')
 
 
 if __name__ == "__main__":

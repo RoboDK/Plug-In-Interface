@@ -114,7 +114,7 @@ def ApplyInterfaceSettings(RDK=None, S=None):
 
     if S is None:
         S = InterfaceSettings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     RDK.Render(False)
 

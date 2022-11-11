@@ -26,7 +26,7 @@ def PaintCurvesPreset2(RDK=None, S=None, curves=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get curve(s) to color..
     if curves is None:

@@ -25,10 +25,12 @@ def StopProgramsAndRobots():
     RDK.Render(False)
 
     programs = RDK.ItemList(robolink.ITEM_TYPE_PROGRAM)
-    robots = RDK.ItemList(robolink.ITEM_TYPE_ROBOT_ARM)
+    robots = RDK.ItemList(robolink.ITEM_TYPE_ROBOT)
 
-    for item in programs + robots:
+    for item in robots + programs:
         item.Stop()
+
+    RDK.Render(True)
 
 
 def runmain():

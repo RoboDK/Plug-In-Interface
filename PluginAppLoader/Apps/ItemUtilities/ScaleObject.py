@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Scale an object given a per-axis scale ratio.
+# Scale object(s) given a per-axis scale ratio.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -17,7 +17,7 @@ from robodk import robolink, roboapps
 
 class ScaleSettings(roboapps.AppSettings):
 
-    def __init__(self, settings_param='Scale-Settings'):
+    def __init__(self, settings_param='Scale-Object-Settings'):
         super().__init__(settings_param)
 
         self._UI_SHOW_DISCARD = False
@@ -32,14 +32,14 @@ class ScaleSettings(roboapps.AppSettings):
 
 def ScaleObject(RDK=None, S=None, objects=None):
     """
-    Scale an object given a per-axis scale ratio.
+    Scale object(s) given a per-axis scale ratio.
     """
     if RDK is None:
         RDK = robolink.Robolink()
 
     if S is None:
         S = ScaleSettings()
-        S.Load()
+        S.Load(RDK)
 
     # Get object(s)..
     if objects is None:
@@ -61,8 +61,10 @@ def ScaleObject(RDK=None, S=None, objects=None):
     if S.SCALE_XYZ == [1., 1., 1.]:
         return
 
+    RDK.Render(False)
     for obj in objects:
         obj.Scale(S.SCALE_XYZ)
+    RDK.Render(True)
 
 
 def runmain():

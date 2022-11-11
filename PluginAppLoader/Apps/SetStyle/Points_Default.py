@@ -26,7 +26,7 @@ def PointsResetStyle(RDK=None, S=None, objects=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get object(s) to reset..
     if objects is None:

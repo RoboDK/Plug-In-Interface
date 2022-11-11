@@ -26,7 +26,7 @@ def ExpandPrograms(RDK=None, S=None, progs=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get program(s) to expand..
     if progs is None:
@@ -58,7 +58,7 @@ def ExpandProgram(RDK=None, S=None, prog_from=None, prog_to=None, prog_root=None
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get program to expand..
     if prog_from is None:

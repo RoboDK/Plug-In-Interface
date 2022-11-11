@@ -129,7 +129,7 @@ def Snapshot(RDK=None, S=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     width, height = S.SNAPSHOT_SIZE
 

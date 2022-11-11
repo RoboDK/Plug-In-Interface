@@ -139,8 +139,8 @@ def MainAction():
     # Retrieve the degrees of freedom or axes (num_dofs = 6 for a 6 axis robot)
     num_dofs = len(robot.JointsHome().list())
 
-    run = roboapps.RunApplication()
-    while run.Run():
+    APP = roboapps.RunApplication()
+    while APP.Run():
         # At the begining in case of "continue"
         keys_prev = keys.copy()
         triggers_prev = triggers.copy()

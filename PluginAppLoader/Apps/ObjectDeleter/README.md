@@ -6,9 +6,6 @@ Editor
 Use the Editor to set the Object Deleter settings.
 - Radius: radius of the delete zone, in mm.
 - Delete location: RoboDK item (frame or station) of the zone's origin
-- Defaults: Set all parameters to default.
-- OK: Save the current settings and close the editor.
-- Cancel or X: Discard changes and close the editor.
 
 Delete
 --------------

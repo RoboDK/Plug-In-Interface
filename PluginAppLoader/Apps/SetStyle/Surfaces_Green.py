@@ -26,7 +26,7 @@ def PaintSurfacesPreset1(RDK=None, S=None, objects=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get object(s) to color..
     if objects is None:

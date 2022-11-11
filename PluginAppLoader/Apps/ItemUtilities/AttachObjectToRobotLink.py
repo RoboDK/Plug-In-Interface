@@ -42,7 +42,7 @@ def AttachObjectToRobotLink(RDK=None, S=None, objects=None):
 
     if S is None:
         S = Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get object(s)..
     if objects is None:
@@ -77,8 +77,10 @@ def AttachObjectToRobotLink(RDK=None, S=None, objects=None):
     RDK.MergeItems([robot_link] + objects)
 
     if S.DELETE_SOURCE_OBJECT:
+        RDK.Render(False)
         for obj in objects:
             obj.Delete()
+        RDK.Render(True)
 
 
 def runmain():

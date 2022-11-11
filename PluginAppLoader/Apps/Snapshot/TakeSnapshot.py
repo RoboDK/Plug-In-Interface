@@ -27,7 +27,7 @@ def TakeSnapshot(RDK=None, S=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     date_str = datetime.datetime.now().strftime("%H-%M-%S")
     path_rdk = RDK.getParam('PATH_OPENSTATION')

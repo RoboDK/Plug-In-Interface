@@ -19,11 +19,33 @@
 from robodk import robolink, robomath, roboapps
 
 try:
-    from ObjectDeleter import DeleteObjects  # Import as an App module
+    from ObjectDeleter import DeleteObjects  # Import as an App module. This is needed when the action is used externally, in a RoboDK script for instance.
     from ObjectDeleter import Settings
 except:
     import DeleteObjects
     import Settings
+
+
+def DeleteObjectsLoop(RDK=None, S=None):
+    """
+    This file deletes objects in a zone indefinitely using the preset settings.
+    It can be called as an App action or within an App module.
+    
+    You can call it programmatically from a RoboDK program call.
+    To use the zone ID #2, call DeleteObjectsLoop(2).
+    """
+    if RDK is None:
+        RDK = robolink.Robolink()
+
+    if S is None:
+        S = Settings.Settings()
+        S.Load(RDK)
+
+    APP = roboapps.RunApplication(RDK)
+    while APP.Run():
+        if not DeleteObjects.DeleteObjects(RDK=RDK, S=S):
+            break
+        robomath.pause(0.1)
 
 
 def runmain():
@@ -45,15 +67,11 @@ def runmain():
                 pass
 
         RDK = robolink.Robolink()
-        APP = roboapps.RunApplication(RDK)
 
         S = Settings.Settings('Object-Deleter-Settings-' + str(id))
         S.Load(RDK)
 
-        while APP.Run():
-            if not DeleteObjects.DeleteObjects(RDK=RDK, S=S):
-                break
-            robomath.pause(0.1)
+        DeleteObjectsLoop(RDK=RDK, S=S)
 
 
 if __name__ == '__main__':

@@ -19,7 +19,7 @@ Spawner
 --------------
 
 Use the spawner button to create a new box in you station using the Editor parameters.
-The spawner button defaults to the spawner ID #0
+The spawner button defaults to the spawner ID #0.
 
 Add Python Script
 ----------------------

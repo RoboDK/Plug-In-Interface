@@ -26,7 +26,7 @@ def MergePrograms(RDK=None, S=None, progs=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get programs to merge..
     if progs is None:
@@ -76,6 +76,5 @@ def runmain():
         MergePrograms()
 
 
-# Important: leave the main function as runmain if you want to compile this app
 if __name__ == "__main__":
     runmain()

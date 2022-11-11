@@ -18,7 +18,7 @@ from robodk import robolink, roboapps
 
 class SimplifySettings(roboapps.AppSettings):
 
-    def __init__(self, settings_param='Simplify-Settings'):
+    def __init__(self, settings_param='Simplify-Object-Settings'):
         super().__init__(settings_param)
 
         self._UI_SHOW_DISCARD = False
@@ -45,17 +45,12 @@ def SimplifyObject(RDK=None, S=None, objects=None):
 
     if S is None:
         S = SimplifySettings()
-        S.Load()
+        S.Load(RDK)
 
     # Get object(s)..
     if objects is None:
         # ..from tree selection
-        objects = [x for x in RDK.Selection() if x.Type() in [
-            robolink.ITEM_TYPE_OBJECT,
-            robolink.ITEM_TYPE_CURVE,
-            robolink.ITEM_TYPE_ROBOT,
-            robolink.ITEM_TYPE_TOOL,
-        ]]
+        objects = [x for x in RDK.Selection() if x.Type() in [robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_CURVE, robolink.ITEM_TYPE_ROBOT, robolink.ITEM_TYPE_TOOL]]
         if not objects:
             # ..or user selection
             obj = RDK.ItemUserPick('Select the object', RDK.ItemList(robolink.ITEM_TYPE_OBJECT))
@@ -64,12 +59,7 @@ def SimplifyObject(RDK=None, S=None, objects=None):
             objects = [obj]
     else:
         # ..as provided
-        objects = [x for x in objects if x.Type() in [
-            robolink.ITEM_TYPE_OBJECT,
-            robolink.ITEM_TYPE_CURVE,
-            robolink.ITEM_TYPE_ROBOT,
-            robolink.ITEM_TYPE_TOOL,
-        ]]
+        objects = [x for x in objects if x.Type() in [robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_CURVE, robolink.ITEM_TYPE_ROBOT, robolink.ITEM_TYPE_TOOL]]
         if not objects:
             return
 
@@ -77,9 +67,11 @@ def SimplifyObject(RDK=None, S=None, objects=None):
     S.ShowUI('Simplify settings')
 
     # Apply the simplification
+    RDK.Render(False)
     for obj in objects:
         status = obj.setParam("FilterMesh", [S.SHAPE_RADIUS, S.TRIANGLE_AREA, S.TRIANGLE_ANGLE])
         RDK.ShowMessage(f"{obj.Name()}: {status}", False)
+    RDK.Render(True)
 
 
 def runmain():

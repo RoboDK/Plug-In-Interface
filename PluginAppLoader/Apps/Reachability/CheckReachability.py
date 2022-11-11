@@ -27,7 +27,7 @@ def MainAction(RDK=None, S=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get the rotation range
     RANGE_RX = range(1)
@@ -48,15 +48,29 @@ def MainAction(RDK=None, S=None):
         RANGE_TZ = range(S.RANGE_TZ[0], S.RANGE_TZ[1], S.RANGE_TZ[2]) if S.RANGE_TZ[2] > 0 and S.RANGE_TZ[0] - S.RANGE_TZ[1] != 0 else RANGE_RZ
 
     # Get the robot
-    robot = RDK.ItemUserPick('Select a robot to test the reachability', robolink.ITEM_TYPE_ROBOT)
+    robot = RDK.ItemUserPick('Select a robot to test the reachability', robolink.ITEM_TYPE_ROBOT_ARM)
     if not robot.Valid():
         # User canceled, or no robot in the station
         return
 
-    # Get the current pose of the robot:
-    robot_pose_ref = robot.Pose()
+    # Get the current pose of the robot
+    robot.setPoseTool(robot.PoseTool())
+    robot.setPoseFrame(robot.PoseFrame())
     robot_tool = robot.PoseTool()
     robot_base = robot.PoseFrame()
+    robot_pose_ref = robot.Pose()
+    robot_joints = robot.Joints()
+
+    # If the robot has synchronized axis, showing unreachable poses can be tricky
+    robot_dof = len(robot_joints.list())
+    robot_dof_ext = 0
+    for robot_link in robot.getLinks(robolink.ITEM_TYPE_ROBOT):
+        dof = len(robot_link.Joints().list())
+        robot_dof_ext += dof
+        robot_dof -= dof
+
+    if robot_dof_ext > 0:
+        RDK.ShowMessage('Robot has synchronized axis. Only reachable poses can be shown.')
 
     # Iterate through all pose combinations and collect all valid poses
     reachable_poses = []
@@ -71,9 +85,9 @@ def MainAction(RDK=None, S=None):
 
                             pose_add = robomath.transl(tx, ty, tz) * robomath.rotx(rx * robomath.pi / 180) * robomath.roty(ry * robomath.pi / 180) * robomath.rotz(rz * robomath.pi / 180)
                             pose_test = robot_pose_ref * pose_add
-                            jnts_sol = robot.SolveIK(pose_test, None, robot_tool, robot_base)
+                            jnts_sol = robot.SolveIK(pose_test, robot_joints, robot_tool, robot_base)
 
-                            if len(jnts_sol.list()) <= 1:
+                            if len(jnts_sol.list()) != robot_dof + robot_dof_ext:
                                 print(msg + " -> Not reachable")
                                 unreachable_poses.append(pose_test)
                             else:
@@ -81,20 +95,27 @@ def MainAction(RDK=None, S=None):
                                 reachable_poses.append(pose_test)
 
     # Preview display options
+    # If no tool is available, show the robot joints as there will be nothing to show otherwise!
     display_options = robolink.SEQUENCE_DISPLAY_TOOL_POSES
-    if S.PREVIEW_ROBOT_JOINTS:
-        display_options += robolink.SEQUENCE_DISPLAY_ROBOT_POSES
+    if S.PREVIEW_ROBOT_JOINTS or not robot.getLink(robolink.ITEM_TYPE_TOOL).Valid():
+        # Preview the robot in addition to the tool
+        display_options |= robolink.SEQUENCE_DISPLAY_ROBOT_POSES
 
-    # Show poses
+    # Only show reachable poses for synchronized axis, as it may show unexpected poses
+    if robot_dof_ext > 0:
+        unreachable_poses = []
+
+    # Reset previous previews
     time_out = 0.
     robot.ShowSequence([])
 
-    if S.PREVIEW_REACHABLE:
-        robot.ShowSequence(reachable_poses, display_options + robolink.SEQUENCE_DISPLAY_COLOR_GOOD, S.TIMEOUT_REACHABLE * 1000)
+    # Show reachable/unreachable poses
+    if S.PREVIEW_REACHABLE and reachable_poses:
+        robot.ShowSequence(reachable_poses, display_options | robolink.SEQUENCE_DISPLAY_COLOR_GOOD, S.TIMEOUT_REACHABLE * 1000)
         time_out = max(time_out, S.TIMEOUT_REACHABLE)
 
-    if S.PREVIEW_UNREACHABLE:
-        robot.ShowSequence(unreachable_poses, display_options + robolink.SEQUENCE_DISPLAY_COLOR_BAD, S.TIMEOUT_UNREACHABLE * 1000)
+    if S.PREVIEW_UNREACHABLE and unreachable_poses:
+        robot.ShowSequence(unreachable_poses, display_options | robolink.SEQUENCE_DISPLAY_COLOR_BAD, S.TIMEOUT_UNREACHABLE * 1000)
         time_out = max(time_out, S.TIMEOUT_UNREACHABLE)
 
     # Show the poses until the user uncheck the action, or the timeout is reached
@@ -118,7 +139,7 @@ def MainActionOff(RDK=None, S=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     if not S.PREVIEW_CLEAR_ALL:
         return

@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Attempts to recover broken Item links in a Program. For instance, when a Program was copied from another station.
+# Recover missing links in program(s), which happens when a program is copied from another station.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -104,7 +104,7 @@ def RecoverPrograms(RDK=None, S=None, progs=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get program(s) to recover..
     if progs is None:

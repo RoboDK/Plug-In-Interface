@@ -26,7 +26,7 @@ def ConvertMoveC(RDK=None, S=None, progs=None):
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
+        S.Load(RDK)
 
     # Get program(s) to convert..
     if progs is None:

@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# This file spawns a box using the preset settings.
+# Spawns a box using the preset settings.
 # It can be called as an App action or within an App module.
 #
 # You can call it programmatically from a RoboDK program call.
@@ -21,20 +21,25 @@ import random
 import os
 
 try:
-    from BoxSpawner import Settings  # Import as an App module
+    from BoxSpawner import Settings  # Import as an App module. This is needed when the action is used externally, in a RoboDK script for instance.
 except:
     import Settings
 
 
 def SpawnBox(RDK=None, S=None):
+    """
+    Spawns a box using the preset settings.
+    It can be called as an App action or within an App module.
+
+    You can call it programmatically from a RoboDK program call.
+    To use the spawner ID #2, call SpawnBox(2).
+    """
     if RDK is None:
         RDK = robolink.Robolink()
 
     if S is None:
         S = Settings.Settings()
-        S.Load()
-
-    USE_METRIC = S.UNITS_TYPE[0] == 0
+        S.Load(RDK)
 
     # Check if the parent exists
     PARENT_NAME = S.SPAWN_FRAME[1][S.SPAWN_FRAME[0]]
@@ -44,6 +49,7 @@ def SpawnBox(RDK=None, S=None):
         return None
 
     # Check that the required files exists
+    USE_METRIC = S.UNITS_TYPE[0] == 0
     if not USE_METRIC and not os.path.exists(S.REF_BOX_IN_PATH):
         RDK.ShowMessage(f"Unable to find the resource file ({S.REF_BOX_IN_PATH})!")
         return None
@@ -137,10 +143,12 @@ def runmain():
             except:
                 pass
 
-        S = Settings.Settings('Box-Spawner-Settings-' + str(id))
-        S.Load()
+        RDK = robolink.Robolink()
 
-        SpawnBox(S=S)
+        S = Settings.Settings('Box-Spawner-Settings-' + str(id))
+        S.Load(RDK)
+
+        SpawnBox(RDK=RDK, S=S)
 
 
 if __name__ == '__main__':

@@ -14,9 +14,33 @@
 #
 # --------------------------------------------
 
-from robodk.robolink import Robolink
+from robodk import robolink, roboapps
 import os
 
-RDK = Robolink()
-script = RDK.AddFile(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/DeleteObjects.py'))
-script.setName('DeleteObjects')
+
+def AddDeleteObjectsScript():
+    """
+    This file adds the Object Deleter script to your RoboDK station.
+    You can then call it programmatically from a RoboDK program call.
+    To use the zone ID #2, call DeleteObjectsLoop(2).
+    """
+
+    RDK = robolink.Robolink()
+    script = RDK.AddFile(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/DeleteObjects.py'))
+    script.setName('DeleteObjects')
+
+
+def runmain():
+    """
+    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
+    Important: Use the function name 'runmain()' if you want to compile this action.
+    """
+
+    if roboapps.Unchecked():
+        roboapps.Exit()
+    else:
+        AddDeleteObjectsScript()
+
+
+if __name__ == '__main__':
+    runmain()

@@ -99,7 +99,7 @@ def runmain():
     else:
         id = robodialogs.mbox("Box Spawner ID", entry=0)
         if id == False:
-            roboapps.Exit()  # User cancel
+            roboapps.Exit()  # User cancelled
         S = Settings('Box-Spawner-Settings-' + str(id))
         S.Load()
         S.ShowUI('Box Spawner Settings (' + str(id) + ')')

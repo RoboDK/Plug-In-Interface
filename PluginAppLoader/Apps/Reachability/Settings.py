@@ -26,17 +26,17 @@ class Settings(roboapps.AppSettings):
 
         # --------------------------------------------
         self._FIELDS_UI['SECTION_PREVIEW'] = "$Preview$"
-        self._FIELDS_UI['PREVIEW_ROBOT_JOINTS'] = 'Preview robot (in addition to the tool)'
+        self._FIELDS_UI['PREVIEW_ROBOT_JOINTS'] = 'Preview robot (not just the tool)'
         self._FIELDS_UI['PREVIEW_REACHABLE'] = 'Preview reachable poses'
         self._FIELDS_UI['PREVIEW_UNREACHABLE'] = 'Preview unreachable poses'
         self.PREVIEW_ROBOT_JOINTS = False
-        self.PREVIEW_REACHABLE = False
+        self.PREVIEW_REACHABLE = True
         self.PREVIEW_UNREACHABLE = True
 
         self._FIELDS_UI['TIMEOUT_REACHABLE'] = 'Reachable timeout [s]'
         self._FIELDS_UI['TIMEOUT_UNREACHABLE'] = 'Unreachable timeout [s]'
-        self.TIMEOUT_REACHABLE = 5.
-        self.TIMEOUT_UNREACHABLE = 5.
+        self.TIMEOUT_REACHABLE = 10.
+        self.TIMEOUT_UNREACHABLE = 10.
 
         self._FIELDS_UI['PREVIEW_CLEAR_ALL'] = 'Clear all robot previews on exit'
         self.PREVIEW_CLEAR_ALL = True

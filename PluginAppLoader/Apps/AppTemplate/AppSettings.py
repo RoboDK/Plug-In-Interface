@@ -19,7 +19,7 @@ class Settings(roboapps.AppSettings):
     """
     App Template's App Settings.
     
-    Use robodk.roboapps to create auto-generated user interface for your App's settings.
+    Use robodk.roboapps.AppSettings to create auto-generated user interface for your App's settings.
     Settings are automatically saved in your station and are accessible from anywhere in your App.
     """
 
