@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Show/hide the text in the 3D view.
+# Show/hide the object text in the 3D view.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -16,14 +16,14 @@ from robodk import robolink, roboapps
 
 
 def ActionChecked():
-    """Hide the text in the 3D view."""
+    """Hide the object text in the 3D view."""
 
     RDK = robolink.Robolink()
     RDK.Command("ShowTextObject", "0")
 
 
 def ActionUnchecked():
-    """Show the text in the 3D view."""
+    """Show the object text in the 3D view."""
 
     RDK = robolink.Robolink()
     RDK.Command("ShowTextObject", "1")

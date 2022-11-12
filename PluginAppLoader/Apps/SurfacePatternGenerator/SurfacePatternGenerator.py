@@ -1,9 +1,17 @@
-# The Surface Pattern Generator (SPG) App let's you generate surface patterns on an object surface, with its associated Curve Follow Project (CFP).
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
 #
-# Type help("robodk.robolink") or help("robodk.robomath") for more information
-# Press F5 to run the script
-# Documentation: https://robodk.com/doc/en/RoboDK-API.html
-# Reference:     https://robodk.com/doc/en/PythonAPI/index.html
+# The Surface Pattern Generator (SPG) App let's you generate surface patterns on an object surface,
+# with its associated Curve Follow Project (CFP).
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
 
 from robodk import robolink, roboapps
 from _spgtools import *
@@ -14,50 +22,52 @@ PART_NAME = None  # 'Paint Part'
 
 def runmain():
 
-    #---------------------------------------------
     class SurfaceSettings(roboapps.AppSettings):
-
-        from collections import OrderedDict
-        __FIELDS_UI = OrderedDict()
-
-        __FIELDS_UI['SIZE_X'] = "Size along X (mm)"
-        __FIELDS_UI['SIZE_Y'] = "Size along Y (mm)"
-        SIZE_X = 500.0
-        SIZE_Y = 500.0
-
-        __FIELDS_UI['STEP_X'] = "Step along X (mm)"
-        __FIELDS_UI['STEP_Y'] = "Step along Y (mm)"
-        STEP_X = 20.0
-        STEP_Y = 50.0
-
-        __FIELDS_UI['ANGLE_TRIANGLE'] = "Triangular path (deg)"
-        ANGLE_TRIANGLE = 0.0
-
-        __FIELDS_UI['COVER_ALL'] = "Cover all surface"
-        __FIELDS_UI['EVEN_DISTRIBUTION'] = "Distribute lines evenly"
-        __FIELDS_UI['CONTINUOUS'] = "Connect lines"
-        COVER_ALL = False
-        EVEN_DISTRIBUTION = False
-        CONTINUOUS = True
-
-        __FIELDS_UI['REPEAT_TIMES'] = "Repeat times"
-        __FIELDS_UI['REPEAT_OFFSET'] = "Repeat Offset along Z (mm)"
-        REPEAT_TIMES = 1
-        REPEAT_OFFSET = 2.0
-
-        __FIELDS_UI['ANGLE_TCP_X'] = "Tool angle X (deg)"
-        __FIELDS_UI['ANGLE_TCP_Y'] = "Tool angle Y (deg)"
-        ANGLE_TCP_X = 0.0
-        ANGLE_TCP_Y = 0.0
-
-        __FIELDS_UI['SPEED_OPERATION'] = "Operation speed (mm/s)"
-        SPEED_OPERATION = 20.0
+        """Surface Pattern Generator App Settings."""
 
         def __init__(self):
             super(SurfaceSettings, self).__init__('Surface-Pattern-Generator-Settings')
-            self._FIELDS_UI = self.__FIELDS_UI
 
-        def ShowUI(self):
+            from collections import OrderedDict
+            self._FIELDS_UI = OrderedDict()
+
+            # --------------------------------------------
+            self._FIELDS_UI['SECTION_PATTERN'] = "$PATTERN$"
+            self._FIELDS_UI['SIZE_X'] = "Size along X (mm)"
+            self._FIELDS_UI['SIZE_Y'] = "Size along Y (mm)"
+            self.SIZE_X = 500.0
+            self.SIZE_Y = 500.0
+
+            self._FIELDS_UI['STEP_X'] = "Step along X (mm)"
+            self._FIELDS_UI['STEP_Y'] = "Step along Y (mm)"
+            self.STEP_X = 20.0
+            self.STEP_Y = 50.0
+
+            self._FIELDS_UI['ANGLE_TRIANGLE'] = "Triangular path (deg)"
+            self.ANGLE_TRIANGLE = 0.0
+
+            self._FIELDS_UI['COVER_ALL'] = "Cover all surface"
+            self._FIELDS_UI['EVEN_DISTRIBUTION'] = "Distribute lines evenly"
+            self._FIELDS_UI['CONTINUOUS'] = "Connect lines"
+            self.COVER_ALL = False
+            self.EVEN_DISTRIBUTION = False
+            self.CONTINUOUS = True
+
+            self._FIELDS_UI['REPEAT_TIMES'] = "Repeat times"
+            self._FIELDS_UI['REPEAT_OFFSET'] = "Repeat Offset along Z (mm)"
+            self.REPEAT_TIMES = 1
+            self.REPEAT_OFFSET = 2.0
+
+            self._FIELDS_UI['SECTION_PROGRAM'] = "$PROGRAM$"
+            self._FIELDS_UI['ANGLE_TCP_X'] = "Tool angle X (deg)"
+            self._FIELDS_UI['ANGLE_TCP_Y'] = "Tool angle Y (deg)"
+            self.ANGLE_TCP_X = 0.0
+            self.ANGLE_TCP_Y = 0.0
+
+            self._FIELDS_UI['SPEED_OPERATION'] = "Operation speed (mm/s)"
+            self.SPEED_OPERATION = 20.0
+
+        def ShowUI(self, windowtitle=None, *args, **kwargs):
 
             def update_pattern():
                 self._UI_READ_FIELDS()
@@ -77,7 +87,10 @@ def runmain():
 
                 CreateMainProgram(PART, prog_name_list)
 
-            windowtitle = PART.Name()
+            if not windowtitle:
+                windowtitle = PART.Name()
+            else:
+                windowtitle = f"[{PART.Name()}] {windowtitle}"
 
             if not roboapps.ENABLE_QT:
 
@@ -102,7 +115,7 @@ def runmain():
 
                     layout.addWidget(b_update)
 
-            super(SurfaceSettings, self).ShowUI(windowtitle=windowtitle, callback_frame=custom_frame)
+            super(SurfaceSettings, self).ShowUI(windowtitle=windowtitle, callback_frame=custom_frame, *args, **kwargs)
 
     #---------------------------------------------
     # Initialize the RoboDK API

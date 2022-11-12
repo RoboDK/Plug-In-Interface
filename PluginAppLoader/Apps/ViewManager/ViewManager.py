@@ -1,13 +1,18 @@
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
 # Manage recorded 3D views using a list of named views
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
 
-# For more information about the RoboDK API:
-# Documentation: https://robodk.com/doc/en/RoboDK-API.html
-# Reference:     https://robodk.com/doc/en/PythonAPI/index.html
-#-------------------------------------------------------
-
-from robodk.robolink import *
-from robodk.robomath import *
-from robodk.robodialogs import *
+from robodk import robolink, robomath, robodialogs, roboapps
 import ast
 import sys
 import os
@@ -24,146 +29,17 @@ WAYPOINTS_DELAY = 0.0  # s, delay between waypoints/views (multi-select)
 
 if sys.version_info[0] < 3:  # Python 2.X only:
     import Tkinter as tkinter
-    import tkMessageBox as messagebox
 else:  # Python 3.x only
     import tkinter
-    from tkinter import messagebox
 
 
-def ShowMessageYesNoCancel(msg, title=None):
-    print(msg)
-    if title is None:
-        title = msg
+def ViewManager():
 
-    root = tkinter.Tk()
-    root.overrideredirect(1)
-    root.withdraw()
-    root.attributes("-topmost", True)
-    result = messagebox.askyesnocancel(title, msg)  #, icon='warning')#, parent=texto)
-    root.destroy()
-    return result
-
-
-# Start the RoboDK API
-RDK = Robolink()
-
-
-def LoadView(view_name, vr_view=False):
-    import ast
-    vp_str = RDK.getParam(view_name)
-    if vp_str is None:
-        RDK.ShowMessage("Preferred view not recorded. Save a view point first", False)
-        quit()
-
-    # Lazy way to convert a list as a string to a list of floats
-    #exec('vp_xyzabc = ' + vp_str, locals())
-    vp_xyzabc = ast.literal_eval(vp_str)
-
-    vp = KUKA_2_Pose(vp_xyzabc)
-
-    if vr_view:
-        # Set headset VR view
-        RDK.Command("ViewPoseVR", str(Pose_2_TxyzRxyz(vp)))
-
-    else:
-        # Set normal VR view
-        RDK.setViewPose(vp)
-
-    print("Done")
-
-
-def threadMoveTo(poses, stop):
-    RDK = Robolink()
-    for pose in poses:
-        RDK.setViewPose(pose)
-        pause(1 / 100)
-        if stop():
-            break
-
-
-def NavigateTo(poses_to):
-    on_Stop()
-
-    global stop_threads
-    stop_threads = False
-
-    global STEPS_SIZE
-    global WAYPOINTS_DELAY
-
-    def PoseSplit(pose1, pose2, flatview=False):
-        pose_delta = invH(pose1) * pose2
-        pose_list = []
-
-        # Calculate steps
-        pose_delta_cam = pose1 * invH(pose2)  # Pose delta seen by the camera
-        travel_mm = norm(pose_delta_cam.Pos())
-        steps = travel_mm / STEPS_SIZE
-        if steps > 1e6:
-            print('Too many steps! ' + str(steps))
-        steps = int(min(steps, 1e6))
-
-        x, y, z, w, p, r = Pose_2_UR(pose_delta)
-
-        xd = x / steps
-        yd = y / steps
-        zd = z / steps
-        wd = w / steps
-        pd = p / steps
-        rd = r / steps
-        for i in range(steps - 1):
-            factor = i + 1
-            pose_i = pose1 * UR_2_Pose([xd * factor, yd * factor, zd * factor, wd * factor, pd * factor, rd * factor])
-            if flatview:
-                xyzabc = Pose_2_KUKA(invH(pose_i))
-                xyzabc[4] = 0
-                pose_i = invH(KUKA_2_Pose(xyzabc))
-
-            pose_list.append(pose_i)
-
-        pose_list.append(pose2)  # Ensure we do not 'jump'
-
-        return pose_list
-
-    add_delay = WAYPOINTS_DELAY > 0 and len(poses_to) > 1
-    pose_lst = []
-    pose_curr = RDK.ViewPose()
-    for pose_to in poses_to:
-
-        if stop_threads:
-            return
-
-        if pose_to == pose_curr:
-            continue
-
-        xyzabc1 = Pose_2_KUKA(invH(pose_curr))
-        xyzabc2 = Pose_2_KUKA(invH(pose_to))
-
-        keep_Y_flat = True
-        if abs(xyzabc1[4]) > 5 or abs(xyzabc2[4]) > 5:
-            print("Moving in full 6DOF")
-            keep_Y_flat = False
-
-        split_poses = PoseSplit(pose_curr, pose_to, flatview=keep_Y_flat)
-
-        if add_delay:
-            t = threading.Thread(target=threadMoveTo, args=(split_poses, lambda: stop_threads))
-            t.start()
-            t.join()  # need to join to have a delay
-            pause(WAYPOINTS_DELAY)
-        else:
-            pose_lst.extend(split_poses)
-
-        pose_curr = pose_to
-
-    if not add_delay and len(pose_lst) > 0:
-        t = threading.Thread(target=threadMoveTo, args=(pose_lst, lambda: stop_threads))
-        t.start()  # no need to join, all poses are included
-
-
-if __name__ == "__main__":
+    # Start the RoboDK API
+    RDK = robolink.Robolink()
 
     # Name of the view we can use with the first button of the toolbar
-    MAIN_VIEW_NAME = "Main View"
+    MAIN_VIEW_NAME = "ViewManager-View-0"
 
     ListNames = []
     ListPoses = []
@@ -177,7 +53,7 @@ if __name__ == "__main__":
             if i == 0 and ListNames[i] == MAIN_VIEW_NAME:
                 continue
 
-            x, y, z, a, b, c = Pose_2_KUKA(ListPoses[i])
+            x, y, z, a, b, c = robomath.Pose_2_KUKA(ListPoses[i])
             stri = "%s|[%.3f,%.3f,%.3f,%.3f,%.3f,%.3f]" % (ListNames[i], x, y, z, a, b, c)
             strall += "%s||" % stri
             print(stri)
@@ -196,33 +72,91 @@ if __name__ == "__main__":
         RDK.setParam("ViewStepsSize", STEPS_SIZE)
         RDK.setParam("ViewWaypointsDelay", WAYPOINTS_DELAY)
 
-    steps_size = RDK.getParam("ViewStepsSize")
-    if steps_size is not None:
-        STEPS_SIZE = float(steps_size)
+    def threadMoveTo(poses, stop):
+        RDK = robolink.Robolink()
+        for pose in poses:
+            RDK.setViewPose(pose)
+            robomath.pause(1 / 100)
+            if stop():
+                break
 
-    waypoints_delay = RDK.getParam("ViewWaypointsDelay")
-    if waypoints_delay is not None:
-        WAYPOINTS_DELAY = float(waypoints_delay)
+    def NavigateTo(poses_to):
+        on_Stop()
 
-    vp_str = RDK.getParam("ViewPose")
-    if vp_str is not None:
-        vp_xyzabc = ast.literal_eval(vp_str)
-        vp = KUKA_2_Pose(vp_xyzabc)
-        ListNames.append(MAIN_VIEW_NAME)
-        ListPoses.append(vp)
+        global stop_threads
+        stop_threads = False
 
-    strvp_all = RDK.getParam("ViewNames")
-    if strvp_all is not None:
-        for strvp in strvp_all.split("||"):
-            strvp_slt = strvp.split("|")
-            if len(strvp) > 1:
-                vp_xyzabc = ast.literal_eval(strvp_slt[1])
-                if len(vp_xyzabc) >= 6:
-                    vp = KUKA_2_Pose(vp_xyzabc)
-                    view_name = strvp_slt[0]
-                    print("Loaded view: " + strvp)
-                    ListNames.append(view_name)
-                    ListPoses.append(vp)
+        global STEPS_SIZE
+        global WAYPOINTS_DELAY
+
+        def PoseSplit(pose1, pose2, flatview=False):
+            pose_delta = robomath.invH(pose1) * pose2
+            pose_list = []
+
+            # Calculate steps
+            pose_delta_cam = pose1 * robomath.invH(pose2)  # Pose delta seen by the camera
+            travel_mm = robomath.norm(pose_delta_cam.Pos())
+            steps = travel_mm / STEPS_SIZE
+            if steps > 1e6:
+                print('Too many steps! ' + str(steps))
+            steps = int(min(steps, 1e6))
+
+            x, y, z, w, p, r = robomath.Pose_2_UR(pose_delta)
+
+            xd = x / steps
+            yd = y / steps
+            zd = z / steps
+            wd = w / steps
+            pd = p / steps
+            rd = r / steps
+            for i in range(steps - 1):
+                factor = i + 1
+                pose_i = pose1 * robomath.UR_2_Pose([xd * factor, yd * factor, zd * factor, wd * factor, pd * factor, rd * factor])
+                if flatview:
+                    xyzabc = robomath.Pose_2_KUKA(robomath.invH(pose_i))
+                    xyzabc[4] = 0
+                    pose_i = robomath.invH(robomath.KUKA_2_Pose(xyzabc))
+
+                pose_list.append(pose_i)
+
+            pose_list.append(pose2)  # Ensure we do not 'jump'
+
+            return pose_list
+
+        add_delay = WAYPOINTS_DELAY > 0 and len(poses_to) > 1
+        pose_lst = []
+        pose_curr = RDK.ViewPose()
+        for pose_to in poses_to:
+
+            if stop_threads:
+                return
+
+            if pose_to == pose_curr:
+                continue
+
+            xyzabc1 = robomath.Pose_2_KUKA(robomath.invH(pose_curr))
+            xyzabc2 = robomath.Pose_2_KUKA(robomath.invH(pose_to))
+
+            keep_Y_flat = True
+            if abs(xyzabc1[4]) > 5 or abs(xyzabc2[4]) > 5:
+                print("Moving in full 6DOF")
+                keep_Y_flat = False
+
+            split_poses = PoseSplit(pose_curr, pose_to, flatview=keep_Y_flat)
+
+            if add_delay:
+                t = threading.Thread(target=threadMoveTo, args=(split_poses, lambda: stop_threads))
+                t.start()
+                t.join()  # need to join to have a delay
+                robomath.pause(WAYPOINTS_DELAY)
+            else:
+                pose_lst.extend(split_poses)
+
+            pose_curr = pose_to
+
+        if not add_delay and len(pose_lst) > 0:
+            t = threading.Thread(target=threadMoveTo, args=(pose_lst, lambda: stop_threads))
+            t.start()  # no need to join, all poses are included
 
     def on_Close():
         on_Stop()
@@ -230,26 +164,10 @@ if __name__ == "__main__":
         SaveSettings()
         w.destroy()
 
-    w = tkinter.Tk()
-
-    w.attributes("-topmost", True)
-    w.title("Manage views")
-    iconpath = getPathIcon()
-    if os.path.exists(iconpath):
-        w.iconbitmap(iconpath)
-
-    w.geometry("200x400")
-    w.protocol("WM_DELETE_WINDOW", on_Close)
-
-    listbox = tkinter.Listbox(w, selectmode="extended")
-
-    for i in range(len(ListNames)):
-        listbox.insert(i + 1, ListNames[i])
-
     def on_Stop():
         global stop_threads
         stop_threads = True
-        pause(0.1)
+        robomath.pause(0.1)
 
     def on_ListDelete():
         on_Stop()
@@ -262,7 +180,7 @@ if __name__ == "__main__":
         for index in sel[::-1]:  # move backwards!!
             print(index)
             nm = ListNames[index]
-            if ShowMessageYesNoCancel("Delete view: " + nm):
+            if robodialogs.ShowMessageYesNoCancel("Delete view: " + nm):
                 del ListNames[index]
                 del ListPoses[index]
                 listbox.delete(index)  # delete from UI
@@ -283,7 +201,7 @@ if __name__ == "__main__":
         for index in sel:
             print(index)
             lbli = ListNames[index]
-            new_name = mbox("Enter the view name for %s" % listbox.get(index), entry=lbli)
+            new_name = robodialogs.mbox("Enter the view name for %s" % listbox.get(index), entry=lbli)
             if not new_name:
                 continue
 
@@ -326,7 +244,7 @@ if __name__ == "__main__":
         on_Stop()
 
         sel = listbox.curselection()
-        new_name = mbox("Enter the view name", entry="New View %i" % (len(ListNames) + 1))
+        new_name = robodialogs.mbox("Enter the view name", entry="New View %i" % (len(ListNames) + 1))
         if not new_name:
             return
 
@@ -360,7 +278,7 @@ if __name__ == "__main__":
             print(index)
             vp = ListPoses[index]
 
-            strpose = str(Pose_2_TxyzRxyz(transl(0, 0, +2000) * vp))[1:-1]
+            strpose = str(robomath.Pose_2_TxyzRxyz(robomath.transl(0, 0, +2000) * vp))[1:-1]
             result = RDK.Command("ViewPoseVR", strpose)
 
             RDK.setViewPose(vp)
@@ -425,6 +343,52 @@ if __name__ == "__main__":
 
         SaveViews()
 
+    #------------------------------------------------
+
+    steps_size = RDK.getParam("ViewStepsSize")
+    if steps_size is not None:
+        STEPS_SIZE = float(steps_size)
+
+    waypoints_delay = RDK.getParam("ViewWaypointsDelay")
+    if waypoints_delay is not None:
+        WAYPOINTS_DELAY = float(waypoints_delay)
+
+    vp_str = RDK.getParam("ViewPose")
+    if vp_str is not None:
+        vp_xyzabc = ast.literal_eval(vp_str)
+        vp = robomath.KUKA_2_Pose(vp_xyzabc)
+        ListNames.append(MAIN_VIEW_NAME)
+        ListPoses.append(vp)
+
+    strvp_all = RDK.getParam("ViewNames")
+    if strvp_all is not None:
+        for strvp in strvp_all.split("||"):
+            strvp_slt = strvp.split("|")
+            if len(strvp) > 1:
+                vp_xyzabc = ast.literal_eval(strvp_slt[1])
+                if len(vp_xyzabc) >= 6:
+                    vp = robomath.KUKA_2_Pose(vp_xyzabc)
+                    view_name = strvp_slt[0]
+                    print("Loaded view: " + strvp)
+                    ListNames.append(view_name)
+                    ListPoses.append(vp)
+
+    w = tkinter.Tk()
+
+    w.attributes("-topmost", True)
+    w.title("Manage views")
+    iconpath = robolink.getPathIcon()
+    if os.path.exists(iconpath):
+        w.iconbitmap(iconpath)
+
+    w.geometry("200x400")
+    w.protocol("WM_DELETE_WINDOW", on_Close)
+
+    listbox = tkinter.Listbox(w, selectmode="extended")
+
+    for i in range(len(ListNames)):
+        listbox.insert(i + 1, ListNames[i])
+
     # Settings
     frame = tkinter.Frame(w)
     frame.pack(fill=tkinter.X, side=tkinter.BOTTOM, expand=True, anchor='n')
@@ -476,3 +440,19 @@ if __name__ == "__main__":
     w.mainloop()
 
     print("Finished")
+
+
+def runmain():
+    """
+    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
+    Important: Use the function name 'runmain()' if you want to compile this action.
+    """
+
+    if roboapps.Unchecked():
+        roboapps.Exit()
+    else:
+        ViewManager()
+
+
+if __name__ == '__main__':
+    runmain()

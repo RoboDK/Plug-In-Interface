@@ -16,7 +16,9 @@ from robodk import robolink, roboapps, robodialogs
 
 
 def SetSize(RDK=None):
-    """Prompt the user to enter the size of the screen and update the main window of RoboDK accordingly."""
+    """
+    Prompt the user to enter the size of the screen and update the main window of RoboDK accordingly.
+    """
     if RDK is None:
         RDK = robolink.Robolink()
 

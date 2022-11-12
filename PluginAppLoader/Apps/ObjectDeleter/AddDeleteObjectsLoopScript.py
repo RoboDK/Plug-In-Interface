@@ -17,6 +17,7 @@
 from robodk import robolink, roboapps
 import os
 
+
 def AddDeleteObjectsLoopScript():
     """
     This file adds the Object Deleter script to your RoboDK station.
@@ -27,6 +28,7 @@ def AddDeleteObjectsLoopScript():
     RDK = robolink.Robolink()
     script = RDK.AddFile(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/DeleteObjectsLoop.py'))
     script.setName('DeleteObjectsLoop')
+
 
 def runmain():
     """

@@ -12,7 +12,7 @@
 #
 # --------------------------------------------
 
-from robodk import robolink, robomath, robodialogs, roboapps
+from robodk import robolink, robodialogs, roboapps
 import datetime
 
 import Settings

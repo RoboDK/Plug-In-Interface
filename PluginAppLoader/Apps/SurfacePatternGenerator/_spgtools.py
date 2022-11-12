@@ -1,9 +1,16 @@
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
 # Surface Pattern Generator utilities.
 #
-# Type help("robodk.robolink") or help("robodk.robomath") for more information
-# Press F5 to run the script
-# Documentation: https://robodk.com/doc/en/RoboDK-API.html
-# Reference:     https://robodk.com/doc/en/PythonAPI/index.html
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
 
 from robodk import robolink, robomath
 import math
@@ -289,3 +296,7 @@ def CreateMainProgram(PART, prog_name_list):
     # Start the program simulation:
     #prog_main.RunProgram() # This will freeze the UI
     ShowMsg("Done!!")
+
+
+if __name__ == '__main__':
+    pass
