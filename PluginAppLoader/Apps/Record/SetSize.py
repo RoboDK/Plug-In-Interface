@@ -27,12 +27,11 @@ def SetSize(RDK=None, S=None):
         S.Load(RDK)
 
     # Get the desired screen size from the user
-    w, h = S.DEFAULT_SCREEN_SIZE
-    newsize = robodialogs.mbox("Set the screen size (size of the 3D window).\n Width x Height:", entry=f"{w}x{h}")
-    if newsize == False:
+    newsize = robodialogs.InputDialog("Set the screen size (size of the 3D window).\n Width x Height:", S.DEFAULT_SCREEN_SIZE)
+    if newsize is None:
         return
 
-    RDK.Command("SetSize3D", newsize)
+    RDK.Command("SetSize3D", f"{newsize[0]}x{newsize[1]}")
 
 
 def runmain():

@@ -24,7 +24,6 @@ class InterfaceSettings(roboapps.AppSettings):
         from collections import OrderedDict
         self._FIELDS_UI = OrderedDict()
 
-        #---------------------------------------------
         # IMPORTANT! The default settings below should be the same as RoboDK's default
 
         # --------------------------------------------
@@ -196,9 +195,8 @@ def runmain():
     else:
         S = InterfaceSettings('Interface-Settings-Custom')
         S.Load()
-        S._UI_TEXT_SAVE = 'Apply'
-        S._UI_SHOW_DISCARD = False
-        S.ShowUI('Interface Settings (Custom)')
+        if not S.ShowUI('Interface Settings (Custom)'):
+            return
         ApplyInterfaceSettings(S=S)
 
 

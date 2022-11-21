@@ -60,7 +60,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        id = robodialogs.mbox("Object Deleter ID", entry=0)
+        id = robodialogs.InputDialog("Object Deleter ID", 0)
         if id == False:
             roboapps.Exit()  # User cancel
         S = Settings('Object-Deleter-Settings-' + str(id))

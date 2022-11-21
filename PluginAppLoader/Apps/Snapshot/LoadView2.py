@@ -26,7 +26,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        id = robodialogs.mbox("View ID", entry=0)
+        id = robodialogs.InputDialog("View ID", 0)
         if id == False:
             roboapps.Exit()  # User cancel
         LoadView('Snapshot-View-' + str(id).strip())

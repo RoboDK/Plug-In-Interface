@@ -20,9 +20,6 @@ class ScaleSettings(roboapps.AppSettings):
     def __init__(self, settings_param='Scale-Object-Settings'):
         super().__init__(settings_param)
 
-        self._UI_SHOW_DISCARD = False
-        self._UI_TEXT_SAVE = 'Apply'
-
         from collections import OrderedDict
         self._FIELDS_UI = OrderedDict()
 
@@ -57,7 +54,8 @@ def ScaleObject(RDK=None, S=None, objects=None):
         if not objects:
             return
 
-    S.ShowUI('Scale settings')
+    if not S.ShowUI('Scale settings'):
+        return
     if S.SCALE_XYZ == [1., 1., 1.]:
         return
 

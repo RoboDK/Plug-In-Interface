@@ -21,9 +21,6 @@ class SimplifySettings(roboapps.AppSettings):
     def __init__(self, settings_param='Simplify-Object-Settings'):
         super().__init__(settings_param)
 
-        self._UI_SHOW_DISCARD = False
-        self._UI_TEXT_SAVE = 'Apply'
-
         from collections import OrderedDict
         self._FIELDS_UI = OrderedDict()
 
@@ -64,7 +61,8 @@ def SimplifyObject(RDK=None, S=None, objects=None):
             return
 
     # Get the scaling
-    S.ShowUI('Simplify settings')
+    if not S.ShowUI('Simplify settings'):
+        return
 
     # Apply the simplification
     RDK.Render(False)

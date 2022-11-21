@@ -20,10 +20,6 @@ class Settings(roboapps.AppSettings):
     def __init__(self, settings_param='Attach-Object-Robot-Settings'):
         super().__init__(settings_param)
 
-        self._UI_TEXT_SAVE = 'Apply'
-        self._UI_TEXT_DISCARD = 'Cancel'
-        self._UI_SHOW_DEFAULTS = False
-
         from collections import OrderedDict
         self._FIELDS_UI = OrderedDict()
 
@@ -67,7 +63,7 @@ def AttachObjectToRobotLink(RDK=None, S=None, objects=None):
 
     DOF = len(robot.Joints().tolist())
     S.ROBOT_LINK = [0, [str(x) for x in range(DOF + 1)]]
-    if S.ShowUI('Attach Object Settings'):
+    if not S.ShowUI('Attach Object Settings'):
         return
 
     robot_link = robot.ObjectLink(int(S.ROBOT_LINK[0]))

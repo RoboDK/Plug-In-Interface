@@ -23,18 +23,18 @@ def SetSize(RDK=None):
         RDK = robolink.Robolink()
 
     # Get the desired screen size from the user
-    entry = '1920x1080'
+    entry = [1920, 1080]
 
     # If available, use the current size
     current_size = RDK.Command('SetSize3D')
     if len(current_size.split('x', maxsplit=2)) == 2:
-        entry = current_size
+        entry = current_size.split('x')
 
-    newsize = robodialogs.mbox("Set the screen size (size of the 3D window).\nEnter ' ' to unlock the screen\nWidth x Height:", entry=entry)
-    if newsize == False:
+    newsize = robodialogs.InputDialog("Set the screen size (size of the 3D window).\nEnter ' ' to unlock the screen\nWidth x Height:", entry=entry)
+    if newsize is None:
         return
 
-    RDK.Command("SetSize3D", newsize.strip())
+    RDK.Command("SetSize3D", f"{newsize[0]}x{newsize[1]}")
 
 
 def runmain():
