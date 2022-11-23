@@ -2,10 +2,12 @@
 #include "ui_dialogapplist.h"
 #include "apploader.h"
 #include "tableheader.h"
+#include "applistdelegate.h"
 
 #include <QSettings>
 #include <QFileInfo>
 #include <QDesktopServices>
+#include <QMainWindow>
 
 
 DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
@@ -17,12 +19,16 @@ DialogAppList::DialogAppList(AppLoader *apploader, QWidget *parent) :
     setModal(true);
     setAttribute(Qt::WA_DeleteOnClose);
 
+
     Qt::WindowFlags flags = windowFlags();
     flags &= ~Qt::WindowContextHelpButtonHint;
     flags |= Qt::CustomizeWindowHint;
     flags |= Qt::Window;
     setWindowFlags(flags);
 
+    resize(pAppLoader->MainWindow->size() / 2.0);
+
+    ui->tableWidget->setItemDelegate(new AppListDelegate());
     ui->tableWidget->setHorizontalHeader(new TableHeader(Qt::Horizontal));
 
     UpdateForm();
@@ -63,18 +69,21 @@ void DialogAppList::UpdateForm(){
         tAppMenu *appmenu = pAppLoader->ListMenus[i];
         QTableWidgetItem *itemName = new QTableWidgetItem(appmenu->Name);
 
-        QTableWidgetItem *itemVersion = new QTableWidgetItem(appmenu->Version);
+        QTableWidgetItem *itemVersion = new QTableWidgetItem(appmenu->Version + appmenu->Name);
+        itemVersion->setData(Qt::UserRole, appmenu->Version);
         itemVersion->setTextAlignment(Qt::AlignCenter);
 
         QTableWidgetItem *itemStatus = nullptr;
         QPushButton* buttonAction = nullptr;
 
         if (appmenu->Active){
-            itemStatus = new QTableWidgetItem(iconEnabled, tr("Enabled"));
+            itemStatus = new QTableWidgetItem(iconEnabled, "E" + appmenu->Name);
+            itemStatus->setData(Qt::UserRole, tr("Enabled"));
             buttonAction = new QPushButton(tr("DISABLE"));
             buttonAction->setProperty("action-enable", false);
         } else {
-            itemStatus = new QTableWidgetItem(iconDisabled, tr("Disabled"));
+            itemStatus = new QTableWidgetItem(iconDisabled, "D" + appmenu->Name);
+            itemStatus->setData(Qt::UserRole, tr("Disabled"));
             buttonAction = new QPushButton(tr("ENABLE"));
             buttonAction->setProperty("action-enable", true);
         }
@@ -82,8 +91,14 @@ void DialogAppList::UpdateForm(){
         connect(buttonAction, &QPushButton::clicked,
                 this, &DialogAppList::onButtonActionClicked);
 
-        QTableWidgetItem* itemStorage = new QTableWidgetItem(
-            appmenu->Global ? tr("Global") : tr("User"));
+        QTableWidgetItem* itemStorage = nullptr;
+        if (appmenu->Global) {
+            itemStorage = new QTableWidgetItem("G" + appmenu->Name);
+            itemStorage->setData(Qt::UserRole, tr("Global"));
+        } else {
+            itemStorage = new QTableWidgetItem("U" + appmenu->Name);
+            itemStorage->setData(Qt::UserRole, tr("User"));
+        }
         itemStorage->setTextAlignment(Qt::AlignCenter);
 
         QFileInfo pathInfo(appmenu->IniPath);
@@ -158,3 +173,12 @@ void DialogAppList::onButtonFolderClicked()
 
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }
+
+void DialogAppList::on_tableWidget_cellDoubleClicked(int row, int column)
+{
+    Q_UNUSED(column)
+    QPushButton* button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(row, 3));
+    if (button)
+        button->click();
+}
+

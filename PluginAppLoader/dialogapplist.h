@@ -38,6 +38,8 @@ private slots:
     /// Open application location
     void onButtonFolderClicked();
 
+    void on_tableWidget_cellDoubleClicked(int row, int column);
+
 private:
     AppLoader *pAppLoader;
     Ui::DialogAppList *ui;

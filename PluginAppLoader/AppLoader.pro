@@ -82,6 +82,7 @@ CONFIG(release, debug|release) {
 # Add header and source files (use File->New File or Project and add your files)
 # This can be modified manually or automatically by Qt Creator
 HEADERS += \
+    applistdelegate.h \
     apploader.h \
     dialogapplist.h \
     installerdialog.h \
@@ -91,6 +92,7 @@ HEADERS += \
     zip/zip.h
 
 SOURCES += \
+    applistdelegate.cpp \
     apploader.cpp \
     dialogapplist.cpp \
     installerdialog.cpp \
