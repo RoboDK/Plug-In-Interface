@@ -10,12 +10,18 @@ It includes:
     * Checkable
     * Momentary
     * Contextual
+    * Double-click (for generic items)
 
 * Options
     * Individual
     * Grouped
 
 * Settings
-    * GUI settings
+    * App configuration
+    * Savable settings
 
 * Icons
+
+* Python
+    * Shared modules
+    * Dependencies

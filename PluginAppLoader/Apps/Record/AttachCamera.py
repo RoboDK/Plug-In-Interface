@@ -1,22 +1,43 @@
-# This action is "checkable" as defined in the INI settings.
-# Therefore, we can use the AttachCamera station parameter to detect if the button is checked or unchecked.
-# This script will be triggered when the button is clicked (checked or unchecked)
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
+# Attach the camera (3D view point) to the currently selected item.
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
 
-from robodk.robolink import *  # RoboDK API
-from robodk.robomath import *  # Robot toolbox
+from robodk import robolink, robomath, roboapps
+
+import Settings
 
 
-def AttachCamera():
-    RDK = Robolink()
+def AttachCamera(RDK=None, S=None):
+    """
+    Attach the camera (3D view point) to the currently selected item.
+    """
+    if RDK is None:
+        RDK = robolink.Robolink()
 
-    item2station_pose = eye(4)
-    view_pose_last = eye(4)
+    if S is None:
+        S = Settings.Settings()
+        S.Load(RDK)
+
+    item2station_pose = robomath.eye(4)
+    view_pose_last = robomath.eye(4)
     last_item = None
 
-    RDK.Render()
+    APP = roboapps.RunApplication()
+    while APP.Run():
 
-    run = RunApplication()
-    while run.Run():
+        # Sync rendering with this App
+        RDK.Render(False)
+
         # Retrieve user selection
         selected_items = RDK.Selection()
         if len(selected_items) <= 0:
@@ -27,8 +48,8 @@ def AttachCamera():
         item = selected_items[0]
 
         # Prevent selecting programs or instructions or anything that doesn't move
-        if item.type == ITEM_TYPE_ROBOT or item.type == ITEM_TYPE_TOOL or item.type == ITEM_TYPE_FRAME or item.type == ITEM_TYPE_OBJECT or item.type == ITEM_TYPE_TARGET:
-            item_pose = item.PoseAbs()  # Selected item pose with respect to the station reference
+        if item.type in [robolink.ITEM_TYPE_ROBOT, robolink.ITEM_TYPE_TOOL, robolink.ITEM_TYPE_FRAME, robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_TARGET]:
+            item_pose = item.PoseWrt(RDK.ActiveStation())  # Selected item pose with respect to the station reference (this works for robots too!)
             item2station_pose = item_pose.inv()
 
             if last_item != item:
@@ -41,91 +62,32 @@ def AttachCamera():
                 last_item = item
 
             else:
-                # calculate the new view pose and udpate it
-                view_pose = camera2item_pose * item2station_pose
+                # Calculate the new view pose and update it
+                if S.CAMERA_RELATIVE:
+                    view_pose = camera2item_pose * item2station_pose
+                else:
+                    view_pose = (item_pose * robomath.rotx(-robomath.pi)).inv()
 
                 # Only update if the view pose changed
                 if view_pose != view_pose_last:
                     view_pose_last = view_pose
                     RDK.setViewPose(view_pose)
-                    RDK.Render()
 
-
-class RunApplication:
-    """Class to detect when the terminate signal is emited to stop an action.
-
-    .. code-block:: python
-
-        run = RunApplication()
-        while run.Run():
-            # your main loop to run until the terminate signal is detected
-            ...
-
-    """
-    time_last = -1
-    param_name = None
-    RDK = None
-
-    def __init__(self, rdk=None):
-        if rdk is None:
-            from robodk.robolink import Robolink
-            self.RDK = Robolink()
-        else:
-            self.RDK = rdk
-
-        self.time_last = time.time()
-        if len(sys.argv) > 0:
-            path = sys.argv[0]
-            folder = os.path.basename(os.path.dirname(path))
-            file = os.path.basename(path)
-            if file.endswith(".py"):
-                file = file[:-3]
-            elif file.endswith(".exe"):
-                file = file[:-4]
-
-            self.param_name = file + "_" + folder
-            self.RDK.setParam(self.param_name, "1")  # makes sure we can run the file separately in debug mode
-
-    def Run(self):
-        time_now = time.time()
-        if time_now - self.time_last < 0.25:
-            return True
-        self.time_last = time_now
-        if self.param_name is None:
-            # Unknown start
-            return True
-
-        keep_running = not (self.RDK.getParam(self.param_name) == 0)
-        return keep_running
-
-
-def Unchecked():
-    """Verify if the command "Unchecked" is present. In this case it means the action was just unchecked from RoboDK (applicable to checkable actions only)."""
-    if len(sys.argv) >= 2:
-        if "Unchecked" in sys.argv[1:]:
-            return True
-
-    return False
-
-
-def Checked():
-    """Verify if the command "Checked" is present. In this case it means the action was just checked from RoboDK (applicable to checkable actions only)."""
-    if len(sys.argv) >= 2:
-        if "Checked" in sys.argv[1:]:
-            return True
-
-    return False
+    # Action unchecked, turn rendering back on
+    RDK.Render(True)
 
 
 def runmain():
-    # Verify if this is an action that was just unchecked
-    if Unchecked():
-        quit(0)
+    """
+    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
+    Important: Use the function name 'runmain()' if you want to compile this action.
+    """
+
+    if roboapps.Unchecked():
+        roboapps.Exit()
     else:
-        # Checked (or checkable status not applicable)
         AttachCamera()
 
 
-if __name__ == "__main__":
-    # Important: leave the main function as runmain if you want to compile this app
+if __name__ == '__main__':
     runmain()

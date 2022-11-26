@@ -1,20 +1,43 @@
-from robodk.robolink import *
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
+# Set the interface to default.
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
 
-RDK = Robolink()
+from robodk import robolink, roboapps
 
-RDK.Command("DisplayThreshold", 0.1)  # Display everything
+import InterfaceSettings
 
-RDK.Command("DisplayCurves", 0)  # Hide Curves
-RDK.Command("DisplayPoints", 0)  # Hide Points
 
-# Remove mouse feedback (may slow down VR headset if playing with the cell)
-RDK.Command("MouseFeedback", 1)
+def SetInterfaceDefault():
+    """
+    Set the interface to default.
+    """
 
-# Allow all default RoboDK flags
-# https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Robolink.setFlagsRoboDK
-RDK.setFlagsRoboDK(FLAG_ROBODK_ALL)
+    # Default settings of InterfaceSettings are the expected defaults
+    S = InterfaceSettings.InterfaceSettings()
+    S.Apply()
 
-RDK.setWindowState(WINDOWSTATE_NORMAL)
-#RDK.Command("ToolbarLayout", "Default") # already done with the previous command
-RDK.setWindowState(WINDOWSTATE_MAXIMIZED)
-#RDK.setWindowState(WINDOWSTATE_CINEMA)
+
+def runmain():
+    """
+    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
+    Important: Use the function name 'runmain()' if you want to compile this action.
+    """
+
+    if roboapps.Unchecked():
+        roboapps.Exit()
+    else:
+        SetInterfaceDefault()
+
+
+if __name__ == '__main__':
+    runmain()

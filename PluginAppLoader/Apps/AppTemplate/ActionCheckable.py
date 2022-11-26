@@ -1,4 +1,20 @@
-# Checkable action example
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
+# Checkable action example.
+#
+# The main icon for this action is automatically loaded as it shares the same name (ActionCheckable[.py, .svg]).
+# The checked icon loaded as it is suffixed with 'Checked'.
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
+
 from robodk import robolink, robomath, roboapps
 from _AppUtilities import ShowMessage
 import os

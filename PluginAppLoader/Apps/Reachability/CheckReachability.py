@@ -1,135 +1,164 @@
-#####################################################
-## Copyright (C) RoboDK Inc - All Rights Reserved
-## Documentation: https://robodk.com/doc/en/RoboDK-API.html
-## Reference:     https://robodk.com/doc/en/PythonAPI/index.html
-#####################################################
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
 #
-# Purpose: Show a preview of reachability around the current TCP point
+# Show a preview of reachability around the current TCP point.
 #
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
 
-from _config import *
-from robodk.robolink import *  # RoboDK API
-from robodk.robomath import *  # Robot toolbox
+from robodk import robolink, robomath, roboapps
+import time
+
+import Settings
 
 
-# Define the ranges to test
-def MainAction():
-    # Start the RoboDK API
-    RDK = Robolink()
+def MainAction(RDK=None, S=None):
+    """
+    Show a preview of reachability around the current TCP point.
+    """
+    if RDK is None:
+        RDK = robolink.Robolink()
 
-    # Load this app settings
-    S = Settings()
-    S.Load(RDK)
+    if S is None:
+        S = Settings.Settings()
+        S.Load(RDK)
 
-    # Calculate ranges based on input
-    Range_TX = eval(S.Range_TX)
-    Range_TY = eval(S.Range_TY)
-    Range_TZ = eval(S.Range_TZ)
-    Range_RX = eval(S.Range_RX)
-    Range_RY = eval(S.Range_RY)
-    Range_RZ = eval(S.Range_RZ)
+    # Get the rotation range
+    RANGE_RX = range(1)
+    RANGE_RY = range(1)
+    RANGE_RZ = range(1)
+    if S.ROTATION_ENABLE:
+        RANGE_RX = range(S.RANGE_RX[0], S.RANGE_RX[1], S.RANGE_RX[2]) if S.RANGE_RX[2] > 0 and S.RANGE_RX[0] - S.RANGE_RX[1] != 0 else RANGE_RX
+        RANGE_RY = range(S.RANGE_RY[0], S.RANGE_RY[1], S.RANGE_RY[2]) if S.RANGE_RY[2] > 0 and S.RANGE_RY[0] - S.RANGE_RY[1] != 0 else RANGE_RY
+        RANGE_RZ = range(S.RANGE_RZ[0], S.RANGE_RZ[1], S.RANGE_RZ[2]) if S.RANGE_RZ[2] > 0 and S.RANGE_RZ[0] - S.RANGE_RZ[1] != 0 else RANGE_RZ
 
-    # Reachable display timeouts in milliseconds
-    timeout_reachable = 60 * 60 * 1000
-
-    # Non reachable display timeout in milliseconds
-    timeout_unreachable = S.Unreachable_Timeout * 1000
+    # Get the translation range
+    RANGE_TX = range(1)
+    RANGE_TY = range(1)
+    RANGE_TZ = range(1)
+    if S.TRANSLATION_ENABLE:
+        RANGE_TX = range(S.RANGE_TX[0], S.RANGE_TX[1], S.RANGE_TX[2]) if S.RANGE_TX[2] > 0 and S.RANGE_TX[0] - S.RANGE_TX[1] != 0 else RANGE_RX
+        RANGE_TY = range(S.RANGE_TY[0], S.RANGE_TY[1], S.RANGE_TY[2]) if S.RANGE_TY[2] > 0 and S.RANGE_TY[0] - S.RANGE_TY[1] != 0 else RANGE_RY
+        RANGE_TZ = range(S.RANGE_TZ[0], S.RANGE_TZ[1], S.RANGE_TZ[2]) if S.RANGE_TZ[2] > 0 and S.RANGE_TZ[0] - S.RANGE_TZ[1] != 0 else RANGE_RZ
 
     # Get the robot
-    robot = RDK.ItemUserPick('Select a robot to test the reachability', ITEM_TYPE_ROBOT)
+    robot = RDK.ItemUserPick('Select a robot to test the reachability', robolink.ITEM_TYPE_ROBOT_ARM)
     if not robot.Valid():
-        RDK.ShowMessage("Select a robot to see reachability")
-        quit()
+        # User canceled, or no robot in the station
+        return
 
-    # Get the current pose of the robot:
-    robot_pose_ref = robot.Pose()
+    # Get the current pose of the robot
+    robot.setPoseTool(robot.PoseTool())
+    robot.setPoseFrame(robot.PoseFrame())
     robot_tool = robot.PoseTool()
     robot_base = robot.PoseFrame()
+    robot_pose_ref = robot.Pose()
     robot_joints = robot.Joints()
+
+    # If the robot has synchronized axis, showing unreachable poses can be tricky
+    robot_dof = len(robot_joints.list())
+    robot_dof_ext = 0
+    for robot_link in robot.getLinks(robolink.ITEM_TYPE_ROBOT):
+        dof = len(robot_link.Joints().list())
+        robot_dof_ext += dof
+        robot_dof -= dof
+
+    if robot_dof_ext > 0:
+        RDK.ShowMessage('Robot has synchronized axis. Only reachable poses can be shown.')
 
     # Iterate through all pose combinations and collect all valid poses
     reachable_poses = []
     unreachable_poses = []
-    for tx in Range_TX:
-        for ty in Range_TY:
-            for tz in Range_TZ:
-                for rx in Range_RX:
-                    for ry in Range_RY:
-                        for rz in Range_RZ:
-                            print("Testing translation/rotation: " + str([tx, ty, tz, rx, ry, rz]))
-                            pose_add = transl(tx, ty, tz) * rotx(rx * pi / 180) * roty(ry * pi / 180) * rotz(rz * pi / 180)
+    for tx in RANGE_TX:
+        for ty in RANGE_TY:
+            for tz in RANGE_TZ:
+                for rx in RANGE_RX:
+                    for ry in RANGE_RY:
+                        for rz in RANGE_RZ:
+                            msg = "Testing translation/rotation: " + str([tx, ty, tz, rx, ry, rz])
+
+                            pose_add = robomath.transl(tx, ty, tz) * robomath.rotx(rx * robomath.pi / 180) * robomath.roty(ry * robomath.pi / 180) * robomath.rotz(rz * robomath.pi / 180)
                             pose_test = robot_pose_ref * pose_add
-                            jnts_sol = robot.SolveIK(pose_test, None, robot_tool, robot_base)
-                            #print(jnts_sol.list())
-                            if len(jnts_sol.list()) <= 1:
-                                print("Not reachable")
+                            jnts_sol = robot.SolveIK(pose_test, robot_joints, robot_tool, robot_base)
+
+                            if len(jnts_sol.list()) != robot_dof + robot_dof_ext:
+                                print(msg + " -> Not reachable")
                                 unreachable_poses.append(pose_test)
-                                #reachable_poses.append(pose_test)
                             else:
-                                print("Reachable")
+                                print(msg + " -> Reachable")
                                 reachable_poses.append(pose_test)
 
-    # Display settings
-    Display_Default = 1  # Display "ghost" tools in RoboDK
-    Display_Normal = 2
-    Display_Green = 3
-    Display_Red = 4
+    # Preview display options
+    # If no tool is available, show the robot joints as there will be nothing to show otherwise!
+    display_options = robolink.SEQUENCE_DISPLAY_TOOL_POSES
+    if S.PREVIEW_ROBOT_JOINTS or not robot.getLink(robolink.ITEM_TYPE_TOOL).Valid():
+        # Preview the robot in addition to the tool
+        display_options |= robolink.SEQUENCE_DISPLAY_ROBOT_POSES
 
-    Display_Invisible = 64
-    Display_NotActive = 128
-    Display_RobotPoses = 256
-    Display_RobotPosesRotZ = 512
-    Display_Reset = 1048
+    # Only show reachable poses for synchronized axis, as it may show unexpected poses
+    if robot_dof_ext > 0:
+        unreachable_poses = []
 
-    Display_Options = 0
-    #Display_Options += Display_Invisible # Show invisible tools
-    #Display_Options += Display_NotActive # Show non active tools
-    if S.ShowRobotPoses:
-        Display_Options += Display_RobotPoses  # Show robot joints if reachable
-    #Display_Options += Display_RobotPosesRotZ # Show robot joints if reachable (tests rotating around the Z axis)
-    #Display_Options += Display_Reset # Reset flag (clears the trace)
-
-    # Force reset
+    # Reset previous previews
+    time_out = 0.
     robot.ShowSequence([])
 
-    # Show reachable poses:
-    robot.ShowSequence(reachable_poses, Display_Options + Display_Default, timeout_reachable)
+    # Show reachable/unreachable poses
+    if S.PREVIEW_REACHABLE and reachable_poses:
+        robot.ShowSequence(reachable_poses, display_options | robolink.SEQUENCE_DISPLAY_COLOR_GOOD, S.TIMEOUT_REACHABLE * 1000)
+        time_out = max(time_out, S.TIMEOUT_REACHABLE)
 
-    # Show unreachable poses:
-    robot.ShowSequence(unreachable_poses, Display_Options + Display_Red, timeout_unreachable)
+    if S.PREVIEW_UNREACHABLE and unreachable_poses:
+        robot.ShowSequence(unreachable_poses, display_options | robolink.SEQUENCE_DISPLAY_COLOR_BAD, S.TIMEOUT_UNREACHABLE * 1000)
+        time_out = max(time_out, S.TIMEOUT_UNREACHABLE)
 
-    # Example that shows how to wait for the Terminate signal (SIGINT sent by RoboDK uncheck or Ctrl+C)
-    run = RunApplication()
-    while run.Run():
-        import time
-        time.sleep(0.2)
+    # Show the poses until the user uncheck the action, or the timeout is reached
+    if time_out > 0:
+        APP = roboapps.RunApplication()
+        start = time.time()
+        while APP.Run():
+            time.sleep(0.2)
+            if time.time() - start > time_out:
+                break
 
-    robot.ShowSequence([])  # Force reset
+    robot.ShowSequence([])
 
 
-def MainActionOff():
-    """Turn off the display of all sequence previews"""
-    # Get the list of all robots:
-    RDK = Robolink()
-    robot_list = RDK.ItemList(ITEM_TYPE_ROBOT)
+def MainActionOff(RDK=None, S=None):
+    """
+    Turn off the display of all sequence previews (of all robots).
+    """
+    if RDK is None:
+        RDK = robolink.Robolink()
+
+    if S is None:
+        S = Settings.Settings()
+        S.Load(RDK)
+
+    if not S.PREVIEW_CLEAR_ALL:
+        return
+
+    robot_list = RDK.ItemList(robolink.ITEM_TYPE_ROBOT)
     for robot in robot_list:
-        # Force reset preview
         robot.ShowSequence([])
 
 
 def runmain():
-    # For checkable actions: this will tell RoboDK to never force stop (kill) this app
-    #SkipKill()
-
-    # Verify if this is an action that was just unchecked
-    if Unchecked():
+    """
+    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
+    Important: Use the function name 'runmain()' if you want to compile this action.
+    """
+    if roboapps.Unchecked():
         MainActionOff()
-
     else:
-        # Checked (or checkable status not applicable)
         MainAction()
 
 
-# Important: leave the main function as runmain if you want to compile this app
-if __name__ == "__main__":
+if __name__ == '__main__':
     runmain()

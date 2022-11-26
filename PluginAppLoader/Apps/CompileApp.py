@@ -109,7 +109,7 @@ if CompileVersion is None:
     # Exceptionally, if an app has the name ending with "-Src", we'll compile it to the same name without -Src or Comp
     if path_compile_from.lower().endswith("-src"):
         path_compile_to = path_compile_from[:-4]
-        
+
     del_path_compile_from = False
 
     if path_app != path_compile_from:

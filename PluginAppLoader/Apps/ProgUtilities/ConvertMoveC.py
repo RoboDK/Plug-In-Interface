@@ -1,117 +1,131 @@
+# --------------------------------------------
+# --------------- DESCRIPTION ----------------
+#
 # Convert MoveC to linear movements (MoveL) in the selected program(s).
 #
-# Type help("robodk.robolink") or help("robodk.robomath") for more information
-# Press F5 to run the script
-# Documentation: https://robodk.com/doc/en/RoboDK-API.html
-# Reference:     https://robodk.com/doc/en/PythonAPI/index.html
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
+# --------------------------------------------
 
-from robodk import robolink
+from robodk import robolink, roboapps
 
-STEP_MM = 1
-STEP_DEG = 1
-PROG_EXPAND_NAME = "%s Linear"  # ex: MyProg Linear
-
-
-def getConvertedProg(prog, RDK):
-    """Creates a new program from the specified program."""
-
-    # Delete previously generated programs of the same name
-    new_prog_name = PROG_EXPAND_NAME % prog.Name()
-    new_prog = RDK.Item(new_prog_name, robolink.ITEM_TYPE_PROGRAM)
-    if new_prog.Valid() and new_prog.Name() == new_prog_name:
-        new_prog.Delete()
-
-    # Create a new program
-    new_prog = RDK.AddProgram(new_prog_name)
-    if not new_prog.Valid():
-        new_prog.Delete()
-        raise
-    new_prog.setParent(prog.Parent())
-    new_prog.ShowInstructions(False)
-    return new_prog
+import Settings
 
 
-def convertProg(prog_from, prog_to, RDK):
+def ConvertMoveC(RDK=None, S=None, progs=None):
     """
-    Convert MoveC to linear movements (MoveL) from a program to another program.
+    Convert circular (MoveC) to linear (MoveL) instructions in program(s).
     """
+    if RDK is None:
+        RDK = robolink.Robolink()
 
-    print('Converting program: "' + prog_from.Name() + '" to "' + prog_to.Name() + '"')
+    if S is None:
+        S = Settings.Settings()
+        S.Load(RDK)
 
-    # Get the robot parameters of this program
-    robot = prog_from.getLink()
-    if not robot.Valid():
-        RDK.ShowMessage('Link a robot to the program before converting it.')
-        return
-    last_pose = robot.Pose()  # A MoveC has a 'current' start point and 2 targets.
-    dof = len(robot.Joints().tolist())
+    # Get program(s) to convert..
+    if progs is None:
+        # ..from tree selection
+        progs = [x for x in RDK.Selection() if x.Type() == robolink.ITEM_TYPE_PROGRAM]
+        if not progs:
+            # ..or user selection
+            prog = RDK.ItemUserPick('Select the program to convert', robolink.ITEM_TYPE_PROGRAM)
+            if not prog.Valid():
+                return
+            progs = [prog]
+    else:
+        # ..as provided
+        progs = [x for x in progs if x.Type() == robolink.ITEM_TYPE_PROGRAM]
+        if not progs:
+            return
 
-    inst_count = prog_from.InstructionCount()
-    for i in range(inst_count):
-        instruction_dict = prog_from.setParam(i)
-        print(' - Instruction: ' + str(instruction_dict))
+    # Convert programs
+    for prog_from in progs:
 
-        # Store movements
-        if instruction_dict['Type'] == robolink.INS_TYPE_MOVE:
-            name, instype, movetype, isjointtarget, pose, joints = prog_from.Instruction(i)
-            last_pose = pose
+        RDK.Render(False)
 
-        # Convert MoveC
-        elif instruction_dict['Type'] == robolink.INS_TYPE_MOVEC:
-            prog_to.RunInstruction(instruction_dict['Name'], robolink.INSTRUCTION_COMMENT)
+        # Get the robot parameters of this program
+        robot = prog_from.getLink(robolink.ITEM_TYPE_ROBOT)
+        if not robot.Valid():
+            robot = RDK.ItemUserPick("Select the program's robot", robolink.ITEM_TYPE_ROBOT)
+            if not robot.Valid():
+                RDK.ShowMessage(prog_from.Name() + ': a robot is required to convert MoveC to MoveL(s)')
+                continue
+            prog_from.setRobot(robot)
 
-            # InstructionListJoints converts all movements in the whole program.
-            # Create a temporary program with the last pose and the MoveC, get the linear moves.
-            prog_temp = getConvertedProg(prog_to, RDK)
-            prog_temp.MoveJ(last_pose)
-            prog_temp.setParam("Add", instruction_dict)
-            status_joint_list = prog_temp.InstructionListJoints(STEP_MM, STEP_DEG)
-            prog_temp.Delete()
+        last_pose = robot.Pose()  # A MoveC has a 'current' start point and 2 targets.
+        dof = len(robot.Joints().tolist())
 
-            # Check the conversion
-            if status_joint_list[0] != 'Success':
-                raise Exception('Unable to convert MoveC: %s' % status_joint_list[0])
-            joint_list = status_joint_list[1]
-            njoints = joint_list.size(1)
-            if njoints < 2:
-                raise Exception('Invalid program!')
-            joints_list = joint_list[:dof, :]
+        # Create the converted program
+        prog_to = RDK.AddProgram(f"{prog_from.Name()} {S.CONVERT_MOVEC_PROG_SUFFIX.strip()}", robot)
+        prog_to.setParent(prog_from.Parent())
+        prog_to.ShowInstructions(False)
+        print('Converting program: "' + prog_from.Name() + '" to "' + prog_to.Name() + '"')
 
-            # Add the MoveL to new program
-            # This can take a while if we render, inform the user.
-            RDK.ShowMessage('Processing %i points, please wait...' % njoints, False)
-            for i in range(njoints):
-                prog_to.MoveL(joints_list[:, i])
+        # Parse instructions
+        inst_count = prog_from.InstructionCount()
+        for i in range(inst_count):
+            instruction_dict = prog_from.setParam(i)
 
-            continue
+            # Store movements
+            if instruction_dict['Type'] == robolink.INS_TYPE_MOVE:
+                name, instype, movetype, isjointtarget, pose, joints = prog_from.Instruction(i)
+                last_pose = pose
 
-        prog_to.setParam("Add", instruction_dict)
+            # Convert MoveC
+            elif instruction_dict['Type'] == robolink.INS_TYPE_MOVEC:
+                prog_to.RunInstruction(instruction_dict['Name'], robolink.INSTRUCTION_COMMENT)
 
-    prog_to.ShowInstructions(True)
+                # InstructionListJoints converts all movements in the whole program.
+                # Create a temporary program with the last pose and the MoveC, get the linear moves.
+                prog_temp = RDK.AddProgram(f"{prog_from.Name()} {S.CONVERT_MOVEC_PROG_SUFFIX.strip()} [TEMP]", robot)
+                prog_temp.MoveJ(last_pose)
+                prog_temp.setParam("Add", instruction_dict)
+                status_joint_list = prog_temp.InstructionListJoints(S.CONVERT_MOVEC_STEP_MM, S.CONVERT_MOVEC_STEP_DEG)
+                prog_temp.Delete()
 
+                # Check the conversion
+                if status_joint_list[0] != 'Success':
+                    RDK.ShowMessage('Unable to convert MoveC: %s' % status_joint_list[0])
+                    break
 
-def runmain():
-    RDK = robolink.Robolink()
+                joint_list = status_joint_list[1]
+                njoints = joint_list.size(1)
+                if njoints < 2:
+                    raise Exception('Invalid program!')
+                joints_list = joint_list[:dof, :]
 
-    # Get the programs to convert
-    programs = list(filter(lambda item: item.Type() == robolink.ITEM_TYPE_PROGRAM, RDK.Selection()))
-    if len(programs) < 1:
-        RDK.ShowMessage('Please select at least one program.')
-        return
+                # Add the MoveL to new program
+                # This can take a while if we render, inform the user.
+                RDK.ShowMessage('Processing %i points, please wait...' % njoints, False)
+                for i in range(njoints):
+                    prog_to.MoveL(joints_list[:, i])
+                    last_pose = joints_list[:, i]
+                continue
 
-    RDK.Render()
-    RDK.Render(False)
+            prog_to.setParam("Add", instruction_dict)
 
-    for program in programs:
-        # Create a new empty program
-        exp_prog = getConvertedProg(program, RDK)
-
-        # Convert any sub programs into the new program
-        convertProg(program, exp_prog, RDK)
+        prog_to.setParam("RecalculateTargets")
 
     RDK.Render(True)
 
 
-# Important: leave the main function as runmain if you want to compile this app
-if __name__ == "__main__":
+def runmain():
+    """
+    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
+    Important: Use the function name 'runmain()' if you want to compile this action.
+    """
+
+    if roboapps.Unchecked():
+        roboapps.Exit()
+    else:
+        ConvertMoveC()
+
+
+if __name__ == '__main__':
     runmain()
