@@ -404,6 +404,9 @@ void AppLoader::AppsSearch(bool install_requirements){
 
     AppsDelete();
 
+    QString value = RDK->Command("DeveloperMode");
+    bool isDeveloperMode = (!value.isEmpty() && value != "0");
+
     // Get path to apps folder
     QDir globalPath(PathApps);
     QDir userPath(PathUserApps);
@@ -623,10 +626,12 @@ void AppLoader::AppsSearch(bool install_requirements){
             QString displayName = settings.value(keyName + "/DisplayName", name_guess).toString();
             QString comment = settings.value(keyName + "/Description", name_guess).toString();
             bool visible = settings.value(keyName + "/Visible", true).toBool();
+            bool developerOnly = settings.value(keyName + "/DeveloperOnly", false).toBool();
             QString shortcutstr = settings.value(keyName + "/Shortcut", "").toString();
             bool checkable = settings.value(keyName + "/Checkable", false).toBool();
             int checkable_group = settings.value(keyName + "/CheckableGroup", -1).toInt();
-            bool addToolBar = settings.value(keyName + "/AddToToolbar", true).toBool();
+            bool addToMenu = settings.value(keyName + "/AddToMenu", true).toBool();
+            bool addToToolBar = settings.value(keyName + "/AddToToolbar", true).toBool();
             double priority = settings.value(keyName + "/Priority", 50.0f).toDouble();
             QStringList types_rightclick_str = settings.value(keyName + "/TypeOnContextMenu", QStringList("")).toStringList(); // Multiple item support. Format can be "TypeOnContextMenu=int" or "TypeOnContextMenu=int, int, .."
             QStringList types_doubleclick_str = settings.value(keyName + "/TypeOnDoubleClick", QStringList("")).toStringList(); // Multiple item support. Format can be "TypeOnDoubleClick=int" or "TypeOnDoubleClick=int, int, .."
@@ -644,16 +649,18 @@ void AppLoader::AppsSearch(bool install_requirements){
             settings.setValue(keyName + "/DisplayName", displayName);
             settings.setValue(keyName + "/Description", comment);
             settings.setValue(keyName + "/Visible", visible);
+            settings.setValue(keyName + "/DeveloperOnly", developerOnly);
             settings.setValue(keyName + "/Shortcut", shortcutstr);
             settings.setValue(keyName + "/Checkable", checkable);
             settings.setValue(keyName + "/CheckableGroup", checkable_group);
-            settings.setValue(keyName + "/AddToToolbar", addToolBar);
+            settings.setValue(keyName + "/AddToMenu", addToMenu);
+            settings.setValue(keyName + "/AddToToolbar", addToToolBar);
             settings.setValue(keyName + "/Priority", priority);
             settings.setValue(keyName + "/TypeOnContextMenu",  types_rightclick_str);
             settings.setValue(keyName + "/TypeOnDoubleClick",  types_doubleclick_str);
 
             // Forget about this action if it is set to non visible
-            if (!visible){
+            if (!visible || (!isDeveloperMode && developerOnly)){
                 continue;
             }
 
@@ -743,10 +750,11 @@ void AppLoader::AppsSearch(bool install_requirements){
             ListActions.append(new tAppAction(action, priority, appMenu, types_rightclick, types_doubleclick));
 
             // Add the actions to the menu and toolbar
-            menuActions.append(new tAppAction(action, priority, appMenu));
-            if (addToolBar){
+            if (addToMenu)
+                menuActions.append(new tAppAction(action, priority, appMenu));
+
+            if (addToToolBar)
                 toolbarActions.append(new tAppAction(action, priority, appMenu));
-            }
 
             // Create a slot connection to trigger the script, use the object name to remember the file script that we need to run
             QString fileScript(dirAppComplete + "/" + file);
@@ -854,7 +862,7 @@ void AppLoader::AppsLoadMenus(){
             menui = MenuBar->addMenu(appmenu->Name);
         }
         menui->addActions(appmenu->Actions);
-        menui->menuAction()->setVisible(appmenu->Visible);
+        menui->menuAction()->setVisible(appmenu->Visible && !appmenu->Actions.isEmpty());
         AllMenus.append(menui);
     }
 
