@@ -149,7 +149,14 @@ static void setPoseAbsIK(Item item, Mat pose_abs, Item station){
         parents.pop_front();
     }
 
-    item->setPose(getAncestorPose(parents[0], station).inv() * pose_abs);
+    Mat pose = getAncestorPose(parents[0], station).inv() * pose_abs;
+
+    if (item->Type() == IItem::ITEM_TYPE_ROBOT){
+        Mat pose_tool = item->PoseTool();
+        item->setJoints(item->SolveIK(pose, nullptr, &pose_tool));
+    } else {
+        item->setPose(pose);
+    }
 }
 
 //------------------------------- RoboDK Plug-in commands ------------------------------
@@ -251,6 +258,50 @@ bool PluginAttachView::PluginItemClick(Item item, QMenu *menu, TypeClick click_t
 
 QString PluginAttachView::PluginCommand(const QString &command, const QString &value){
     qDebug() << "Sent command: " << command << "    With value: " << value;
+
+    // Expected format: "View2Item", "Item". Attach the View to the Item
+    //                  "Item2View", "Item". Attach the Item to the View
+    //                  "Detach", "". Detach any relationships
+    //
+    // For now, prompting the user for selection is not supported through the PluginCommand.
+
+    last_clicked_item = nullptr;
+
+    if (command.compare("View2Item", Qt::CaseInsensitive) == 0) {
+        Item item = RDK->getItem(value);
+        if (!RDK->Valid(item) || !processItem(item)) {
+            return "Invalid item";
+        }
+
+        if (view_anchor.anchor == item && !view_anchor.is_master){
+            return "Already attached";
+        }
+
+        // Replace any active attachment
+        last_clicked_item = item;
+        callback_activate_slave_view_to_anchor(true);
+        return "OK";
+
+    } else if (command.compare("Item2View", Qt::CaseInsensitive) == 0) {
+        Item item = RDK->getItem(value);
+        if (!RDK->Valid(item) || !processItem(item)) {
+            return "Invalid item";
+        }
+
+        if (view_anchor.anchor == item && view_anchor.is_master){
+            return "Already attached";
+        }
+
+        // Replace any active attachment
+        last_clicked_item = item;
+        callback_activate_slave_anchor_to_view(true);
+        return "OK";
+
+    } else if (command.compare("Detach", Qt::CaseInsensitive) == 0) {
+        view_anchor.clear();
+        return "OK";
+    }
+
     return "";
 }
 

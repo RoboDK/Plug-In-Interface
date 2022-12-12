@@ -50,6 +50,12 @@ class Settings(roboapps.AppSettings):
         self.CONVERT_MOVEC_STEP_DEG = 1.
         self.CONVERT_MOVEC_PROG_SUFFIX = 'Linear MoveC'
 
+        # --------------------------------------------
+        self._FIELDS_UI['SECTION_REVERSE_PROG'] = "$Reverse Program$"
+        self._FIELDS_UI['REVERSED_PROG_SUFFIX'] = "Reversed program suffix"
+        self.REVERSED_PROG_SUFFIX = 'Reversed'
+
+
 
 def runmain():
     """
