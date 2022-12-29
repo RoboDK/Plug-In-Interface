@@ -37,7 +37,7 @@ def ReplaceObjects(objects=None):
 
     # Get the replacement object
     objects_ext = ['.sld', '.stl', '.iges', '.igs', '.step', '.stp', '.obj', '.slp', '.3ds', '.dae', '.blend', '.wrl', '.wrml']
-    replacement_path = robodialogs.getOpenFileName(strtitle='Replacing object. Select new object...', defaultextension='.sld', filetypes=[('Object', '.sld'), ('3D Object', ' '.join(objects_ext))])
+    replacement_path = robodialogs.getOpenFileName(strtitle='Replacing object. Select new object...', strfile=objects[0].Name().replace(' ', '-') + '.sld', defaultextension='.sld', filetypes=[('Object', '.sld'), ('3D Object', ' '.join(objects_ext))])
     if not replacement_path or not os.path.exists(replacement_path):
         return
 
