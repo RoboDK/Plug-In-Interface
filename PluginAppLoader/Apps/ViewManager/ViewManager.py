@@ -344,7 +344,7 @@ def ViewManager():
         SaveViews()
 
     #------------------------------------------------
-
+    global WAYPOINTS_DELAY, STEPS_SIZE
     steps_size = RDK.getParam("ViewStepsSize")
     if steps_size is not None:
         STEPS_SIZE = float(steps_size)
