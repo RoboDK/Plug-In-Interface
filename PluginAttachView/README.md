@@ -1,14 +1,13 @@
-# Collision Sensor
+# Attach View
 
-The Collision Sensor Plug-in for RoboDK adds the ability to simulate sensors, such as a laser sensors or contact switches.
-It uses collision detection between a sensor and its environnement to update a station parameter (simulated digital input).
+The Attach View Plug-in for RoboDK adds the ability to anchor the position of the view to a robot, tool or frame.
+It can be used to create targets at the view location, or create cinematic effects.
 
 
 ## Features
 
-- Right-click an Object to set it as a sensor.
-- Any other Object touching any part of the sensor will trigger it.
-- The sensor status (0 or 1) is updated in the Station parameters using the sensor Object name.
+- Attach the view position to a robot, tool or frame
+- Attach a robot, tool or frame to the view position
 
 
 ## Prerequisites
