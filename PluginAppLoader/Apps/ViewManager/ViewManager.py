@@ -24,6 +24,7 @@ stop_threads = False
 
 global STEPS_SIZE
 STEPS_SIZE = 10.0  # mm, desired step size between split poses
+
 global WAYPOINTS_DELAY
 WAYPOINTS_DELAY = 0.0  # s, delay between waypoints/views (multi-select)
 
@@ -344,6 +345,8 @@ def ViewManager():
         SaveViews()
 
     #------------------------------------------------
+    global STEPS_SIZE
+    global WAYPOINTS_DELAY
 
     steps_size = RDK.getParam("ViewStepsSize")
     if steps_size is not None:
