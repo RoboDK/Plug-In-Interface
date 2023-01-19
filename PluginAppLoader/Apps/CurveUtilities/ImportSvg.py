@@ -167,6 +167,9 @@ def ImportSvg(RDK=None, S=None, file=None):
         if S.SVG_CENTER_OBJECT_FRAME:
             curve_item.setGeometryPose(pose=robomath.xyzrpw_2_pose([-width / 2, -height / 2, 0, 0, 0, 0]), apply=True)
 
+        curve_item.setVisible(False)
+        curve_item.setVisible(True)
+
     RDK.ShowMessage(f"Done importing {file}!", False)
 
 
