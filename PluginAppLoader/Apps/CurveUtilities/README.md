@@ -11,6 +11,7 @@ The Curve Utilities App for RoboDK adds tools to generate and edit curve objects
 ## Features
 
  - Import curves from an SVG (.svg) file
+ - Simplify curve segments (sort, merge, reverse direction, remove duplicates, etc)
 
 
  ## Prerequisites
