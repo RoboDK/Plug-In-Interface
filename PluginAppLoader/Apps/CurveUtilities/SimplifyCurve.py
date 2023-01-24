@@ -34,17 +34,33 @@ def GetObjectCurves(object_item, feature_id=-1):
     return object_curves
 
 
-def SortCurves(coords, start=None):
+def SortCurves(coords, start=None, reverse_segments=False):
     if start is None:
         start = coords[0]
+
     pass_by = coords.copy()
     path = [start]
+
     if start in pass_by:
         pass_by.remove(start)
+
     while pass_by:
-        nearest = min(pass_by, key=lambda x: robomath.distance(path[-1][-1][:3], x[0][:3]))
+
+        if reverse_segments:
+            # Check both ends of the curve
+            nearest = min(pass_by, key=lambda x: min(robomath.distance(path[-1][-1][:3], x[0][:3]), robomath.distance(path[-1][-1][:3], x[-1][:3])))
+            if robomath.distance(path[-1][-1][:3], nearest[-1][:3]) < robomath.distance(path[-1][-1][:3], nearest[0][:3]):
+                _nearest = nearest.copy()
+                _nearest.reverse()
+                nearest = _nearest
+        else:
+            # Check only the first point
+            nearest = min(pass_by, key=lambda x: min(robomath.distance(path[-1][-1][:3], x[0][:3])))
+
         path.append(nearest)
+
         pass_by.remove(nearest)
+
     return path
 
 
@@ -72,25 +88,49 @@ def ReorderCurves(RDK=None, S=None, objects=None):
         if not objects:
             return
 
+    selection = RDK.Selection()
+
     for object_item in objects:
 
         RDK.ShowMessage(f'Processing {object_item.Name()}..', False)
 
         curves_list = GetObjectCurves(object_item)
-        if len(curves_list) <= 2:
+        if len(curves_list) <= 0:
             continue
 
         RDK.Render(False)
 
-        object_item.Copy()
-        sorted_object_item = object_item.Parent().Paste()
-        sorted_object_item.setName(sorted_object_item.Name() + ' Sorted')
+        if not S.SIMPLIFY_INPLACE:
+            object_item.Copy()
+            sorted_object_item = object_item.Parent().Paste()
+            sorted_object_item.setName(sorted_object_item.Name() + ' Simplified')
+        else:
+            sorted_object_item = object_item
+        sorted_object_item.setParam("Reset", "Curves")  # We will lose curve colors!
         sorted_object_item.setVisible(True)
 
-        sorted_curves_list = SortCurves(curves_list)
-        sorted_object_item.setParam("Reset", "Curves")  # We will lose curve colors!
+        if S.SIMPLIFY_SORT:
+            sorted_curves_list = SortCurves(curves_list, reverse_segments=S.SIMPLIFY_REVERSE)
+        else:
+            sorted_curves_list = curves_list
+
+        if S.SIMPLIFY_MERGE:
+            merged_sorted_curves_list = []
+            for curve in sorted_curves_list:
+                merged_sorted_curves_list.extend(curve)
+            sorted_curves_list = [merged_sorted_curves_list]
+
+        if S.SIMPLIFY_DUPLICATE:
+            merged_sorted_curves_list = []
+            for curve in sorted_curves_list:
+                curve = [v for i, v in enumerate(curve) if i == 0 or v != curve[i - 1]]
+                merged_sorted_curves_list.append(curve)
+            sorted_curves_list = merged_sorted_curves_list
+
         for curve in sorted_curves_list:
             sorted_object_item.AddCurve(curve, True, robolink.PROJECTION_NONE)
+
+    RDK.setSelection(selection)  # Restore selection
 
 
 def runmain():
