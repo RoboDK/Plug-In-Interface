@@ -95,7 +95,7 @@ def ImportSvg(RDK=None, S=None, file=None):
         if 'stroke' in styles and not styles['stroke'].startswith('#'):
             styles.pop('stroke')
 
-        draw_color = S.SVG_DEFAULT_COLOR
+        draw_color = S.SVG_DEFAULT_COLOR  # 0-255
         if S.SVG_IMPORT_COLOR:
             hex_color = None
             if S.SVG_STROKE_OVER_FILL_COLOR:
@@ -110,13 +110,11 @@ def ImportSvg(RDK=None, S=None, file=None):
                     hex_color = styles['stroke']
 
             if hex_color:
-                draw_color = spt.misctools.hex2rgb(hex_color)
-                draw_color = [round(x / 255, 4) for x in draw_color]
+                draw_color = spt.misctools.hex2rgb(hex_color)  # 0-255
 
-        if 'id' in attrib:
-            RDK.ShowMessage(f"Importing path {attrib['id']} with color {hex_color}", False)
-        else:
-            RDK.ShowMessage(f"Importing path {path_count} with color {hex_color}", False)
+        draw_color = [round(x / 255, 4) for x in draw_color]  # 0-1
+
+        RDK.ShowMessage(f"Importing path {attrib['id'] if 'id' in attrib else path_count} with color {draw_color}", False)
 
         for segment in path.scaled(SCALE).translated(TRANSLATE):
             points = []
@@ -166,6 +164,9 @@ def ImportSvg(RDK=None, S=None, file=None):
 
         if S.SVG_CENTER_OBJECT_FRAME:
             curve_item.setGeometryPose(pose=robomath.xyzrpw_2_pose([-width / 2, -height / 2, 0, 0, 0, 0]), apply=True)
+
+        curve_item.setVisible(False)
+        curve_item.setVisible(True)
 
     RDK.ShowMessage(f"Done importing {file}!", False)
 

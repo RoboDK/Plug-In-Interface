@@ -47,7 +47,7 @@ class Settings(roboapps.AppSettings):
         self.SVG_AS_POINTS = False
 
         self._FIELDS_UI['SVG_DEFAULT_COLOR'] = "Default color (r, g, b) [0-255]"
-        self.SVG_DEFAULT_COLOR = (255, 255, 255)
+        self.SVG_DEFAULT_COLOR = [255, 255, 255]
 
         self._FIELDS_UI['SVG_IMPORT_COLOR'] = "Import colors from styling"
         self.SVG_IMPORT_COLOR = True
@@ -55,6 +55,22 @@ class Settings(roboapps.AppSettings):
         self._FIELDS_UI['SVG_STROKE_OVER_FILL_COLOR'] = "Use stroke color over fill color"
         self.SVG_STROKE_OVER_FILL_COLOR = True
 
+        self._FIELDS_UI['SECTION_SIMPLIFY_CURVE'] = "$SIMPLIFY CURVE$"
+
+        self._FIELDS_UI['SIMPLIFY_SORT'] = "Sort segments (make continuous)"
+        self.SIMPLIFY_SORT = True
+
+        self._FIELDS_UI['SIMPLIFY_REVERSE'] = "Fix reversed segments when sorting"
+        self.SIMPLIFY_REVERSE = True
+
+        self._FIELDS_UI['SIMPLIFY_MERGE'] = "Merge segments into one curve"
+        self.SIMPLIFY_MERGE = True
+
+        self._FIELDS_UI['SIMPLIFY_DUPLICATE'] = "Remove duplicated points"
+        self.SIMPLIFY_DUPLICATE = True
+
+        self._FIELDS_UI['SIMPLIFY_INPLACE'] = "Replace original curve (not reversible)"
+        self.SIMPLIFY_INPLACE = False
 
 def runmain():
     """
