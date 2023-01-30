@@ -32,7 +32,7 @@ def ActionChecked():
 
     i = 0
     while APP.Run():
-        ShowMessage(RDK, ACTION_NAME, "Checked Status., " + str(i), False)
+        ShowMessage(RDK, ACTION_NAME, "Checked Status.. " + str(i), False)
         robomath.pause(0.25)
         i += 1
 
