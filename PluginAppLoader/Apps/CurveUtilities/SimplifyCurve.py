@@ -49,16 +49,15 @@ def SortCurves(coords, start=None, reverse_segments=False):
         if reverse_segments:
             # Check both ends of the curve
             nearest = min(pass_by, key=lambda x: min(robomath.distance(path[-1][-1][:3], x[0][:3]), robomath.distance(path[-1][-1][:3], x[-1][:3])))
+            path_nearest = nearest.copy()
             if robomath.distance(path[-1][-1][:3], nearest[-1][:3]) < robomath.distance(path[-1][-1][:3], nearest[0][:3]):
-                _nearest = nearest.copy()
-                _nearest.reverse()
-                nearest = _nearest
+                path_nearest.reverse()
         else:
             # Check only the first point
             nearest = min(pass_by, key=lambda x: min(robomath.distance(path[-1][-1][:3], x[0][:3])))
+            path_nearest = nearest.copy()
 
-        path.append(nearest)
-
+        path.append(path_nearest)
         pass_by.remove(nearest)
 
     return path
@@ -77,7 +76,7 @@ def ReorderCurves(RDK=None, S=None, objects=None):
         S.Load(RDK)
 
     if objects is None:
-        objects = [x for x in RDK.Selection() if x.type in [robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_CURVE]]
+        objects = [x for x in RDK.Selection() if x.type in [robolink.ITEM_TYPE_OBJECT]]
         if not objects:
             objects = RDK.ItemUserPick('Select the curves to sort', robolink.ITEM_TYPE_OBJECT)
             if not objects.Valid():
