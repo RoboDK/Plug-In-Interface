@@ -24,9 +24,9 @@ from collections import OrderedDict
 import Settings
 
 
-def RecoverPrograms(RDK=None, S=None, progs=None):
+def ReversePrograms(RDK=None, S=None, progs=None):
     """
-    Recover missing links in program(s), which happens when a program is copied from another station.
+    Reverse program(s) into new program(s), taking motion type into account.
     """
     if RDK is None:
         RDK = robolink.Robolink()
@@ -145,7 +145,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        RecoverPrograms()
+        ReversePrograms()
 
 
 if __name__ == '__main__':
