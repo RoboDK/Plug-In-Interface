@@ -98,7 +98,7 @@ def runmain():
         roboapps.Exit()
     else:
         id = robodialogs.InputDialog("Box Spawner ID", 0)
-        if id == False:
+        if id is None:
             roboapps.Exit()  # User cancelled
         S = Settings('Box-Spawner-Settings-' + str(id))
         S.Load()

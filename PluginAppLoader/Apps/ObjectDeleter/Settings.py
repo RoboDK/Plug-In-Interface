@@ -61,7 +61,7 @@ def runmain():
         roboapps.Exit()
     else:
         id = robodialogs.InputDialog("Object Deleter ID", 0)
-        if id == False:
+        if id is None:
             roboapps.Exit()  # User cancel
         S = Settings('Object-Deleter-Settings-' + str(id))
         S.Load()
