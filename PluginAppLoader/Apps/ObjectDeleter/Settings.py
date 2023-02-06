@@ -31,6 +31,22 @@ class Settings(roboapps.AppSettings):
         self._FIELDS_UI['ZONE_RADIUS'] = "Zone radius"
         self.ZONE_RADIUS = 250.
 
+        self._FIELDS_UI['SECTION_INCLUDE'] = "$INCLUSIONS$"
+        
+        self._FIELDS_UI['INCLUDE_HIDDEN'] = "Delete hidden items"
+        self._FIELDS_UI['INCLUDE_OBJECT'] = "Delete objects"
+        self._FIELDS_UI['INCLUDE_CURVE'] = "Delete curves"
+        self._FIELDS_UI['INCLUDE_FRAME'] = "Delete frames"
+        self._FIELDS_UI['INCLUDE_TARGET'] = "Delete targets"
+        self.INCLUDE_HIDDEN = False
+        self.INCLUDE_OBJECT = True
+        self.INCLUDE_CURVE = False
+        self.INCLUDE_FRAME = False
+        self.INCLUDE_TARGET = False
+
+        self._FIELDS_UI['INCLUDE_REGEX'] = "Name regex (i.e. 'Box.*)"
+        self.INCLUDE_REGEX = ''
+
         self.UpdateFrameList()
 
     def UpdateFrameList(self, RDK=None):

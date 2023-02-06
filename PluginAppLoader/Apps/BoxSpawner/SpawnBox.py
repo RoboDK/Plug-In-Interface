@@ -50,10 +50,17 @@ def SpawnBox(RDK=None, S=None):
 
     # Check that the required files exists
     USE_METRIC = S.UNITS_TYPE[0] == 0
+
+    # Attempt to recover the file location when used as a module
+    if not os.path.exists(S.REF_BOX_MM_PATH):
+        S.REF_BOX_MM_PATH = os.path.normpath(os.path.dirname(os.path.abspath(Settings.__file__)) + '/' + os.path.basename(S.REF_BOX_MM_PATH))
+    if not os.path.exists(S.REF_BOX_IN_PATH):
+        S.REF_BOX_IN_PATH = os.path.normpath(os.path.dirname(os.path.abspath(Settings.__file__)) + '/' + os.path.basename(S.REF_BOX_IN_PATH))
+
     if not USE_METRIC and not os.path.exists(S.REF_BOX_IN_PATH):
         RDK.ShowMessage(f"Unable to find the resource file ({S.REF_BOX_IN_PATH})!")
         return None
-    if USE_METRIC and not os.path.exists(S.REF_BOX_MM_PATH):
+    elif USE_METRIC and not os.path.exists(S.REF_BOX_MM_PATH):
         RDK.ShowMessage(f"Unable to find the resource file ({S.REF_BOX_MM_PATH})!")
         return None
 
@@ -64,7 +71,7 @@ def SpawnBox(RDK=None, S=None):
         new_box = RDK.AddFile(S.REF_BOX_MM_PATH, PARENT)
     else:
         new_box = RDK.AddFile(S.REF_BOX_IN_PATH, PARENT)
-    new_box.setVisible(True)
+    new_box.setVisible(False)
 
     # Set the initial size
     new_box.Scale(S.BOX_SIZE_XYZ)
@@ -100,26 +107,39 @@ def SpawnBox(RDK=None, S=None):
     new_box.setName((S.BOX_ITEM_NAME_MM if USE_METRIC else S.BOX_ITEM_NAME_IN) % (sx, sy, sz))
 
     # Attach to the closest conveyor
-    if S.ATTACH_TO_CLOSEST_CONVEYOR:
-        parent_pos = PARENT.PoseAbs().Pos()
-        conveyors = [x for x in RDK.ItemList(robolink.ITEM_TYPE_ROBOT_AXES) if len(x.Joints().tolist()) == 1]
-        conveyors = sorted(conveyors, key=lambda x: robomath.distance(parent_pos, x.PoseAbs().Pos()))
-        if not conveyors:
-            RDK.ShowMessage("Unable to find any conveyor to attach too!")
-            new_box.Delete()
-            return None
+    if S.RELOCATE_TYPE[0] != 0:
 
-        conveyor = conveyors[0]
-        if robomath.distance(parent_pos, conveyor.PoseAbs().Pos()) > S.MAX_CONV_DISTANCE:
-            RDK.ShowMessage("Unable to find any conveyor close enough to attach too ({S.MAX_CONV_DISTANCE} mm)!")
-            new_box.Delete()
-            return None
+        if S.RELOCATE_TYPE[0] == 1:
+            # Closest conveyor
+            parent_pos = PARENT.PoseAbs().Pos()
+            conveyors = [x for x in RDK.ItemList(robolink.ITEM_TYPE_ROBOT_AXES) if len(x.Joints().tolist()) == 1]
+            conveyors = sorted(conveyors, key=lambda x: robomath.distance(parent_pos, x.PoseAbs().Pos()))
+            if not conveyors:
+                RDK.ShowMessage("Unable to find any conveyor to attach too!")
+                new_box.Delete()
+                return None
 
-        frames = [x for x in conveyor.Childs() if x.Type() == robolink.ITEM_TYPE_FRAME]
-        if not frames:
-            frames = [RDK.AddFrame(conveyor.Name() + ' Frame', conveyor)]
-        new_box.setParentStatic(frames[0])
+            conveyor = conveyors[0]
+            if robomath.distance(parent_pos, conveyor.PoseAbs().Pos()) > S.MAX_CONV_DISTANCE:
+                RDK.ShowMessage(f"Unable to find any conveyor close enough to attach to (closest is at {robomath.distance(parent_pos, conveyor.PoseAbs().Pos()):.1f} mm)!")
+                new_box.Delete()
+                return None
 
+            frames = [x for x in conveyor.Childs() if x.Type() == robolink.ITEM_TYPE_FRAME]
+            if not frames:
+                frames = [RDK.AddFrame(conveyor.Name() + ' Frame', conveyor)]
+            new_box.setParentStatic(frames[0])
+
+        elif S.RELOCATE_TYPE[0] == 2:
+            # Specific frame
+            NEW_PARENT_NAME = S.RELOCATE_FRAME[1][S.RELOCATE_FRAME[0]]
+            NEW_PARENT = RDK.Item(NEW_PARENT_NAME)
+            if not NEW_PARENT.Valid() or NEW_PARENT.Name() != NEW_PARENT_NAME or NEW_PARENT.Type() not in [robolink.ITEM_TYPE_STATION, robolink.ITEM_TYPE_FRAME]:
+                RDK.ShowMessage(f"Unable to find the parent frame ({NEW_PARENT_NAME})! Did you set the settings?")
+                return None
+            new_box.setParentStatic(NEW_PARENT)
+
+    new_box.setVisible(True)
     RDK.Render(True)
 
     return new_box

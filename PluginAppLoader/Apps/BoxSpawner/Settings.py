@@ -45,9 +45,13 @@ class Settings(roboapps.AppSettings):
         self._FIELDS_UI['SPAWN_FRAME'] = "Spawn location"
         self.SPAWN_FRAME = [0, ['']]
 
-        self._FIELDS_UI['ATTACH_TO_CLOSEST_CONVEYOR'] = "Attach to closest conveyor"
+        #-----------------------------------------------------
+        self._FIELDS_UI['SECTION_RELOCATE'] = "$RELOCATE$"
+        self._FIELDS_UI['RELOCATE_TYPE'] = "Relocate"
+        self._FIELDS_UI['RELOCATE_FRAME'] = "Relocate location"
         self._FIELDS_UI['MAX_CONV_DISTANCE'] = "Maximum conveyor distance [mm]"
-        self.ATTACH_TO_CLOSEST_CONVEYOR = False
+        self.RELOCATE_TYPE = [0, ["Don't relocate", 'Closest conveyor', 'Specific location']]
+        self.RELOCATE_FRAME = [0, ['']]
         self.MAX_CONV_DISTANCE = 500.
 
         #-----------------------------------------------------
@@ -78,6 +82,10 @@ class Settings(roboapps.AppSettings):
         if self.SPAWN_FRAME[1][self.SPAWN_FRAME[0]] not in frames:
             self.SPAWN_FRAME[0] = 0
         self.SPAWN_FRAME[1] = frames
+
+        if self.RELOCATE_FRAME[1][self.RELOCATE_FRAME[0]] not in frames:
+            self.RELOCATE_FRAME[0] = 0
+        self.RELOCATE_FRAME[1] = frames
 
     def ShowUI(self, *args, **kwargs):
         self.UpdateFrameList()

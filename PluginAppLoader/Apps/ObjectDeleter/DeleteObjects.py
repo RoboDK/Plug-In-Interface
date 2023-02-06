@@ -46,18 +46,45 @@ def DeleteObjects(RDK=None, S=None):
         RDK.ShowMessage(f"Unable to find the parent frame ({PARENT_NAME})! Did you set the settings?")
         return False
 
-    # Find the objects in the zone
+    # Compile the regex, if any
+    rgx = None
+    if S.INCLUDE_REGEX:
+        import re
+        rgx = re.compile(S.INCLUDE_REGEX)
+
+    # Get candidate items
+    candidates = []
+    if S.INCLUDE_OBJECT:
+        candidates.extend(RDK.ItemList(robolink.ITEM_TYPE_OBJECT))
+    if S.INCLUDE_CURVE:
+        candidates.extend(RDK.ItemList(robolink.ITEM_TYPE_CURVE))
+    if S.INCLUDE_FRAME:
+        candidates.extend(RDK.ItemList(robolink.ITEM_TYPE_FRAME))
+    if S.INCLUDE_TARGET:
+        candidates.extend(RDK.ItemList(robolink.ITEM_TYPE_TARGET))
+
+    # Find the items in the zone
     p_abs = PARENT.PoseAbs().Pos()
     objects = []
-    for obj in RDK.ItemList(robolink.ITEM_TYPE_OBJECT):
-        if robomath.distance(p_abs, obj.PoseAbs().Pos()) < S.ZONE_RADIUS:
-            objects.append(obj)
+    for obj in candidates:
+        if obj == PARENT:
+            continue
+
+        if not S.INCLUDE_HIDDEN and not obj.Visible():
+            continue
+
+        if rgx and not rgx.fullmatch(obj.Name()):
+            continue
+
+        if robomath.distance(p_abs, obj.PoseAbs().Pos()) > S.ZONE_RADIUS:
+            continue
+
+        objects.append(obj)
 
     # Delete the objects
     if objects:
         RDK.Render(False)
-        for obj in objects:
-            obj.Delete()
+        RDK.Delete(objects)
         RDK.Render(True)
 
     return True
