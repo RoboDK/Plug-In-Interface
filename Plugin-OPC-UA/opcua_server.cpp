@@ -300,11 +300,14 @@ UA_StatusCode write_StationValue(void *h, const UA_NodeId nodeid, const UA_Varia
 
 static UA_StatusCode setJoints(void *h, const UA_NodeId objectId, size_t inputSize, const UA_Variant *input, size_t outputSize, UA_Variant *output) {
     PluginOPCUA *plugin = (PluginOPCUA*)h;
+    qDebug()<<"Setting joints";
     if (inputSize < 2){
+        qDebug()<<"Input size: " << inputSize << "  Output size: " << outputSize;
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
     Item item;
     if (!Var_2_Item(input + 0, &item, plugin->RDK)){
+        qDebug()<<"Invalid item";
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
     //if (!plugin->RDK->Valid(item)){
@@ -322,10 +325,12 @@ static UA_StatusCode setJoints(void *h, const UA_NodeId objectId, size_t inputSi
 
     //Var_2_DoubleArray(input+1, joints, nDOFs_MAX);
     if (!Var_2_DoubleArray(input+1, joint_values, nDOFs_MAX)){
+        qDebug()<<"Invalid double array";
         return UA_STATUSCODE_BADARGUMENTSMISSING;
     }
     tJoints new_joints(joint_values, joints_ndofs);
     item->setJoints(new_joints);
+    plugin->RDK->Render();
     return UA_STATUSCODE_GOOD;
 }
 static UA_StatusCode setJointsStr(void *h, const UA_NodeId objectId, size_t inputSize, const UA_Variant *input, size_t outputSize, UA_Variant *output) {
