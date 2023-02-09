@@ -18,16 +18,18 @@ from robodk import robolink, roboapps
 import Settings
 
 
-def ActionChecked():
+def AddPointOnSurface(RDK=None, S=None):
     """
     Click an object's surface to add a point at that location.
     Points can be added as long as this action is running.
     """
 
-    RDK = robolink.Robolink()
+    if RDK is None:
+        RDK = robolink.Robolink()
 
-    S = Settings.Settings()
-    S.Load(RDK)
+    if S is None:
+        S = Settings.Settings()
+        S.Load(RDK)
 
     # Clear the selection so that we get a 'rising edge'
     RDK.setSelection([])
@@ -57,13 +59,13 @@ def ActionChecked():
             ijk = xyzijk[3:6]
 
             # Get the mouse position on the surface of the object
-            pose_offset = selected_object.Pose()  #selected_object.Parent().PoseAbs().inv() * selected_object.PoseAbs()
+            pose_offset = selected_object.Pose()
             xyz_offset = pose_offset * xyz
             ijk_offset = pose_offset[0:3, 0:3] * ijk
             xyzijk = xyz_offset + ijk_offset
 
             # Add the point to the clicked object, or create a new object
-            point_object = selected_object.AddPoints([xyzijk], S.ADD_TO_OBJECT, robolink.PROJECTION_NONE)
+            point_object = selected_object.AddPoints([xyzijk], S.ADD_TO_OBJECT, robolink.PROJECTION_ALONG_NORMAL_RECALC)
             if not S.ADD_TO_OBJECT:
                 x, y, z, i, j, k = xyzijk
                 point_object.setName(f"{selected_object.Name()} P[{x:.2f},{y:.2f},{z:.2f},{i:.2f},{j:.2f},{k:.2f}]")
@@ -78,7 +80,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        ActionChecked()
+        AddPointOnSurface()
 
 
 if __name__ == '__main__':

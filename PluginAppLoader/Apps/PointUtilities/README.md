@@ -11,6 +11,7 @@ The Point Utilities App for RoboDK adds tools to generate and edit point objects
 ## Features
 
  - Add points on an object surface
+ - Convert points into robot targets
 
 
  ## Prerequisites

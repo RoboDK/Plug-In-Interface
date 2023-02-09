@@ -72,6 +72,11 @@ class Settings(roboapps.AppSettings):
         self._FIELDS_UI['SIMPLIFY_INPLACE'] = "Replace original curve (not reversible)"
         self.SIMPLIFY_INPLACE = False
 
+        self._FIELDS_UI['SECTION_CURVE_TO_TARGETS'] = "$Curve to targets$"
+
+        self._FIELDS_UI['TARGET_INVERSE_NORMAL'] = "Inverse point normal"
+        self.TARGET_INVERSE_NORMAL = True
+
 def runmain():
     """
     Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
