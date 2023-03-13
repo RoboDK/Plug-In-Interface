@@ -175,6 +175,9 @@ def sort_points(segments, start=None):
     """
     if start is None:
         start = segments[0]
+    else:
+        if start not in segments:
+            start = min(segments, key=lambda x: robomath.distance(start, x[:3]))
 
     pass_by = segments.copy()
     sorted_segments = [start]
@@ -195,6 +198,7 @@ def sort_points(segments, start=None):
         pass_by.remove(nearest)
 
     return sorted_segments
+
 
 def runmain():
     """

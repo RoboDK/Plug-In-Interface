@@ -36,6 +36,11 @@ class Settings(roboapps.AppSettings):
         self._FIELDS_UI['TARGET_INVERSE_NORMAL'] = "Inverse point normal"
         self.TARGET_INVERSE_NORMAL = True
 
+        self._FIELDS_UI['SECTION_SORT'] = "$Sort points$"
+
+        self._FIELDS_UI['PROMPT_FIRST_POINT'] = "Prompt to enter the first point when sorting"
+        self.PROMPT_FIRST_POINT = False
+
 
 def runmain():
     """

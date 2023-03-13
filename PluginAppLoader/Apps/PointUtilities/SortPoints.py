@@ -54,18 +54,18 @@ def SortCurveSegments(RDK=None, S=None, objects=None):
 
         RDK.Render(False)
 
-        if True: #not S.SIMPLIFY_INPLACE:
-            object_item.Copy()
-            sorted_object_item = object_item.Parent().Paste()
-            sorted_object_item.setName(sorted_object_item.Name() + ' Sorted')
-        else:
-            sorted_object_item = object_item5
-        sorted_object_item.setParam("Reset", "Points")  # We will lose curve colors!
+        object_item.Copy()
+        sorted_object_item = object_item.Parent().Paste()
+        sorted_object_item.setName(sorted_object_item.Name() + ' Sorted')
+        sorted_object_item.setParam("Reset", "Points")
         sorted_object_item.setVisible(True)
 
-        sorted_points_list = cutools.sort_points(points)
-        sorted_object_item.AddPoints(sorted_points_list, True, robolink.PROJECTION_NONE)
+        start_point = None
+        if S.PROMPT_FIRST_POINT:
+            start_point = robodialogs.InputDialog('Enter the desired start point.\nThe default values represent the current first point.\n\nStart point (xyz) [mm]:', [round(x, 4) for x in points[0][:3]])
 
+        sorted_points_list = cutools.sort_points(points, start_point)
+        sorted_object_item.AddPoints(sorted_points_list, True, robolink.PROJECTION_NONE)
 
     RDK.setSelection(selection)  # Restore selection
 
