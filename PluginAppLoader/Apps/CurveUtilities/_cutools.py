@@ -214,7 +214,7 @@ def sort_curve_segments(segments, start=None, reverse_segments=False):
                 path_nearest.reverse()
         else:
             # Check only the first point
-            nearest = min(pass_by, key=lambda x: min(robomath.distance(sorted_segments[-1][-1][:3], x[0][:3])))
+            nearest = min(pass_by, key=lambda x: robomath.distance(sorted_segments[-1][-1][:3], x[0][:3]))
             path_nearest = nearest.copy()
 
         sorted_segments.append(path_nearest)
