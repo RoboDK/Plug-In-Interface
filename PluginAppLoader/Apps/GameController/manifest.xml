@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
+  <cp:coreProperties>
+    <cp:category>Application</cp:category>
+    <cp:contentStatus>Final</cp:contentStatus>
+    <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-16T21:00:40.208025Z</dcterms:created>
+    <dc:creator>RoboDK</dc:creator>
+    <dc:description>The Game Controller App for RoboDK allows you to control your robot arm using a game controller.</dc:description>
+    <dc:identifier>com.robodk.app.gamecontroller</dc:identifier>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
+    <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-16T21:00:40.208025Z</dcterms:modified>
+    <cp:revision>1</cp:revision>
+    <dc:title>Game Controller</dc:title>
+    <cp:version>1.0.0</cp:version>
+  </cp:coreProperties>
+  <extraProperties>
+    <website>https://robodk.com/</website>
+    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/GameController</documentation>
+    <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/GameController</repository>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
+    <icon>/icon.png</icon>
+  </extraProperties>
+  <dependencies/>
+  <assets>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/AppConfig.ini</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/GameController.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/GameController.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/GameControllerChecked.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/LICENSE.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/README.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/Settings.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/Settings.svg</asset>
+  </assets>
+</packageManifest>

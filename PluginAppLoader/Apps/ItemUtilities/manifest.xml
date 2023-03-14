@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
+  <cp:coreProperties>
+    <cp:category>Application</cp:category>
+    <cp:contentStatus>Final</cp:contentStatus>
+    <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-16T21:00:40.336671Z</dcterms:created>
+    <dc:creator>RoboDK</dc:creator>
+    <dc:description>The Item Utilities App for RoboDK adds utility functions to manipulate Items, such as objects and robots.</dc:description>
+    <dc:identifier>com.robodk.app.itemutilities</dc:identifier>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
+    <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-16T21:00:40.336671Z</dcterms:modified>
+    <cp:revision>1</cp:revision>
+    <dc:title>Item Utilities</dc:title>
+    <cp:version>1.0.0</cp:version>
+  </cp:coreProperties>
+  <extraProperties>
+    <website>https://robodk.com/</website>
+    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/ItemUtilities</documentation>
+    <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/ItemUtilities</repository>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
+  </extraProperties>
+  <dependencies/>
+  <assets>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/AppConfig.ini</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/AttachObjectToRobotLink.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/LICENSE.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/README.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/ReplaceObject.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/ReplaceObject.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/ReplaceRobot.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/ReplaceRobot.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/ScaleObject.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/SimplifyObject.py</asset>
+  </assets>
+</packageManifest>

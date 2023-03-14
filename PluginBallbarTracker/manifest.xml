@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
+  <cp:coreProperties>
+    <cp:category>Plugin</cp:category>
+    <cp:contentStatus>Final</cp:contentStatus>
+    <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-11T02:21:21.290172Z</dcterms:created>
+    <dc:creator>RoboDK</dc:creator>
+    <dc:description>The Ballbar Tracker Plug-in for RoboDK allows you to attach a ballbar to a robot.</dc:description>
+    <dc:identifier>com.robodk.plugin.pluginballbartracker</dc:identifier>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
+    <cp:lastModifiedBy/>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-11T02:21:21.290172Z</dcterms:modified>
+    <cp:revision>1</cp:revision>
+    <dc:title>Ballbar Tracker</dc:title>
+    <cp:version>1.0.0</cp:version>
+  </cp:coreProperties>
+  <extraProperties>
+    <website>https://robodk.com/</website>
+    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginBallbarTracker</documentation>
+    <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginBallbarTracker</repository>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
+  </extraProperties>
+  <assets>
+    <asset cpu="any" system="any">/PluginBallbarTracker.dll</asset>
+    <asset cpu="any" system="any">/README.md</asset>
+    <asset cpu="any" system="any">/doc/ballbar_structure.PNG</asset>
+    <asset cpu="any" system="any">/doc/menu.PNG</asset>
+  </assets>
+</packageManifest>
