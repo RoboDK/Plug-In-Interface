@@ -5,7 +5,7 @@
     <cp:contentStatus>Final</cp:contentStatus>
     <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-11T19:57:28.314764Z</dcterms:created>
     <dc:creator>RoboDK</dc:creator>
-    <dc:description>The App Loader is a RoboDK Plugin.</dc:description>
+    <dc:description>The App Loader Plug-in for RoboDK is a manager for RoboDK Apps. It is the predecessor to the Add-in Manager.</dc:description>
     <dc:identifier>com.robodk.plugin.apploader</dc:identifier>
     <cp:keywords></cp:keywords>
     <dc:language>eng</dc:language>

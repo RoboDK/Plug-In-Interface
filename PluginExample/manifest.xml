@@ -5,7 +5,7 @@
     <cp:contentStatus>Final</cp:contentStatus>
     <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-11T02:21:22.102701Z</dcterms:created>
     <dc:creator>RoboDK</dc:creator>
-    <dc:description>The Example Plug-in is a RoboDK Plugin.</dc:description>
+    <dc:description>The Example Plug-in is a RoboDK Plugin that showcases the Plug-in Interface.</dc:description>
     <dc:identifier>com.robodk.plugin.pluginexample</dc:identifier>
     <cp:keywords></cp:keywords>
     <dc:language>eng</dc:language>

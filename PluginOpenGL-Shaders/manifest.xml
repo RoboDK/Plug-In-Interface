@@ -5,14 +5,14 @@
     <cp:contentStatus>Final</cp:contentStatus>
     <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-11T02:21:23.031127Z</dcterms:created>
     <dc:creator>RoboDK</dc:creator>
-    <dc:description>The OpenGL Plug-in for RoboDK shows how to call plain OpenGL commands with RoboDK.</dc:description>
-    <dc:identifier>com.robodk.plugin.pluginopengl</dc:identifier>
+    <dc:description>The OpenGL (Shaders) Plug-in for RoboDK shows how to draw OpenGL shaders with RoboDK.</dc:description>
+    <dc:identifier>com.robodk.plugin.pluginopenglshaders</dc:identifier>
     <cp:keywords></cp:keywords>
     <dc:language>eng</dc:language>
     <cp:lastModifiedBy></cp:lastModifiedBy>
     <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-11T02:21:23.031127Z</dcterms:modified>
     <cp:revision>1</cp:revision>
-    <dc:title>OpenGL</dc:title>
+    <dc:title>OpenGL (Shaders)</dc:title>
     <cp:version>1.0.0</cp:version>
   </cp:coreProperties>
   <extraProperties>
