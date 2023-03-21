@@ -1,6 +1,8 @@
 AppLoader plug-in for RoboDK
 ===========================
 
+Note: The AppLoader plugin is provided for legacy apps. You should use the new Add-in Manager instead to load, create or edit existing Add-ins.
+
 The App loader plug-in allows you to easily load scripts and executable files as if they were plug-ins in RoboDK software. 
 This plugin allows integrating scripts as part of the RoboDK user interface and easily customize RoboDK for customized offline programming and simulation purposes. 
 Adding scripts to an app will add buttons in the menu and the toolbar automatically. A settings file allows you to easily customize the appearance of a specific set of buttons/actions.
