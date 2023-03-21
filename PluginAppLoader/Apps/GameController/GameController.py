@@ -44,8 +44,6 @@ def MainAction():
     print('To run on the real robot: RoboDK->Connect->Connect robot->Connect.')
     print('Ensure the robot speeds are adequate: RoboDK->Right-click your robot->Options->Parameters.')
 
-    DEG_TO_RAD = robomath.pi / 180.0
-
     # Simulation parameters
     move_steps = {
         "Translate": S.LINEAR_STEPS_INIT,
@@ -58,8 +56,8 @@ def MainAction():
     }
 
     robot_move_type = {
-        "MoveJ": True,
-        "MoveL": False,
+        "MoveJ": False,
+        "MoveL": True,
     }
 
     # Controller buttons, as defined here: https://support.xbox.com/en-CA/help/hardware-network/controller/xbox-one-wireless-controller
@@ -127,9 +125,9 @@ def MainAction():
 
     # Ensure we are in a simulated environnement
     if RDK.RunMode() != robolink.RUNMODE_SIMULATE:
-        RUN_ON_ROBOT = False
+        S.RUN_ON_ROBOT = False
 
-    if RUN_ON_ROBOT:
+    if S.RUN_ON_ROBOT:
         # Check if the robot is already connected
         status, status_msg = robot.ConnectedState()
         if (status == robolink.ROBOTCOM_READY) and not ShowMessageYesNo("You are about to control the connected robot using the controller.\n\nWould you like to run in simulation mode instead?", ""):
@@ -309,22 +307,22 @@ def MainAction():
         if move_type["Translate"]:
             x, y, z = robomath.mult3(move_mtx, move_steps["Translate"])
         elif move_type["Rotate"]:
-            rx, ry, rz = robomath.mult3(move_mtx, move_steps["Rotate"] * DEG_TO_RAD)
+            rx, ry, rz = robomath.mult3(move_mtx, move_steps["Rotate"])
 
         # Get the current robot joints
         robot_joints = robot.Joints()
 
         # Get the robot position from the joints (calculate forward kinematics)
-        robot_position = robot.SolveFK(robot_joints)
+        robot_position = robot.SolveFK(robot_joints) * robot.PoseTool()
 
         # Get the robot configuration (robot joint state)
         robot_config = robot.JointsConfig(robot_joints)
 
         # Calculate the new robot position
-        new_robot_position = robomath.transl(x, y, z) * robomath.rotx(rx) * robomath.roty(ry) * robomath.rotz(rz) * robot_position
+        new_robot_position = robot_position.RelTool(x, y, z, rx, ry, rz)
 
         # Calculate the new robot joints
-        new_robot_joints = robot.SolveIK(new_robot_position)
+        new_robot_joints = robot.SolveIK(new_robot_position, robot_joints, robot.PoseTool())
         if len(new_robot_joints.tolist()) < num_dofs:
             RDK.ShowMessage('No robot solution! The new position is too far, out of reach or close to a singularity.', False)
             continue
