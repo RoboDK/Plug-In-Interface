@@ -37,7 +37,7 @@ class Settings(roboapps.AppSettings):
 
         self._FIELDS_UI['SNAPSHOT_REMOVE_BG'] = 'Remove background (transparency)'
         self._FIELDS_UI['SNAPSHOT_ZOOM_TO_FIT'] = 'Zoom to fit (if background removed)'
-        self.SNAPSHOT_REMOVE_BG = False
+        self.SNAPSHOT_REMOVE_BG = True
         self.SNAPSHOT_ZOOM_TO_FIT = False
 
         self._FIELDS_UI['SNAPSHOT_COMPRESSION'] = 'File compression level'
