@@ -89,7 +89,6 @@ def GridPoints(ref, size_x, size_y, step_x, step_y, cover_all=False, even_distri
             xyzijk = Pose_x_XYZijk(ref, [index_x, limit_sup_y, 0, 0, 0, -1])
             line.append(xyzijk)
 
-        line = [[round(val, 15) for val in pt] for pt in line]  # fix attempt
         lines.append(line)
 
         # Move to the next X index
@@ -126,7 +125,7 @@ def PointsOffset(points, offset):
 
 #---------------------------------------------
 # Main program call that will project the path to a surface
-def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEAT_OFFSET=2, cover_all=False, even_distribution=False, continuous=False, angle_triangle_deg=0.0):
+def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEAT_OFFSET=2, cover_all=False, even_distribution=False, continuous=False, angle_triangle_deg=0.0, remove_points_not_on_surface=True):
     """
     Create an object containing the curves
     REF: Reference frame item
@@ -137,6 +136,7 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
         return
 
     RDK = PART.RDK()
+    RDK.Render(False)
 
     # Retrieve the reference name
     REF_NAME = REF.Name()
@@ -170,6 +170,7 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
     for line, line_projected in zip(lines, projected_lines):
 
         line_projected_filtered = []
+        line_index = 0
 
         if len(line) != len(line_projected):
             print("Projection failed on some points!")
@@ -177,6 +178,10 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
         # Remember the last valid projection
         pti_last = None
         for i in range(len(line_projected)):
+
+            if len(line_projected_filtered) <= line_index:  # Split curves when there is a hole
+                line_projected_filtered.append([])
+
             # retrieve projected and non projected points, with respect to the reference frame
             # retrieve the next point to test if the projection went too far
 
@@ -185,46 +190,57 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
             pti = Pose_x_XYZijk(pose_part_wrt_ref, point)
             pti_proj = Pose_x_XYZijk(pose_part_wrt_ref, proj_point)
 
-            # Check if we have the first valid projected point
-            if pti_last is None:
-                line_projected_filtered.append(pti_proj)
-                pti_last = pti
-                pti_proj_last = pti_proj
-                continue
+            if remove_points_not_on_surface:
+                if robomath.distance(pti, pti_proj) < 1e-3:
+                    #print("Point is not on the object surface, or move back the projection plane.")
+                    line_index += 1
+                    continue
 
-            # Check if the projection falls through a "window" or "climbs" a wall with respect to the previous pointS
-            if robomath.distance(pti_proj, pti_proj_last) > TOL_PROJ_Z * robomath.distance(pti, pti_last):
-                #print("Point falls through or climbs, skipping")
-                continue
+            else:
+                # Check if we have the first valid projected point
+                if pti_last is None:
+                    line_projected_filtered.append(pti_proj)
+                    pti_last = pti
+                    pti_proj_last = pti_proj
+                    continue
+
+                # Check if the projection falls through a "window" or "climbs" a wall with respect to the previous points
+                if robomath.distance(pti_proj, pti_proj_last) > TOL_PROJ_Z * robomath.distance(pti, pti_last):
+                    #print("Point falls through or climbs, skipping")
+                    continue
 
             # List the point as valid
-            line_projected_filtered.append(pti_proj)
+            line_projected_filtered[line_index].append(pti_proj)
 
             # Remember the last valid projection
             pti_last = pti
             pti_proj_last = pti_proj
 
-        if len(line_projected_filtered) == 0:
-            # no projection found. Skip
-            continue
+        for curve in line_projected_filtered:
 
-        if points_object is None:
-            ShowMsg("Creating object for %s..." % REF_NAME)
-            # Add the points as an object in the RoboDK station tree
-            points_object = RDK.AddCurve(line_projected_filtered, projection_type=robolink.PROJECTION_NONE)
-            # Add the points to the reference and set the reference name
-            points_object.setParent(REF)
-            points_object.setName(REF_NAME)
-        else:
-            # Add curve to existing object
-            RDK.AddCurve(line_projected_filtered, points_object, True, projection_type=robolink.PROJECTION_NONE)
+            if len(curve) < 2:
+                # no projection found. Skip
+                continue
 
-        for rep in range(1, round(REPEAT_TIMES)):
-            # Calculate a new curve with respect to the reference curve
-            points_projected_filtered_rep = PointsOffset(line_projected_filtered, REPEAT_OFFSET * rep)
+            if points_object is None:
+                ShowMsg("Creating object for %s..." % REF_NAME)
+                # Add the points as an object in the RoboDK station tree
+                points_object = RDK.AddCurve(curve, projection_type=robolink.PROJECTION_NONE)
+                # Add the points to the reference and set the reference name
+                points_object.setParent(REF)
+                points_object.setName(REF_NAME)
+            else:
+                # Add curve to existing object
+                RDK.AddCurve(curve, points_object, True, projection_type=robolink.PROJECTION_NONE)
 
-            #  Add the shifted curve without projecting it
-            points_object = RDK.AddCurve(points_projected_filtered_rep, points_object, True, robolink.PROJECTION_NONE)
+            for rep in range(1, round(REPEAT_TIMES)):
+                # Calculate a new curve with respect to the reference curve
+                points_projected_filtered_rep = PointsOffset(curve, REPEAT_OFFSET * rep)
+
+                #  Add the shifted curve without projecting it
+                points_object = RDK.AddCurve(points_projected_filtered_rep, points_object, True, robolink.PROJECTION_NONE)
+
+        RDK.Render(True)
 
     return points_object
 
@@ -235,6 +251,8 @@ def CreateProgram(REF, SPEED_OPERATION, ANGLE_TCP_X, ANGLE_TCP_Y):
     REF_NAME = REF.Name()
 
     RDK = REF.RDK()
+
+    RDK.Render(False)
 
     ShowMsg("Working with %s ..." % REF_NAME)
 
@@ -247,6 +265,7 @@ def CreateProgram(REF, SPEED_OPERATION, ANGLE_TCP_X, ANGLE_TCP_Y):
     curve_follow = RDK.Item(REF_NAME, robolink.ITEM_TYPE_MACHINING)
     if not curve_follow.Valid():
         curve_follow = RDK.AddMachiningProject(REF_NAME)
+    curve_follow.setVisible(False)
 
     ShowMsg("Solving toolpath for %s" % REF_NAME)
 
@@ -258,6 +277,9 @@ def CreateProgram(REF, SPEED_OPERATION, ANGLE_TCP_X, ANGLE_TCP_Y):
     curve_follow.setPoseTool(robomath.rotx(ANGLE_TCP_X * robomath.pi / 180.0) * robomath.roty(ANGLE_TCP_Y * robomath.pi / 180.0))
 
     prog, status = curve_follow.setMachiningParameters(part=points_object)
+
+    RDK.Render(True)
+
     print(status)
     if status == 0:
         ShowMsg("Program %s generated successfully" % REF_NAME)
