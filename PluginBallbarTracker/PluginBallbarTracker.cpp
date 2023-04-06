@@ -288,6 +288,8 @@ void PluginBallbarTracker::PluginEvent(TypeEvent event_type){
         // Update the pose of attached ballbars
         update_ballbar_pose();
         break;
+    case EventChangedStation:
+        attached_ballbars.clear();
     default:
         break;
 
