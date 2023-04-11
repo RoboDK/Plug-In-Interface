@@ -9,7 +9,7 @@
 static QList<Item> parentsOf(Item item, QList<int> filters = {}){
     Item parent = item;
     QList<Item> parents;
-    while (parent != nullptr && parent->Type() != IItem::ITEM_TYPE_STATION && parent->Type() != IItem::ITEM_TYPE_ANY) {
+    while (parent != nullptr && parent->Type() != IItem::ITEM_TYPE_STATION && parent->Type() != IItem::ITEM_TYPE_ANY){
         parent = parent->Parent();
 
         if (filters.empty()){
@@ -17,7 +17,7 @@ static QList<Item> parentsOf(Item item, QList<int> filters = {}){
             continue;
         }
 
-        for (const auto &filter : filters) {
+        for (const auto &filter : filters){
             if (parent->Type() == filter){
                 parents.push_back(parent);
                 break;
@@ -53,20 +53,60 @@ static Item findLCA(Item item1, Item item2){
 // Find the pose to apply to obtain child from parent
 static Mat poseFromTo(Item item_child, Item item_parent){
 
+    if (item_child == item_parent){
+        return Mat();
+    }
+
     QList<Item> parents = parentsOf(item_child);
     if (!parents.contains(item_parent)){
         qDebug() << item_child->Name() << " is not a child of " << item_parent->Name();
         return Mat(false);
     }
 
-    Mat pose = item_parent->Pose();
-    for (int i = parents.size() - 1; i >= 0; --i){
-        pose *= parents[i]->Pose();
+    parents.push_front(item_child);
+    int idx = parents.indexOf(item_parent);
+    QList<Mat> poses;
+    for (int i = idx - 1; i >= 0; --i){
+        if (parents[i]->Type() == IItem::ITEM_TYPE_TOOL){
+            poses.append(parents[i]->PoseTool());
+        } else if (parents[i]->Type() == IItem::ITEM_TYPE_ROBOT){
+            poses.append(parents[i]->SolveFK(parents[i]->Joints()));
+        } else{
+            poses.append(parents[i]->Pose());
+        }
     }
-    pose *= item_child->Pose();
 
+    Mat pose;
+    for (const auto &p : poses){
+        pose *= p;
+    }
     return pose;
 }
+
+// Find the pose of an item with respect to anoter item
+static Mat poseWrt(Item item1, Item item2, RoboDK *rdk){
+
+    if (item1 == item2){
+        return Mat();
+    }
+
+    Mat pose1 = item1->PoseAbs();
+    Mat pose2 = item2->PoseAbs();
+
+
+    Item station = rdk->getActiveStation();
+
+    if (item1->Type() == IItem::ITEM_TYPE_ROBOT || item1->Type() == IItem::ITEM_TYPE_TOOL){
+        pose1 = poseFromTo(item1, station);
+    }
+
+    if (item2->Type() == IItem::ITEM_TYPE_ROBOT || item2->Type() == IItem::ITEM_TYPE_TOOL){
+        pose2 = poseFromTo(item2, station);
+    }
+
+    return pose2.inv() * pose1;
+}
+
 
 // Validates (and retrieve) a ballbar by it's two ends
 bool validateBallbar(const Item bar_end_item, const Item bar_center_item, Item &bb_orbit, Item &bb_extend){
@@ -81,8 +121,7 @@ bool validateBallbar(const Item bar_end_item, const Item bar_center_item, Item &
             if (bb_extend == nullptr && parent->Joints().Length() == 1){
                 bb_extend = parent;
                 qDebug() << "Found ballbar extend mechanism: " << bb_extend->Name();
-            }
-            else if (bb_orbit == nullptr && parent->Joints().Length() == 2){
+            } else if (bb_orbit == nullptr && parent->Joints().Length() == 2){
                 bb_orbit = parent;
                 qDebug() << "Found ballbar orbit mechanism: " << bb_orbit->Name();
             }
@@ -98,8 +137,7 @@ bool validateBallbar(const Item bar_end_item, const Item bar_center_item, Item &
 
     if (is_child && bb_orbit != nullptr && bb_extend != nullptr){
         return true;
-    }
-    else{
+    } else{
         bb_orbit = nullptr;
         bb_extend = nullptr;
         return false;
@@ -154,8 +192,7 @@ void PluginBallbarTracker::PluginUnload(){
     last_clicked_item = nullptr;
     attached_ballbars.clear();
 
-    if (nullptr != action_attach)
-    {
+    if (nullptr != action_attach){
         disconnect(action_attach, SIGNAL(triggered(bool)), this, SLOT(callback_attach_ballbar(bool)));
         delete action_attach;
         action_attach = nullptr;
@@ -208,8 +245,7 @@ QString PluginBallbarTracker::PluginCommand(const QString &command, const QStrin
         callback_attach_ballbar(true);
         qDebug() << "Attached " << item->Name();
         return "OK";
-    }
-    else if (command.compare("Detach", Qt::CaseInsensitive) == 0){
+    } else if (command.compare("Detach", Qt::CaseInsensitive) == 0){
         callback_attach_ballbar(false);
         qDebug() << "Detached " << item->Name();
         return "OK";
@@ -236,7 +272,8 @@ QString PluginBallbarTracker::PluginCommand(const QString &command, const QStrin
 
 void PluginBallbarTracker::PluginEvent(TypeEvent event_type){
     switch (event_type){
-    case EventChanged:{
+    case EventChanged:
+    {
         // Check if any attached ballbars were removed
         for (auto it = attached_ballbars.begin(); it != attached_ballbars.end(); it++){
             attached_ballbar_t bb = *it;
@@ -251,6 +288,8 @@ void PluginBallbarTracker::PluginEvent(TypeEvent event_type){
         // Update the pose of attached ballbars
         update_ballbar_pose();
         break;
+    case EventChangedStation:
+        attached_ballbars.clear();
     default:
         break;
 
@@ -270,24 +309,15 @@ bool PluginBallbarTracker::process_item(Item item){
 
     // Check if we right clicked a tool and get the robot pointer instead
     if (item->Type() == IItem::ITEM_TYPE_TOOL){
-        item = item->Parent();
-    }
 
-    // Check if we selected a robot or an item attached to a robot
-    if (item->Type() == IItem::ITEM_TYPE_ROBOT){
+        if (item->Parent()->Type() == IItem::ITEM_TYPE_ROBOT){
+            qDebug() << "Found valid robot tool: " << item->Name();
 
-        // External axis such as the ballbar shows as ITEM_TYPE_ROBOT using Type(), but are also listed as ITEM_TYPE_ROBOT_AXES
-        if (RDK->getItemList(IItem::ITEM_TYPE_ROBOT_AXES).contains(item)){
-            return false;
+            last_clicked_item = item;
+            return true;
         }
-
-        // Get the parent robot, this will always return the pointer to the 6 axis robot, or the robot itself
-        Item robot_item = item->getLink(IItem::ITEM_TYPE_ROBOT);
-        qDebug() << "Found valid robot: " << robot_item->Name();
-
-        last_clicked_item = robot_item;
-        return true;
     }
+
     return false;
 }
 
@@ -301,50 +331,30 @@ void PluginBallbarTracker::update_ballbar_pose(){
             tJoints orbit_joints = bb.ballbar_orbit_mech->Joints();
 
             // Poses
-            Item lca = findLCA(bb.robot, bb.ballbar_center_frame);
-            if (lca == nullptr){
-                qDebug() << "Unable to find lowest common ancestor.";
-                continue;
-            }
-            Mat robot_pose = poseFromTo(bb.robot, lca);
-            Mat bb_center_pose = poseFromTo(bb.ballbar_center_frame, lca);
-            Mat bb_pose = poseFromTo(bb.ballbar_end_frame, lca);
-            if (!robot_pose.Valid() || !bb_center_pose.Valid() || !bb_pose.Valid()){
-                qDebug() << "Unable to retreive the ballbar poses.";
-                continue;
-            }
+            Mat pillar_2_tool = poseWrt(bb.robot, bb.ballbar_center_frame, RDK);
+            Mat pillar_2_end = poseWrt(bb.ballbar_center_frame, bb.ballbar_end_frame, RDK);
 
-            // XYZs
-            // TODO: Refactor tXYZ so that it is easier to work with. i.e. r = norm(subs2(v1, v2))
-            QVector3D robot_pos(robot_pose.Get(0, 3), robot_pose.Get(1, 3), robot_pose.Get(2, 3));
-            QVector3D bb_center_pos(bb_center_pose.Get(0, 3), bb_center_pose.Get(1, 3), bb_center_pose.Get(2, 3));
-            QVector3D bb_pos(bb_pose.Get(0, 3), bb_pose.Get(1, 3), bb_pose.Get(2, 3));
-
-            // Vectors
-            QVector3D center2tool = bb_center_pos - robot_pos;
-            QVector3D center2end = bb_center_pos - bb_pos;
+            QVector3D pillar_2_tool_vec(pillar_2_tool.Get(0, 3), pillar_2_tool.Get(1, 3), pillar_2_tool.Get(2, 3));
+            QVector3D pillar_2_end_vec(pillar_2_end.Get(0, 3), pillar_2_end.Get(1, 3), pillar_2_end.Get(2, 3));
 
             // Calculate the spherical coordinate system (r, θ, φ)
             // Radius r
-            double r = center2tool.length();  // desired radius
-            double r0 = center2end.length();  // current radius
+            double r = pillar_2_tool_vec.length();  // desired radius
+            double r0 = pillar_2_end_vec.length();  // current radius
 
             // Rho φ
-            double rho = qRadiansToDegrees(qAcos(center2tool.z() / r)) - 90.0;
+            double rho = 90.0 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.z() / r));
 
             // Theta θ
-            double theta = 90.0;
-            if (center2tool.x() != 0){
-                theta = qRadiansToDegrees(qAtan2(center2tool.y(), center2tool.x()));
+            double theta = 180 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.x() / qSqrt(pillar_2_tool_vec.x() * pillar_2_tool_vec.x() + pillar_2_tool_vec.y() * pillar_2_tool_vec.y())));
+            if (pillar_2_tool_vec.y() > 0){
+                theta = -theta;
             }
 
             // Update the ballbar
             extend_joints.Data()[0] += r - r0;
             orbit_joints.Data()[0] = theta;
             orbit_joints.Data()[1] = rho;
-
-            bb.ballbar_extend_mech->setJoints(extend_joints);
-            bb.ballbar_orbit_mech->setJoints(orbit_joints);
 
             // Check if the position is unreachable/invalid
             tJoints lower_limits;
@@ -355,6 +365,17 @@ void PluginBallbarTracker::update_ballbar_pose(){
             if ((extend_joints.Data()[0] < lower_limits.Data()[0]) || (extend_joints.Data()[0] > upper_limits.Data()[0])){
                 bb.reachable = false;
                 // as an option, you can add bb.detach();
+            } else{
+                bb.ballbar_extend_mech->setJoints(extend_joints);
+            }
+
+            bb.ballbar_orbit_mech->JointLimits(&lower_limits, &upper_limits);
+            if ((orbit_joints.Data()[0] < lower_limits.Data()[0]) || (extend_joints.Data()[0] > upper_limits.Data()[0]) ||
+                (orbit_joints.Data()[1] < lower_limits.Data()[1]) || (extend_joints.Data()[1] > upper_limits.Data()[1])){
+                bb.reachable = false;
+                // as an option, you can add bb.detach();
+            } else{
+                bb.ballbar_orbit_mech->setJoints(orbit_joints);
             }
 
             renderUpdate = true;
@@ -374,7 +395,7 @@ void PluginBallbarTracker::callback_attach_ballbar(bool attach){
     // If the request is to detach, do so
     if (!attach){
         QMutableListIterator<attached_ballbar_t> i(attached_ballbars);
-        while (i.hasNext()) {
+        while (i.hasNext()){
             if (i.next().robot == last_clicked_item){
                 i.remove();
             }
@@ -392,7 +413,7 @@ void PluginBallbarTracker::callback_attach_ballbar(bool attach){
         QList<Item> mechanisms = RDK->getItemList(IItem::ITEM_TYPE_ROBOT_AXES);
         {
             QMutableListIterator<Item> i(mechanisms);
-            while (i.hasNext()) {
+            while (i.hasNext()){
                 if (i.next()->Joints().Length() != 1){
                     i.remove();
                 }
@@ -402,7 +423,7 @@ void PluginBallbarTracker::callback_attach_ballbar(bool attach){
         QList<Item> frames = RDK->getItemList(IItem::ITEM_TYPE_FRAME);
         {
             QMutableListIterator<Item> i(frames);
-            while (i.hasNext()) {
+            while (i.hasNext()){
                 QList<Item> parents = parentsOf(i.next());
                 bool remove = true;
                 for (const Item &m : mechanisms){
