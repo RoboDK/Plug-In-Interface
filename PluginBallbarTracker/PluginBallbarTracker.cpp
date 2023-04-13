@@ -370,8 +370,8 @@ void PluginBallbarTracker::update_ballbar_pose(){
             }
 
             bb.ballbar_orbit_mech->JointLimits(&lower_limits, &upper_limits);
-            if ((orbit_joints.Data()[0] < lower_limits.Data()[0]) || (extend_joints.Data()[0] > upper_limits.Data()[0]) ||
-                (orbit_joints.Data()[1] < lower_limits.Data()[1]) || (extend_joints.Data()[1] > upper_limits.Data()[1])){
+            if ((orbit_joints.Data()[0] < lower_limits.Data()[0]) || (orbit_joints.Data()[0] > upper_limits.Data()[0]) ||
+                (orbit_joints.Data()[1] < lower_limits.Data()[1]) || (orbit_joints.Data()[1] > upper_limits.Data()[1])){
                 bb.reachable = false;
                 // as an option, you can add bb.detach();
             } else{
