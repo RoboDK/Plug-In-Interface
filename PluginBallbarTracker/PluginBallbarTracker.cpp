@@ -289,6 +289,8 @@ void PluginBallbarTracker::PluginEvent(TypeEvent event_type){
         update_ballbar_pose();
         break;
     case EventChangedStation:
+    case EventAbout2ChangeStation:
+    case EventAbout2CloseStation:
         attached_ballbars.clear();
     default:
         break;
@@ -343,10 +345,10 @@ void PluginBallbarTracker::update_ballbar_pose(){
             double r0 = pillar_2_end_vec.length();  // current radius
 
             // Rho φ
-            double rho = 90.0 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.z() / r));
+            double rho = 90.0 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.z() / std::max(1e-6, r)));
 
             // Theta θ
-            double theta = 180 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.x() / qSqrt(pillar_2_tool_vec.x() * pillar_2_tool_vec.x() + pillar_2_tool_vec.y() * pillar_2_tool_vec.y())));
+            double theta = 180 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.x() / std::max(1e-6, qSqrt(pillar_2_tool_vec.x() * pillar_2_tool_vec.x() + pillar_2_tool_vec.y() * pillar_2_tool_vec.y()))));
             if (pillar_2_tool_vec.y() > 0){
                 theta = -theta;
             }
@@ -357,24 +359,30 @@ void PluginBallbarTracker::update_ballbar_pose(){
             orbit_joints.Data()[1] = rho;
 
             // Check if the position is unreachable/invalid
-            tJoints lower_limits;
-            tJoints upper_limits;
-            bb.ballbar_extend_mech->JointLimits(&lower_limits, &upper_limits);
+            tJoints extend_lower_limits;
+            tJoints extend_upper_limits;
+            tJoints orbit_lower_limits;
+            tJoints orbit_upper_limits;
+            bb.ballbar_extend_mech->JointLimits(&extend_lower_limits, &extend_upper_limits);
+            bb.ballbar_orbit_mech->JointLimits(&orbit_lower_limits, &orbit_upper_limits);
 
-            bb.reachable = true;
-            if ((extend_joints.Data()[0] < lower_limits.Data()[0]) || (extend_joints.Data()[0] > upper_limits.Data()[0])){
-                bb.reachable = false;
-                // as an option, you can add bb.detach();
-            } else{
-                bb.ballbar_extend_mech->setJoints(extend_joints);
+            bb.reachable = false;
+            if ((extend_joints.Data()[0] >= extend_lower_limits.Data()[0]) && (extend_joints.Data()[0] <= extend_upper_limits.Data()[0]) &&
+                (orbit_joints.Data()[0] >= orbit_lower_limits.Data()[0]) && (orbit_joints.Data()[0] <= orbit_upper_limits.Data()[0]) &&
+                (orbit_joints.Data()[1] >= orbit_lower_limits.Data()[1]) && (orbit_joints.Data()[1] <= orbit_upper_limits.Data()[1])){
+                bb.reachable = true;
             }
 
-            bb.ballbar_orbit_mech->JointLimits(&lower_limits, &upper_limits);
-            if ((orbit_joints.Data()[0] < lower_limits.Data()[0]) || (orbit_joints.Data()[0] > upper_limits.Data()[0]) ||
-                (orbit_joints.Data()[1] < lower_limits.Data()[1]) || (orbit_joints.Data()[1] > upper_limits.Data()[1])){
-                bb.reachable = false;
-                // as an option, you can add bb.detach();
+            // Remove the false check to enable auto-detach
+            // By default, the ballbar is always tracked within its limits (this can lead to funny behaviours outside reach)
+            if (false && !bb.reachable){
+                bb.detach();
             } else{
+                extend_joints.Data()[0] = std::max(extend_lower_limits.Data()[0], std::min(extend_joints.Data()[0], extend_upper_limits.Data()[0]));
+                orbit_joints.Data()[0] = std::max(orbit_lower_limits.Data()[0], std::min(orbit_joints.Data()[0], orbit_upper_limits.Data()[0]));
+                orbit_joints.Data()[1] = std::max(orbit_lower_limits.Data()[1], std::min(orbit_joints.Data()[1], orbit_upper_limits.Data()[1]));
+
+                bb.ballbar_extend_mech->setJoints(extend_joints);
                 bb.ballbar_orbit_mech->setJoints(orbit_joints);
             }
 
