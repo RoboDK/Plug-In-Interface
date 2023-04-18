@@ -75,11 +75,12 @@ def runmain():
     # Update pattern
     prog_name_list = []
     for REF in REF_PATTERN_LIST:
-        new_obj = CreatePaths(REF, PART, S.SIZE_X, S.SIZE_Y, S.STEP_X, S.STEP_Y, S.REPEAT_TIMES, S.REPEAT_OFFSET, S.COVER_ALL, S.EVEN_DISTRIBUTION, S.CONTINUOUS, S.ANGLE_TRIANGLE)
+        new_obj = CreatePaths(REF, PART, S.SIZE_X, S.SIZE_Y, S.STEP_X, S.STEP_Y, S.REPEAT_TIMES, S.REPEAT_OFFSET, S.COVER_ALL, S.EVEN_DISTRIBUTION, S.CONTINUOUS, S.ANGLE_TRIANGLE, S.REMOVE_UNPROJECTED_POINTS)
 
-        prog = CreateProgram(REF, S.SPEED_OPERATION, S.ANGLE_TCP_X, S.ANGLE_TCP_Y)
-        if prog is not None and prog.Valid():
-            prog_name_list.append(prog.Name())
+        if S.CREATE_PROGRAM:
+            prog = CreateProgram(REF, S.SPEED_OPERATION, S.ANGLE_TCP_X, S.ANGLE_TCP_Y)
+            if prog is not None and prog.Valid():
+                prog_name_list.append(prog.Name())
 
     if prog_name_list:
         CreateMainProgram(PART, prog_name_list)

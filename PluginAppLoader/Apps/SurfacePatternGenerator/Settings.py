@@ -46,14 +46,19 @@ class Settings(roboapps.AppSettings):
         self.EVEN_DISTRIBUTION = False
         self.CONTINUOUS = True
 
+        self._FIELDS_UI['REMOVE_UNPROJECTED_POINTS'] = "Remove points that are not on the surface"
+        self.REMOVE_UNPROJECTED_POINTS = False
+
         self._FIELDS_UI['REPEAT_TIMES'] = "Repeat times"
         self._FIELDS_UI['REPEAT_OFFSET'] = "Repeat Offset along Z (mm)"
         self.REPEAT_TIMES = 1
         self.REPEAT_OFFSET = 2.0
 
         self._FIELDS_UI['SECTION_PROGRAM'] = "$PROGRAM$"
+        self._FIELDS_UI['CREATE_PROGRAM'] = "Create Program"
         self._FIELDS_UI['ANGLE_TCP_X'] = "Tool angle X (deg)"
         self._FIELDS_UI['ANGLE_TCP_Y'] = "Tool angle Y (deg)"
+        self.CREATE_PROGRAM = True
         self.ANGLE_TCP_X = 0.0
         self.ANGLE_TCP_Y = 0.0
 
