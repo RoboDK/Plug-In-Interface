@@ -5,8 +5,8 @@
 #include <QMenuBar>
 #include <QtMath>
 
-// Parents of an item up to the station, with type filtering
-static QList<Item> parentsOf(Item item, QList<int> filters = {}){
+// Get the list of parents of an Item up to the Station, with type filtering (i.e. [ITEM_TYPE_FRAME, ITEM_TYPE_ROBOT, ..]).
+static QList<Item> getAncestors(Item item, QList<int> filters = {}){
     Item parent = item;
     QList<Item> parents;
     while (parent != nullptr && parent->Type() != IItem::ITEM_TYPE_STATION && parent->Type() != IItem::ITEM_TYPE_ANY){
@@ -27,12 +27,13 @@ static QList<Item> parentsOf(Item item, QList<int> filters = {}){
     return parents;
 }
 
-// Find the common ancestor of two items
-static Item findLCA(Item item1, Item item2){
+
+// Finds the lowest common ancestor (LCA) between two Items in the Station's tree.
+static Item getLowestCommonAncestor(Item item1, Item item2){
 
     // Make an ordered list of parents (backwards). Iter on it until the parent differs.. and you get the lowest common ancestor (LCA)
-    QList<Item> parents1 = parentsOf(item1);
-    QList<Item> parents2 = parentsOf(item2);
+    QList<Item> parents1 = getAncestors(item1);
+    QList<Item> parents2 = getAncestors(item2);
 
     Item lca = nullptr;
     int size = std::min(parents1.size(), parents2.size());
@@ -40,24 +41,28 @@ static Item findLCA(Item item1, Item item2){
         if (parents1.back() != parents2.back()){
             break;
         }
+
         lca = parents1.back();
         parents1.pop_back();
         parents2.pop_back();
     }
+
     if (lca == nullptr){
         qDebug() << item1->Name() << " does not share an ancestor with " << item2->Name();
     }
+
     return lca;
 }
 
-// Find the pose to apply to obtain child from parent
-static Mat poseFromTo(Item item_child, Item item_parent){
+
+// Gets the pose between two Items that have a hierarchical relationship in the Station's tree.
+static Mat getAncestorPose(Item item_child, Item item_parent){
 
     if (item_child == item_parent){
         return Mat();
     }
 
-    QList<Item> parents = parentsOf(item_child);
+    QList<Item> parents = getAncestors(item_child);
     if (!parents.contains(item_parent)){
         qDebug() << item_child->Name() << " is not a child of " << item_parent->Name();
         return Mat(false);
@@ -83,8 +88,9 @@ static Mat poseFromTo(Item item_child, Item item_parent){
     return pose;
 }
 
-// Find the pose of an item with respect to anoter item
-static Mat poseWrt(Item item1, Item item2, RoboDK *rdk){
+
+// Gets the pose of an Item (item1) with respect to an another Item (item2).
+static Mat getPoseWrt(Item item1, Item item2, RoboDK *rdk){
 
     if (item1 == item2){
         return Mat();
@@ -97,11 +103,11 @@ static Mat poseWrt(Item item1, Item item2, RoboDK *rdk){
     Item station = rdk->getActiveStation();
 
     if (item1->Type() == IItem::ITEM_TYPE_ROBOT || item1->Type() == IItem::ITEM_TYPE_TOOL){
-        pose1 = poseFromTo(item1, station);
+        pose1 = getAncestorPose(item1, station);
     }
 
     if (item2->Type() == IItem::ITEM_TYPE_ROBOT || item2->Type() == IItem::ITEM_TYPE_TOOL){
-        pose2 = poseFromTo(item2, station);
+        pose2 = getAncestorPose(item2, station);
     }
 
     return pose2.inv() * pose1;
@@ -147,7 +153,7 @@ bool validateBallbar(const Item bar_end_item, const Item bar_center_item, Item &
 // Retrieves a ballbar starting from the attachment point item.
 // A ballbar is strctured as such: attachment frame->extend mechanism->orbit mechanism->rotation frame
 bool retriveBallbar(const Item bar_end_item, Item &bar_center_item, Item &bb_orbit, Item &bb_extend){
-    QList<Item> frames = parentsOf(bar_end_item, { IItem::ITEM_TYPE_FRAME });
+    QList<Item> frames = getAncestors(bar_end_item, { IItem::ITEM_TYPE_FRAME });
     for (const auto &frame : frames){
         if (validateBallbar(bar_end_item, frame, bb_orbit, bb_extend)){
             bar_center_item = frame;
@@ -333,8 +339,8 @@ void PluginBallbarTracker::update_ballbar_pose(){
             tJoints orbit_joints = bb.ballbar_orbit_mech->Joints();
 
             // Poses
-            Mat pillar_2_tool = poseWrt(bb.robot, bb.ballbar_center_frame, RDK);
-            Mat pillar_2_end = poseWrt(bb.ballbar_center_frame, bb.ballbar_end_frame, RDK);
+            Mat pillar_2_tool = getPoseWrt(bb.robot, bb.ballbar_center_frame, RDK);
+            Mat pillar_2_end = getPoseWrt(bb.ballbar_center_frame, bb.ballbar_end_frame, RDK);
 
             QVector3D pillar_2_tool_vec(pillar_2_tool.Get(0, 3), pillar_2_tool.Get(1, 3), pillar_2_tool.Get(2, 3));
             QVector3D pillar_2_end_vec(pillar_2_end.Get(0, 3), pillar_2_end.Get(1, 3), pillar_2_end.Get(2, 3));
@@ -432,7 +438,7 @@ void PluginBallbarTracker::callback_attach_ballbar(bool attach){
         {
             QMutableListIterator<Item> i(frames);
             while (i.hasNext()){
-                QList<Item> parents = parentsOf(i.next());
+                QList<Item> parents = getAncestors(i.next());
                 bool remove = true;
                 for (const Item &m : mechanisms){
                     if (parents.contains(m)){
