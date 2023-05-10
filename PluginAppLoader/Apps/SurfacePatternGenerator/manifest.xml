@@ -13,7 +13,7 @@
     <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-16T21:00:41.781001Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Surface Pattern Generator</dc:title>
-    <cp:version>1.0.0</cp:version>
+    <cp:version>1.0.1</cp:version>
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>

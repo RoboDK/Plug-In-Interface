@@ -23,7 +23,6 @@
     <email>info@robodk.com</email>
     <icon>/icon.svg</icon>
   </extraProperties>
-  <dependencies/>
   <assets>
     <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/AddPointOnSurface.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/AddPointOnSurface.svg</asset>
@@ -34,5 +33,8 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/README.md</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/Settings.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/Settings.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/SortPoints.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/SurfaceInfo.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/_putools.py</asset>
   </assets>
 </packageManifest>
