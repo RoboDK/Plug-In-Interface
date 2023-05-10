@@ -29,7 +29,7 @@ static Mat vp_2_camabs(Mat vp){
 static QList<Item> getAncestors(Item item, QList<int> filters = {}){
     Item parent = item;
     QList<Item> parents;
-    while (parent != nullptr && parent->Type() != IItem::ITEM_TYPE_STATION && parent->Type() != IItem::ITEM_TYPE_ANY) {
+    while (parent != nullptr && parent->Type() != IItem::ITEM_TYPE_STATION && parent->Type() != IItem::ITEM_TYPE_ANY){
         parent = parent->Parent();
 
         if (filters.empty()){
@@ -37,7 +37,7 @@ static QList<Item> getAncestors(Item item, QList<int> filters = {}){
             continue;
         }
 
-        for (const auto &filter : filters) {
+        for (const auto &filter : filters){
             if (parent->Type() == filter){
                 parents.push_back(parent);
                 break;
@@ -77,6 +77,7 @@ static Item getLowestCommonAncestor(Item item1, Item item2){
 
 // Gets the pose between two Items that have a hierarchical relationship in the Station's tree.
 static Mat getAncestorPose(Item item_child, Item item_parent){
+
     if (item_child == item_parent){
         return Mat();
     }
@@ -87,46 +88,48 @@ static Mat getAncestorPose(Item item_child, Item item_parent){
         return Mat(false);
     }
 
-    QList<Item> items;
-    items.append(item_child);
-    items.append(parents);
-    int idx = items.indexOf(item_parent);
-    Mat pose = Mat();
+    parents.push_front(item_child);
+    int idx = parents.indexOf(item_parent);
+    QList<Mat> poses;
     for (int i = idx - 1; i >= 0; --i){
-        if (items[i]->Type() == IItem::ITEM_TYPE_TOOL){
-            pose *= items[i]->PoseTool();
-        }
-        else if (items[i]->Type() == IItem::ITEM_TYPE_ROBOT){
-            pose *= items[i]->SolveFK(items[i]->Joints());
-        }
-        else{
-            pose *= items[i]->Pose();
+        if (parents[i]->Type() == IItem::ITEM_TYPE_TOOL){
+            poses.append(parents[i]->PoseTool());
+        } else if (parents[i]->Type() == IItem::ITEM_TYPE_ROBOT){
+            poses.append(parents[i]->SolveFK(parents[i]->Joints()));
+        } else{
+            poses.append(parents[i]->Pose());
         }
     }
 
+    Mat pose;
+    for (const auto &p : poses){
+        pose *= p;
+    }
     return pose;
 }
 
 
 // Gets the pose of an Item (item1) with respect to an another Item (item2).
-static Mat getPoseWrt(Item item1, Item item2){
+static Mat getPoseWrt(Item item1, Item item2, RoboDK *rdk){
+
     if (item1 == item2){
         return Mat();
     }
 
-    QList<Item> parents1 = getAncestors(item1);
-    if (parents1.contains(item2)){
-        return getAncestorPose(item1, item2);
+    Mat pose1 = item1->PoseAbs();
+    Mat pose2 = item2->PoseAbs();
+
+
+    Item station = rdk->getActiveStation();
+
+    if (item1->Type() == IItem::ITEM_TYPE_ROBOT || item1->Type() == IItem::ITEM_TYPE_TOOL){
+        pose1 = getAncestorPose(item1, station);
     }
 
-    QList<Item> parents2 = getAncestors(item2);
-    if (parents2.contains(item1)){
-        return getAncestorPose(item2, item1).inv();
+    if (item2->Type() == IItem::ITEM_TYPE_ROBOT || item2->Type() == IItem::ITEM_TYPE_TOOL){
+        pose2 = getAncestorPose(item2, station);
     }
 
-    Item lca = getLowestCommonAncestor(item1, item2);
-    Mat pose1 = getAncestorPose(item1, lca);
-    Mat pose2 = getAncestorPose(item2, lca);
     return pose2.inv() * pose1;
 }
 
@@ -387,7 +390,7 @@ void PluginAttachView::updateViewPose(){
 
     if (!view_anchor.is_master){
         // Set the view using the anchor
-        Mat pose_abs = getPoseWrt(view_anchor.anchor, view_anchor.station);
+        Mat pose_abs = getPoseWrt(view_anchor.anchor, view_anchor.station, RDK);
         Mat view_pose = camabs_2_vp(pose_abs);
         RDK->setViewPose(view_pose);
     }
