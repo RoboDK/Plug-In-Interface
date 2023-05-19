@@ -438,7 +438,8 @@ def ViewManager():
     btnGo.pack(fill=tkinter.X, side=tkinter.BOTTOM)
 
     listbox.pack(fill=tkinter.X, side=tkinter.TOP)
-    listbox.bind('<Double-Button>', on_ListNavigateTo)  #on_ListShow)
+    # listbox.bind('<Double-Button>', on_ListNavigateTo)  # Animation 
+    listbox.bind('<Double-Button>', on_ListShow) # Move direct
 
     w.mainloop()
 
