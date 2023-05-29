@@ -31,6 +31,7 @@ PYTHON_VERSION = {}
 #PYTHON_VERSION['34'] = 'C:/Python34/python.exe'
 #PYTHON_VERSION['35'] = 'C:/Python353/python.exe'
 PYTHON_VERSION['37'] = 'C:/RoboDK/Python37/python.exe'
+PYTHON_VERSION['310'] = 'C:/RoboDK/Python-Embedded/python.exe'
 
 # Module loader template
 LIBRARY_LOADER = """# Load Python library from your App folder and run the custom action
@@ -166,7 +167,7 @@ if CompileVersion is None:
     print("DONE!!")
     quit(0)
 
-if python_version[0] != int(CompileVersion[0]) or python_version[1] != int(CompileVersion[1]):  # or python_version[2] != int(CompileVersion[2]):
+if python_version[0] != int(CompileVersion[0]) or python_version[1] != int(CompileVersion[1:]):  # or python_version[2] != int(CompileVersion[2]):
     raise Exception("Targeting Python v%s but Python version is %s" % (CompileVersion, str(python_version)))
 
 # Compiled files
@@ -198,7 +199,7 @@ for root, dirnames, filenames in os.walk(path_compile_to_version):
         #    print("Skipping compilation of: " + filename)
         #    continue
 
-        fmove_to = os.path.dirname(fmove_from) + '/../' + os.path.basename(fmove_from).replace('cpython-34.', '').replace('cpython-35.', '').replace('cpython-36.', '').replace('cpython-37.', '').replace('cpython-38.', '')
+        fmove_to = os.path.dirname(fmove_from) + '/../' + os.path.basename(fmove_from).replace('cpython-34.', '').replace('cpython-35.', '').replace('cpython-36.', '').replace('cpython-37.', '').replace('cpython-38.', '').replace('cpython-39.', '').replace('cpython-310.', '').replace('cpython-311.', '')
 
         # Autodesk needs the main file as a PY file
         #if root.lower().replace("/","").replace("\\","").endswith("robodk__pycache__") and os.path.basename(fmove_to.lower()) == "robodk.pyc":
