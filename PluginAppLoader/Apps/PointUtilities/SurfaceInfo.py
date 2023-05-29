@@ -137,7 +137,7 @@ def SurfaceInfo(RDK=None, S=None):
         # Get the mesh of the feature
         feature_mesh = get_object_point_cloud(selected_object, feature_id, False)
         if len(feature_mesh) > 10000:
-            # RoboDK will hand on larges mesh (and this is unlikely a primitive)
+            # RoboDK will hang on large mesh (and this is unlikely a primitive)
             continue
 
         # Best-fit it
