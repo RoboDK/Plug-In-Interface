@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
+  <cp:coreProperties>
+    <cp:category>Application</cp:category>
+    <cp:contentStatus>Final</cp:contentStatus>
+    <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-16T21:00:39.819148Z</dcterms:created>
+    <dc:creator>RoboDK</dc:creator>
+    <dc:description>The App Template for RoboDK provides the necessary examples to build a RoboDK App.</dc:description>
+    <dc:identifier>com.robodk.app.apptemplate</dc:identifier>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
+    <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-16T21:00:39.819148Z</dcterms:modified>
+    <cp:revision>1</cp:revision>
+    <dc:title>App Template</dc:title>
+    <cp:version>1.0.0</cp:version>
+  </cp:coreProperties>
+  <extraProperties>
+    <website>https://robodk.com/</website>
+    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/AppTemplate</documentation>
+    <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/AppTemplate</repository>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
+  </extraProperties>
+  <dependencies/>
+  <assets>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/ActionCheckable.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/ActionCheckable.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/ActionCheckableChecked.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/ActionMomentary.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/ActionMomentary.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/ActionOnContext.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/ActionOnContext.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/ActionOnDoubleClick.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/AppConfig.ini</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/AppSettings.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/AppSettings.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/LICENSE.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/OptionCheckable.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/OptionCheckableGroupA.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/OptionCheckableGroupB.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/README.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/requirements.txt</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/_AppUtilities.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/AppTemplate/__init__.py</asset>
+  </assets>
+</packageManifest>
