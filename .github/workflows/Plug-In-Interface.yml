@@ -48,6 +48,8 @@ jobs:
           tools: "tools_qtcreator,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
           target: "desktop"
+          cache: "true"
+          cache-key-prefix: "install-qt-action-${{ matrix.os }}"
 
       - name: Configure and build Plug-In-Interface on Windows
         if: startsWith(matrix.os, 'windows')
