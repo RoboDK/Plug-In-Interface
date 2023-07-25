@@ -1,8 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Expand the selected items and their children in the tree.
-# This also expand (show instructions) of programs.
+# Show (set visible) every item in the station.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -17,10 +16,9 @@ from robodk import robolink, roboapps
 import _Utilities as utils
 
 
-def TreeExpand():
+def ShowAll():
     """
-    Expand the selected items and their children in the tree.
-    This also expand (show instructions) of programs.
+    Show (set visible) every item in the station.
     """
     RDK = robolink.Robolink()
 
@@ -41,7 +39,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        TreeExpand()
+        ShowAll()
 
 
 if __name__ == '__main__':
