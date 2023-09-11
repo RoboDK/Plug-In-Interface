@@ -1,11 +1,11 @@
 # Attach Object
 
-The Attach Object Plug-in for RoboDK can dynamically attach multiple objects to a robot joint.
+The Attach Object Plug-in for RoboDK can dynamically attach multiple objects to a robot link.
 
 ## Features
 
 - Attached objects will be updated to track the robot movements
-- An object can be attached once, and a robot can have multiple objects attached to multiple joints
+- An object can be attached once, and a robot can have multiple objects attached to multiple links
 - The user can attach and detach objects by right-clicking an object, multiple objects, or a robot
 
 | Dress Pack (multiple objects)           | Robot                                   | Robot + Dress Pack                            |
@@ -17,20 +17,20 @@ The Attach Object Plug-in for RoboDK can dynamically attach multiple objects to 
 
 ### Attaching and detaching objects from RoboDK
 
-Attach or detach an object or multiple objects to the same robot joint by right-clicking them (either in the tree or in the cell). Attach and detach menus will be present according to the state of the selected objects.
+Attach or detach an object or multiple objects to the same robot link by right-clicking them (either in the tree or in the cell). Attach and detach menus will be present according to the state of the selected objects.
 If more than one robot is present in the station, a selection prompt will appear.
 
 Attached objects will conserve their relative position to the robot when the object is attached. Place them correctly before attaching them.
 
 ![Objects menu](./doc/object-menus.png)
 
-Attach or detach an object or multiple objects to the same robot joint by right-clicking a robot (either in the tree or in the cell). Attach and detach menus will be present according to the state of the selected robot.
+Attach or detach an object or multiple objects to the same robot link by right-clicking a robot (either in the tree or in the cell). Attach and detach menus will be present according to the state of the selected robot.
 If more than one object is present in the station, a selection prompt will appear.
 
 ![Attaching objects](./doc/robot-menus.png)
 
 
-Once the objects an the robot are selected, a prompt will appear to select the joint ID to attach. For instance, to attach an object on the last joint of a six axis robot, enter 6.
+Once the objects an the robot are selected, a prompt will appear to select the link ID to attach. For instance, to attach an object on the last link of a six axis robot, enter 6.
 
 ![Attaching objects](./doc/joint-entry.png)
 
@@ -54,12 +54,12 @@ objects = RDK.ItemList(ITEM_TYPE_OBJECT, list_names=True)
 dof = len(robot.Joints().list())
 for obj in objects:
 
-    entry = mbox("Joint to attach %s?" % obj, entry=str(dof))
+    entry = mbox("Robot link to attach %s?" % obj, entry=str(dof))
     if entry == False:
         continue
-    joint = int(entry)
+    link = int(entry)
 
-    value = "%i|%s|%s" % (joint, robot.Name(), obj)
+    value = "%i|%s|%s" % (link, robot.Name(), obj)
     result = RDK.PluginCommand("Plugin Attach Object", "Attach", value)
     RDK.ShowMessage(value + " -> " + result, False)
 ```
