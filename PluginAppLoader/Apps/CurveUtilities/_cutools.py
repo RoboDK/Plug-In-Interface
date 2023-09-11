@@ -88,13 +88,19 @@ def filter_straight_lines(points, tolerance_line_rad=0.01, check_normals=True, t
 
             # Find the orientation vector from point A to point J. Note: as we get further from A, the apparent tolerance will decrease.
             pj = points[j]
+            if robomath.distance(pa, pj) < 1e-6:
+                # Points are overlapping. Check normals!
+                if check_normals and len(pa) > 3 and len(pj) > 3 and abs(robomath.angle3(pa[3:6], pj[3:6])) > tolerance_normals_rad:
+                    break
+                segment.append(pj)
+                continue
+
             vaj = robomath.normalize3(robomath.subs3(pa, pj))
             delta = abs(robomath.angle3(vab, vaj))
             if delta > tolerance_line_rad:
                 break
-            if check_normals:
-                if len(pa) > 3 and len(pj) > 3 and abs(robomath.angle3(pa[3:6], pj[3:6])) > tolerance_normals_rad:
-                    break
+            if check_normals and len(pa) > 3 and len(pj) > 3 and abs(robomath.angle3(pa[3:6], pj[3:6])) > tolerance_normals_rad:
+                break
             segment.append(pj)
 
         if len(segment) > 0:
@@ -221,6 +227,33 @@ def sort_curve_segments(segments, start=None, reverse_segments=False):
         pass_by.remove(nearest)
 
     return sorted_segments
+
+
+def split_discontinuous_curves(segments, tolerance_mm=50.0, start=None):
+    """
+    Split/group segments into separate curves objects based on continuity.
+    """
+    if start is None:
+        start = segments[0]
+
+    pass_by = segments.copy()
+    grouped_segments = [[start]]
+
+    if start in pass_by:
+        pass_by.remove(start)
+
+    while pass_by:
+
+        nearest = min(pass_by, key=lambda x: robomath.distance(grouped_segments[-1][-1][-1][:3], x[0][:3]))
+        distance = robomath.distance(grouped_segments[-1][-1][-1][:3], nearest[0][:3])
+        if distance > tolerance_mm:
+            grouped_segments.append([])
+
+        path_nearest = nearest.copy()
+        grouped_segments[-1].append(path_nearest)
+        pass_by.remove(nearest)
+
+    return grouped_segments
 
 
 def runmain():

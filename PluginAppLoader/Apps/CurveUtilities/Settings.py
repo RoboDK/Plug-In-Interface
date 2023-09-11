@@ -69,6 +69,12 @@ class Settings(roboapps.AppSettings):
         self.SIMPLIFY_TOLERANCE_STRAIGHT_LINE = 0.02
 
         #----------------------------------------------------------
+        self._FIELDS_UI['SECTION_SPLIT'] = "$Split Discontinuous Curves$"
+
+        self._FIELDS_UI['SPLIT_TOLERANCE'] = "Split tolerance [mm]"
+        self.SPLIT_TOLERANCE = 50.0
+
+        #----------------------------------------------------------
         self._FIELDS_UI['SECTION_CURVE_TO_TARGETS'] = "$Curve to targets$"
 
         self._FIELDS_UI['TARGET_INVERSE_NORMAL'] = "Inverse point normal"
