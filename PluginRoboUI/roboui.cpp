@@ -61,6 +61,14 @@ QString RoboUI::PluginLoad(QMainWindow* mainWindow, QMenuBar* menuBar, QStatusBa
 
 void RoboUI::PluginUnload()
 {
+    ImGui_ImplOpenGL2_Shutdown();
+    ImGui::DestroyContext();
+
+    if (_renderWindow)
+    {
+        _renderWindow->removeEventFilter(this);
+        _renderWindow = nullptr;
+    }
 }
 
 void RoboUI::PluginLoadToolbar(QMainWindow* mainWindow, int iconSize)
