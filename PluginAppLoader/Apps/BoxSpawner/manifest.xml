@@ -5,7 +5,7 @@
     <cp:contentStatus>Final</cp:contentStatus>
     <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-16T21:00:39.945263Z</dcterms:created>
     <dc:creator>RoboDK</dc:creator>
-    <dc:description>The Box Spawner App for RoboDK let's you programmatically add box objects in your RoboDK Station.</dc:description>
+    <dc:description>The Box Spawner App for RoboDK lets you programmatically add box objects in your RoboDK Station.</dc:description>
     <dc:identifier>com.robodk.app.boxspawner</dc:identifier>
     <cp:keywords/>
     <dc:language>eng</dc:language>

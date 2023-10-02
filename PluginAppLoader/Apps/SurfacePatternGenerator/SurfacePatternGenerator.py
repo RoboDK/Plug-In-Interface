@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# The Surface Pattern Generator (SPG) App let's you generate surface patterns on an object surface,
+# The Surface Pattern Generator (SPG) App lets you generate surface patterns on an object surface,
 # with its associated Curve Follow Project (CFP).
 #
 # More information about the RoboDK API for Python here:

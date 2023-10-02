@@ -1,6 +1,6 @@
 # Surface Pattern Generator
 
-The Surface Pattern Generator (SPG) App for RoboDK let's you generate simple surface patterns on an object surface.
+The Surface Pattern Generator (SPG) App for RoboDK lets you generate simple surface patterns on an object surface.
 
 - For more information about RoboDK Apps, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).

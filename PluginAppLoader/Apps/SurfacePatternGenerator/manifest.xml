@@ -5,7 +5,7 @@
     <cp:contentStatus>Final</cp:contentStatus>
     <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-16T21:00:41.781001Z</dcterms:created>
     <dc:creator>RoboDK</dc:creator>
-    <dc:description>The Surface Pattern Generator (SPG) App for RoboDK let's you generate simple surface patterns on an object surface.</dc:description>
+    <dc:description>The Surface Pattern Generator (SPG) App for RoboDK lets you generate simple surface patterns on an object surface.</dc:description>
     <dc:identifier>com.robodk.app.surfacepatterngenerator</dc:identifier>
     <cp:keywords/>
     <dc:language>eng</dc:language>

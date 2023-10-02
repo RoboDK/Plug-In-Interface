@@ -39,6 +39,7 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/SimplifyCurve.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/SimplifyCurveStraightLines.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/SortCurveSegments.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/SplitDiscontinuousCurves.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/_cutools.py</asset>
   </assets>
 </packageManifest>

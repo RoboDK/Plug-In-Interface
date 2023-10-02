@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# This file let's you control your robot with an Game Controller as a RoboDK checkable App.
+# This file lets you control your robot with an Game Controller as a RoboDK checkable App.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html

@@ -1,6 +1,6 @@
 # Box Spawner
 
-The Box Spawner App for RoboDK let's you programmatically add box objects in your RoboDK Station.
+The Box Spawner App for RoboDK lets you programmatically add box objects in your RoboDK Station.
 You can customize the spawner location, box parameters, and request a new box from a RoboDK Program.
 Multiple spawner location are supported by providing a spawner ID in your program call.
 
