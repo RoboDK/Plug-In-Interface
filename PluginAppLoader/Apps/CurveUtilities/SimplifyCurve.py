@@ -52,6 +52,11 @@ def SimplifyCurve(RDK=None, S=None, objects=None):
         if len(curves) <= 0:
             continue
 
+        start_point = None
+        if S.SIMPLIFY_SORT:
+            start_point = cutools.get_start_point(object_item, 'Click on the starting point of the "%s" curve (approx.)' % object_item.Name())
+            start_point = [start_point]
+
         RDK.Render(False)
 
         if not S.SIMPLIFY_INPLACE:
@@ -61,7 +66,6 @@ def SimplifyCurve(RDK=None, S=None, objects=None):
         else:
             sorted_object_item = object_item
         sorted_object_item.setParam("Reset", "Curves")  # We will lose curve colors!
-        sorted_object_item.setVisible(True)
 
         simplified_curves = curves
 
@@ -71,7 +75,7 @@ def SimplifyCurve(RDK=None, S=None, objects=None):
             simplified_curves = [cutools.project_points(curve, object_item, S.SIMPLIFY_PROJECT_POINT, S.SIMPLIFY_PROJECT_ALONG_NORMAL, S.SIMPLIFY_RECALC_NORMAL) for curve in simplified_curves]
 
         if S.SIMPLIFY_SORT:
-            simplified_curves = cutools.sort_curve_segments(simplified_curves, reverse_segments=S.SIMPLIFY_REVERSE)
+            simplified_curves = cutools.sort_curve_segments(simplified_curves, start=start_point, reverse_segments=S.SIMPLIFY_REVERSE)
 
         if S.SIMPLIFY_MERGE:
             simplified_curves = [cutools.merge_curves(simplified_curves)]
@@ -82,8 +86,19 @@ def SimplifyCurve(RDK=None, S=None, objects=None):
         if S.SIMPLIFY_DUPLICATES:
             simplified_curves = [cutools.filter_subsequent_duplicated_points(curve, S.SIMPLIFY_TOLERANCE_POINT, S.SIMPLIFY_COMPARE_NORMALS, S.SIMPLIFY_TOLERANCE_NORMALS) for curve in simplified_curves]
 
+        # Curves are relative to the object origin, while AddCurve is relative to the object pose
+        # This is a "easy" way to work around it
+        pose = sorted_object_item.Pose()
+        sorted_object_item.setPose(robomath.eye(4))
+
         for curve in simplified_curves:
             sorted_object_item.AddCurve(curve, True, robolink.PROJECTION_NONE)
+
+        sorted_object_item.setPose(pose)
+
+        # There is a bug in RoboDK where the resulting object does not show the curve icon, this is a workaround
+        sorted_object_item.setVisible(False)
+        sorted_object_item.setVisible(True)
 
     RDK.setSelection(selection)  # Restore selection
 

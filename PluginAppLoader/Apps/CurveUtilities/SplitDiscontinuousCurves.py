@@ -52,18 +52,32 @@ def SplitDiscontinuousCurves(RDK=None, S=None, objects=None):
         if len(curves) <= 0:
             continue
 
+        start_point = cutools.get_start_point(object_item, 'Click on the starting point of the "%s" curve (approx.)' % object_item.Name())
+        start_point = [start_point]
+
         RDK.Render(False)
 
-        grouped_curves = cutools.split_discontinuous_curves(curves, S.SPLIT_TOLERANCE)  # Works better if they are sorted first
+        grouped_curves = cutools.split_discontinuous_curves(curves, S.SPLIT_TOLERANCE, start=start_point)  # Works better if they are sorted first
+
+        # Curves are relative to the object origin, while AddCurve is relative to the object pose
+        # This is a "easy" way to work around it
+        pose = object_item.Pose()
 
         object_item.Copy()
         for i, group in enumerate(grouped_curves):
             sorted_object_item = object_item.Parent().Paste()
             sorted_object_item.setName(sorted_object_item.Name() + f' {i}')
             sorted_object_item.setParam("Reset", "Curves")  # We will lose curve colors!
-            sorted_object_item.setVisible(True)
+            sorted_object_item.setPose(robomath.eye(4))
+
             for curve in group:
                 sorted_object_item.AddCurve(curve, True, robolink.PROJECTION_NONE)
+
+            sorted_object_item.setPose(pose)
+
+            # There is a bug in RoboDK where the resulting object does not show the curve icon, this is a workaround
+            sorted_object_item.setVisible(False)
+            sorted_object_item.setVisible(True)
 
     RDK.setSelection(selection)  # Restore selection
 
