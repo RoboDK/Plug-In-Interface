@@ -194,7 +194,6 @@ def get_curves(object_item):
         i += 1
     return object_curves
 
-
 def sort_curve_segments(segments, start=None, reverse_segments=False):
     """
     Sort the order of segments (list of curves) by distance from the end of a segment to the start of the next segment.
@@ -270,9 +269,16 @@ def split_discontinuous_curves(segments, tolerance_mm=50.0, start=None):
 
 def closest_point(point_list, point):
     """
-    Find the point in a list of points (a curve) that is teh closest to another point.
+    Find the point in a list of points (a curve) that is the closest to another point.
     """
     return min(point_list, key=lambda x: robomath.distance(point[:3], x[:3]))
+
+
+def closest_point_index(point_list, point):
+    """
+    Find the index of a point in a list of points (a curve) that is the closest to another point.
+    """
+    return point_list.index(closest_point(point_list, point))
 
 
 def get_start_point(object_item, show_message=''):
@@ -286,11 +292,13 @@ def get_start_point(object_item, show_message=''):
 
     if show_message:
         RDK.ShowMessage(str(show_message))
+        RDK.ShowMessage(str(show_message), False)
 
+    xyzijk = []
     APP = roboapps.RunApplication()
     while APP.Run():
 
-        robomath.pause(0.001)
+        robomath.pause(0.01)
 
         is_selected, feature_type, feature_id = object_item.SelectedFeature()
         if not is_selected:
@@ -324,8 +332,9 @@ def get_start_point(object_item, show_message=''):
 
         print("Mouse on: '" + object_item.Name() + "', Feature type:" + str(feature_type) + ", Feature ID:" + str(feature_id) + ", Mouse point: " + str(point_mouse[0]))
         print("Point: " + str(xyzijk))
+        break
 
-        return xyzijk
+    return xyzijk
 
 
 def runmain():
