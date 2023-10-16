@@ -6,9 +6,8 @@ This example shows the possibility of integrating a third-party library (ImGUI) 
 
 
 ## Features
-- Move the simulated or connected robot from the GUI
-- Move relative to the active reference frame, tool or joint values
-- Change the step size (mm or deg)
+- Drawing a graphical user interface on top of a RoboDK 3D scene
+- Determination of mouse position and the ability to switch between elements of the customized interface and the original application interface
 
 
 ## Prerequisites
