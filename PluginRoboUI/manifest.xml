@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
+  <cp:coreProperties>
+    <cp:category>Plugin</cp:category>
+    <cp:contentStatus>Final</cp:contentStatus>
+    <dcterms:created xsi:type="dcterms:W3CDTF">2023-07-11T12:38:00.000000Z</dcterms:created>
+    <dc:creator>RoboDK</dc:creator>
+    <dc:description>The RoboUI Plug-in for RoboDK shows the possibility of integrating the ImGUI library to render a customized UI in the 3D scene window.</dc:description>
+    <dc:identifier>com.robodk.plugin.roboui</dc:identifier>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
+    <cp:lastModifiedBy/>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-07-11T12:38:00.000000Z</dcterms:modified>
+    <cp:revision>1</cp:revision>
+    <dc:title>RoboUI</dc:title>
+    <cp:version>1.0.0</cp:version>
+  </cp:coreProperties>
+  <extraProperties>
+    <website>https://robodk.com/</website>
+    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginRoboUI</documentation>
+    <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginRoboUI</repository>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
+  </extraProperties>
+  <assets>
+    <asset cpu="any" system="any">/README.md</asset>
+    <asset cpu="any" system="any">/RoboUI.dll</asset>
+  </assets>
+</packageManifest>
