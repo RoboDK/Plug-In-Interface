@@ -12,7 +12,7 @@
 #
 # --------------------------------------------
 
-from robodk import robolink, robomath
+from robodk import robolink, robomath, roboapps
 
 
 def project_points(points, object: robolink.Item, project_on_surface=True, project_along_normal=True, recalculate_normals=True):
@@ -183,7 +183,7 @@ def get_curve(object_item, curve_id=0):
 
 
 def get_curves(object_item):
-    """Retrieve all the curves of an object item."""
+    """Retrieve all the curves of an object item. Points are relative to the object origin."""
     object_curves = []
     i = 0
     while True:
@@ -193,7 +193,6 @@ def get_curves(object_item):
         object_curves.append(curve)
         i += 1
     return object_curves
-
 
 def sort_curve_segments(segments, start=None, reverse_segments=False):
     """
@@ -207,8 +206,11 @@ def sort_curve_segments(segments, start=None, reverse_segments=False):
     pass_by = segments.copy()
     sorted_segments = [start]
 
+    delete_start = False
     if start in pass_by:
         pass_by.remove(start)
+    else:
+        delete_start = True
 
     while pass_by:
 
@@ -226,6 +228,9 @@ def sort_curve_segments(segments, start=None, reverse_segments=False):
         sorted_segments.append(path_nearest)
         pass_by.remove(nearest)
 
+    if delete_start:
+        sorted_segments.remove(start)
+
     return sorted_segments
 
 
@@ -239,8 +244,11 @@ def split_discontinuous_curves(segments, tolerance_mm=50.0, start=None):
     pass_by = segments.copy()
     grouped_segments = [[start]]
 
+    delete_start = False
     if start in pass_by:
         pass_by.remove(start)
+    else:
+        delete_start = True
 
     while pass_by:
 
@@ -253,7 +261,80 @@ def split_discontinuous_curves(segments, tolerance_mm=50.0, start=None):
         grouped_segments[-1].append(path_nearest)
         pass_by.remove(nearest)
 
+    if delete_start:
+        grouped_segments[0].pop(0)
+
     return grouped_segments
+
+
+def closest_point(point_list, point):
+    """
+    Find the point in a list of points (a curve) that is the closest to another point.
+    """
+    return min(point_list, key=lambda x: robomath.distance(point[:3], x[:3]))
+
+
+def closest_point_index(point_list, point):
+    """
+    Find the index of a point in a list of points (a curve) that is the closest to another point.
+    """
+    return point_list.index(closest_point(point_list, point))
+
+
+def get_start_point(object_item, show_message=''):
+    """
+    Ask the user to click on the start point of a curve.
+    Optionally, add a message to the user.
+    Returns a point on the object, relative to the object origin.
+    """
+    RDK = object_item.RDK()
+    RDK.setSelection([])
+
+    if show_message:
+        RDK.ShowMessage(str(show_message))
+        RDK.ShowMessage(str(show_message), False)
+
+    xyzijk = []
+    APP = roboapps.RunApplication()
+    while APP.Run():
+
+        robomath.pause(0.01)
+
+        is_selected, feature_type, feature_id = object_item.SelectedFeature()
+        if not is_selected:
+            continue
+
+        # Clear the selection so that we get rising edge
+        RDK.setSelection([])
+
+        # If the user click on a surface, take the mouse point
+        if feature_type == robolink.FEATURE_SURFACE:
+            point_mouse, _ = object_item.GetPoints(robolink.FEATURE_SURFACE)
+            if not point_mouse:
+                continue
+            xyzijk = point_mouse[0][:6]
+
+        # If the user click on a curve, retrieve the curve and find the point closest to the mouse point
+        elif feature_type == robolink.FEATURE_CURVE:
+            point_mouse, _ = object_item.GetPoints(robolink.FEATURE_SURFACE)
+            if not point_mouse:
+                continue
+            curve, _ = object_item.GetPoints(robolink.FEATURE_CURVE, feature_id)
+            xyzijk = closest_point(curve, point_mouse[0][:6])
+            print('Selection error: %.3f mm' % robomath.distance(xyzijk[:3], point_mouse[0][:3]))
+
+        # If the user click on a point, use the point
+        elif feature_type == robolink.FEATURE_POINT:
+            point_mouse, _ = object_item.GetPoints(robolink.FEATURE_POINT)
+            if not point_mouse:
+                continue
+            xyzijk = point_mouse[0][:6]
+
+        print("Mouse on: '" + object_item.Name() + "', Feature type:" + str(feature_type) + ", Feature ID:" + str(feature_id) + ", Mouse point: " + str(point_mouse[0]))
+        print("Point: " + str(xyzijk))
+        break
+
+    return xyzijk
 
 
 def runmain():

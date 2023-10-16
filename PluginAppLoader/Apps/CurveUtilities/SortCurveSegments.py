@@ -52,6 +52,9 @@ def SortCurveSegments(RDK=None, S=None, objects=None):
         if len(curves) <= 0:
             continue
 
+        start_point = cutools.get_start_point(object_item, 'Click on the starting point of the "%s" curve (approx.)' % object_item.Name())
+        start_point = [start_point]
+
         RDK.Render(False)
 
         if not S.SIMPLIFY_INPLACE:
@@ -61,12 +64,22 @@ def SortCurveSegments(RDK=None, S=None, objects=None):
         else:
             sorted_object_item = object_item
         sorted_object_item.setParam("Reset", "Curves")  # We will lose curve colors!
-        sorted_object_item.setVisible(True)
 
-        sorted_curves_list = cutools.sort_curve_segments(curves, reverse_segments=S.SIMPLIFY_REVERSE)
+        sorted_curves_list = cutools.sort_curve_segments(curves, start=start_point, reverse_segments=S.SIMPLIFY_REVERSE)
+
+        # Curves are relative to the object origin, while AddCurve is relative to the object pose
+        # This is a "easy" way to work around it
+        pose = sorted_object_item.Pose()
+        sorted_object_item.setPose(robomath.eye(4))
 
         for curve in sorted_curves_list:
             sorted_object_item.AddCurve(curve, True, robolink.PROJECTION_NONE)
+
+        sorted_object_item.setPose(pose)
+
+        # There is a bug in RoboDK where the resulting object does not show the curve icon, this is a workaround
+        sorted_object_item.setVisible(False)
+        sorted_object_item.setVisible(True)
 
     RDK.setSelection(selection)  # Restore selection
 

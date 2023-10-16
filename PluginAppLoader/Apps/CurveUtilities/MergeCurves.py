@@ -61,10 +61,21 @@ def MergeCurves(RDK=None, S=None, objects=None):
         else:
             sorted_object_item = object_item
         sorted_object_item.setParam("Reset", "Curves")  # We will lose curve colors!
-        sorted_object_item.setVisible(True)
 
         curve = cutools.merge_curves(curves)
+
+        # Curves are relative to the object origin, while AddCurve is relative to the object pose
+        # This is a "easy" way to work around it
+        pose = sorted_object_item.Pose()
+        sorted_object_item.setPose(robomath.eye(4))
+
         sorted_object_item.AddCurve(curve, True, robolink.PROJECTION_NONE)
+
+        sorted_object_item.setPose(pose)
+
+        # There is a bug in RoboDK where the resulting object does not show the curve icon, this is a workaround
+        sorted_object_item.setVisible(False)
+        sorted_object_item.setVisible(True)
 
     RDK.setSelection(selection)  # Restore selection
 

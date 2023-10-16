@@ -65,6 +65,7 @@ def PointToTarget(RDK=None, S=None, objects=None):
         if not curves:
             continue
 
+        pose = object_item.Pose()
         for i, points in enumerate(curves):
             for j, point in enumerate(points):
                 xyz = point[:3]
@@ -75,9 +76,8 @@ def PointToTarget(RDK=None, S=None, objects=None):
                 if S.TARGET_INVERSE_NORMAL:
                     ijk = robomath.mult3(ijk, -1)
 
-                pose = robomath.point_Zaxis_2_pose(xyz, ijk)
                 target = RDK.AddTarget(f'{object_item.Name()} {i+1} {j+1}', object_item.Parent())
-                target.setPose(pose)
+                target.setPose(pose * robomath.point_Zaxis_2_pose(xyz, ijk))
 
     RDK.Render(True)
 
