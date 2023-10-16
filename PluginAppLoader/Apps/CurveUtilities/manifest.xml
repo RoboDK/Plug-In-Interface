@@ -10,10 +10,10 @@
     <cp:keywords/>
     <dc:language>eng</dc:language>
     <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
-    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-16T21:00:40.085391Z</dcterms:modified>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-10-16T21:00:40.085391Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Curve Utilities</dc:title>
-    <cp:version>1.2.0</cp:version>
+    <cp:version>1.3.0</cp:version>
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
@@ -34,6 +34,7 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/README.md</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/RecalculateCurveNormals.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/RemoveCurveDuplicatedPoints.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/SetStartPoint.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/Settings.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/Settings.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/SimplifyCurve.py</asset>
