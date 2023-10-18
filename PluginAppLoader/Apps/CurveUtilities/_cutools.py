@@ -194,6 +194,7 @@ def get_curves(object_item):
         i += 1
     return object_curves
 
+
 def sort_curve_segments(segments, start=None, reverse_segments=False):
     """
     Sort the order of segments (list of curves) by distance from the end of a segment to the start of the next segment.

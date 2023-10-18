@@ -19,6 +19,7 @@ The Curve Utilities App for RoboDK adds tools to generate and edit curve objects
  - Sort the order of curves to create continuous paths
  - Automatically simplify curves with preferred settings
  - Convert curve points to robot targets
+ - Convert a program to a curve
 
 
  ## Prerequisites
