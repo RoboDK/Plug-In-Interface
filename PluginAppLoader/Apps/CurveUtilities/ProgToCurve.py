@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Convert a RooDK program to a curve.
+# Convert a RoboDK program to a curve.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -41,7 +41,7 @@ def inst_pose(inst: str) -> robomath.Mat:
 
 def ProgToCurve(RDK=None, S=None, progs=None):
     """
-    Convert a RooDK program to a curve.
+    Convert a RoboDK program to a curve.
     """
 
     if RDK is None:
