@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
+  <cp:coreProperties>
+    <cp:category>Application</cp:category>
+    <cp:contentStatus>Final</cp:contentStatus>
+    <dcterms:created xsi:type="dcterms:W3CDTF">2023-10-18T21:00:40.085391Z</dcterms:created>
+    <dc:creator>RoboDK</dc:creator>
+    <dc:description>The Cycle Time App for RoboDK is a toolbox for cycle time estimation of robot programs.</dc:description>
+    <dc:identifier>com.robodk.app.cycletime</dc:identifier>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
+    <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-10-18T21:00:40.085391Z</dcterms:modified>
+    <cp:revision>1</cp:revision>
+    <dc:title>Cycle Time</dc:title>
+    <cp:version>1.0.0</cp:version>
+  </cp:coreProperties>
+  <extraProperties>
+    <website>https://robodk.com/</website>
+    <documentation>https://robodk.com/doc/en/General.html#CycleTime</documentation>
+    <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/CycleTime</repository>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
+    <icon>/icon.png</icon>
+  </extraProperties>
+  <assets>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/AppConfig.ini</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/CycleTime.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/CycleTime.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/LICENSE.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/README.md</asset>
+  </assets>
+</packageManifest>
