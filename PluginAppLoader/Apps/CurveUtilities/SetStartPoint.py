@@ -68,7 +68,7 @@ def SortCurveSegments(RDK=None, S=None, objects=None):
         indexes = []
         for i, curve in enumerate(curves):
             if start_point in curve:
-                indexes=[(i, start_point)] # indexes.append((i, start_point))
+                indexes = [(i, start_point)]  # indexes.append((i, start_point))
                 break  # continue
             indexes.append((i, cutools.closest_point(curve, start_point)))
         curve_id, new_start_point = min(indexes, key=lambda x: robomath.distance(x[1][:3], start_point[:3]))

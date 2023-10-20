@@ -13,7 +13,7 @@
     <dcterms:modified xsi:type="dcterms:W3CDTF">2023-10-16T21:00:40.085391Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Curve Utilities</dc:title>
-    <cp:version>1.3.0</cp:version>
+    <cp:version>1.4.0</cp:version>
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
