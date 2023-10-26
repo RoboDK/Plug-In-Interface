@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Show (set visible) the selected items, and hide (set invisible) all other items.
+# Hide (set invisible) all children of the selected items.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -16,9 +16,9 @@ from robodk import robolink, roboapps
 import _Utilities as utils
 
 
-def ShowOnlySelection():
+def ShowAll():
     """
-    Show (set visible) the selected items, and hide (set invisible) all other items.
+    Hide (set invisible) all children of the selected items.
     """
     RDK = robolink.Robolink()
 
@@ -28,11 +28,16 @@ def ShowOnlySelection():
 
     RDK.Render(False)
 
-    for item in RDK.ItemList():
-        if item in selection:
-            item.setVisible(True)
-        else:
-            item.setVisible(False)
+    # for item in selection:
+    #     item.setParam('VisibleChilds', 0)  # RoboDK 5.6.7
+
+    def recurse(item):
+        for child in item.Childs():
+            child.setVisible(False)
+            recurse(child)
+
+    for item in selection:
+        recurse(item)
 
     RDK.Render(True)
 
@@ -46,7 +51,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        ShowOnlySelection()
+        ShowAll()
 
 
 if __name__ == '__main__':
