@@ -14,6 +14,8 @@ The View Utilities App for RoboDK provide bulk visibility functions (visible/hid
 - Show/Hide all but selected items
 - Show/Hide program's targets
 - Show/Hide robot's targets
+- Show/Hide all children
+- Expand/Collapse tree items
 
 
 ## Prerequisites

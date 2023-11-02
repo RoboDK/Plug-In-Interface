@@ -16,6 +16,7 @@ from robodk import robolink, robomath, robodialogs, roboapps
 import os
 
 CORRECT_BASE_FRAME = True
+UPDATE_PROGRAMS = True  # Will make the UI render
 
 
 def ReplaceRobots(robots=None):
@@ -51,13 +52,18 @@ def ReplaceRobots(robots=None):
     if not replacement_robot.Valid():
         return
     replacement_robot_frame = replacement_robot.Parent()
-    replacement_robot_frame.Copy()
+    replacement_robot_frame.setParam('Tree', 'Hide')
+    replacement_robot_frame.setVisible(False)
+    replacement_robot.setVisible(False)
+    replacement_robot.Copy()
 
     # Replace robots
     for old_robot in robots:
+
         old_robot_frame = old_robot.Parent()
         old_robot_tools = old_robot.Childs()
         old_robot_links = old_robot.getLinks(None)
+        old_robot_links = sorted(old_robot_links, key=lambda x: x.Type())  # Targets first, then Programs, then Machining
 
         # Get the current active tool
         robot_tool = old_robot.getLink(robolink.ITEM_TYPE_TOOL)
@@ -71,18 +77,32 @@ def ReplaceRobots(robots=None):
         old_robot.setPoseFrame(old_robot.Parent())
         old_robot.setPoseTool(robot_tool)
         RDK.Update()
-        robot_pose = old_robot.Pose()
+        old_robot_pose = old_robot.Pose()
+        old_robot.setJoints(old_robot.JointsHome())
+        RDK.Update()
+        old_robot_home_pose = old_robot.Pose()
+
+        # Update targets (pose of joint targets) in targets, programs, etc.
+        for robot_link in old_robot_links:
+            link_type = robot_link.Type()
+            if link_type == robolink.ITEM_TYPE_TARGET:
+                status = robot_link.setParam('Recalculate')
+            elif link_type in [robolink.ITEM_TYPE_PROGRAM]:
+                status = robot_link.setParam('RecalculateTargets')
+            elif UPDATE_PROGRAMS and link_type in [robolink.ITEM_TYPE_MACHINING, robolink.ITEM_TYPE_PROGRAM]:
+                valid_instructions, program_time, program_distance, valid_ratio, readable_msg = robot_link.Update()  # Update will trigger a render
+                RDK.Render(False)
 
         # Create the new robot
-        new_robot_frame = old_robot_frame.Parent().Paste()
-        new_robot = new_robot_frame.Childs()[0]
+        new_robot = old_robot_frame.Paste()
+        new_robot.setVisible(True)
+        new_robot_frame = old_robot_frame
+        old_robot_frame.setName(replacement_robot_frame.Name())  # Keeps the Set Ref. links in robot programs valid
+        status = new_robot.setParam("ReorderBefore", str(old_robot.item))
         RDK.setSelection([])
 
-        # Restore the original robot base frame
-        new_robot_frame.setPose(old_robot_frame.Pose())
-        RDK.Update()
-
         # Account for robots where the robot base frame is on J2
+        robot_pose = old_robot_pose.copy()
         if CORRECT_BASE_FRAME:
             old_robot.setJoints(old_robot.JointsHome())  # assume the lower point will be the base
             new_robot.setJoints(new_robot.JointsHome())
@@ -98,32 +118,48 @@ def ReplaceRobots(robots=None):
         for tool in old_robot_tools:
             tool.setParent(new_robot)
 
-        # Migrate items under the base frame
-        for child in [x for x in old_robot_frame.Childs() if x != old_robot]:
-            child.setParentStatic(new_robot_frame)  # Static is important if we moved the robot base frame
-
-        # Remove the old robot
-        old_robot_frame.Delete()
-
-        # Restore the pose
+        # Restore the robot state
         new_robot.setPoseFrame(new_robot_frame)
         new_robot.setPoseTool(robot_tool)
-        #new_robot.setJoints(new_robot.JointsHome())
+        new_robot.setJoints(new_robot.JointsHome())
+        new_robot_dof = len(new_robot.Joints().tolist())
         RDK.Update()
 
-        robot_joints = new_robot.SolveIK(robot_pose, new_robot.JointsHome(), new_robot.PoseTool(), new_robot.PoseFrame())
-        if len(robot_joints.tolist()) == len(new_robot.Joints().tolist()):
-            new_robot.setJoints(robot_joints)
+        # Determine wether its the same robot kinematics (same robot), or a completely different robot
+        different_robot = False
+        if new_robot.Pose() != old_robot_home_pose:
+            different_robot = True
+            robot_joints = new_robot.SolveIK(robot_pose, new_robot.JointsHome(), new_robot.PoseTool(), new_robot.PoseFrame())
+            if len(robot_joints.tolist()) < new_robot_dof:
+                new_robot.setJoints(robot_joints)
         else:
             new_robot.setPose(robot_pose)
         RDK.Update()
 
-        # Restore links
+        # Restore links, fix joint targets
         for robot_link in old_robot_links:
             try:
                 robot_link.setLink(new_robot)
             except:
-                pass
+                continue
+
+        # Update targets (pose of joint targets) in targets, programs, etc.
+        for robot_link in old_robot_links:
+            link_type = robot_link.Type()
+            if link_type == robolink.ITEM_TYPE_TARGET:
+                if different_robot and link_type == robolink.ITEM_TYPE_TARGET and robot_link.isJointTarget():
+                    robot_joints = new_robot.SolveIK(robot_link.PoseWrt(new_robot.Parent()), new_robot.JointsHome(), new_robot.PoseTool(), new_robot.PoseFrame())
+                    if len(robot_joints.tolist()) < new_robot_dof:
+                        robot_link.setJoints(robot_joints)
+                status = robot_link.setParam('Recalculate')
+            elif link_type in [robolink.ITEM_TYPE_PROGRAM]:
+                status = robot_link.setParam('RecalculateTargets')
+            elif UPDATE_PROGRAMS and link_type in [robolink.ITEM_TYPE_MACHINING, robolink.ITEM_TYPE_PROGRAM]:
+                valid_instructions, program_time, program_distance, valid_ratio, readable_msg = robot_link.Update()  # Update will trigger a render
+                RDK.Render(False)
+
+        # Remove the old robot
+        old_robot.Delete()
 
     # Delete initial copy
     replacement_robot_frame.Delete()

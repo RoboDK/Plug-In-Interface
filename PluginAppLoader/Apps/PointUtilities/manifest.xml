@@ -10,10 +10,10 @@
     <cp:keywords/>
     <dc:language>eng</dc:language>
     <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
-    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-16T21:00:40.602913Z</dcterms:modified>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-10-26T21:00:40.602913Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Point Utilities</dc:title>
-    <cp:version>1.1.0</cp:version>
+    <cp:version>1.1.1</cp:version>
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
