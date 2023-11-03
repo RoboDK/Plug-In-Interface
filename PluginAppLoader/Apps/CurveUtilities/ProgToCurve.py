@@ -20,23 +20,36 @@ import _cutools as cutools
 
 def inst_pose(inst: str) -> robomath.Mat:
     from robodk.robomath import transl
+    import math
 
     def rotx(deg):
         from robodk.robomath import rotx as rotx_rad
-        return rotx_rad(deg * 180 / robomath.pi)
+        return rotx_rad(math.radians(deg))
 
     def roty(deg):
         from robodk.robomath import roty as roty_rad
-        return roty_rad(deg * 180 / robomath.pi)
+        return roty_rad(math.radians(deg))
 
     def rotz(deg):
         from robodk.robomath import rotz as rotz_rad
-        return rotz_rad(deg * 180 / robomath.pi)
+        return rotz_rad(math.radians(deg))
 
     try:
         return eval(inst)
     except:
         return None
+
+
+def get_item_from_inst_ptr(inst_ptr, RDK):
+    """Get an item from an instruction pointer, typically a TargetPtr, FramePtr, ToolPtr, etc."""
+    if inst_ptr == '0' or inst_ptr == 0:
+        return None
+
+    item = robolink.Item(RDK, str(inst_ptr))
+    if not item.Valid(True) or str(item.item) != str(inst_ptr):
+        return None
+
+    return item
 
 
 def ProgToCurve(RDK=None, S=None, progs=None):
@@ -73,13 +86,16 @@ def ProgToCurve(RDK=None, S=None, progs=None):
         curve = []
         pose_frame = robomath.eye(4)
         for i in range(prog_item.InstructionCount()):
-            name, instype, movetype, isjointtarget, target, joints = prog_item.Instruction(i)
             inst_dict = prog_item.setParam(i)
 
             if inst_dict['Type'] == robolink.INS_TYPE_CHANGEFRAME:
-                pose_frame = inst_pose(inst_dict['Pose'])
+                frame_item = get_item_from_inst_ptr(inst_dict['FramePtr'], RDK)
+                if not frame_item:
+                    pose_frame = inst_pose(inst_dict['Pose'])
+                else:
+                    pose_frame = frame_item.PoseAbs()
 
-            if not movetype:
+            if inst_dict['Type'] != robolink.INS_TYPE_MOVE:
                 continue
 
             pose = inst_pose(inst_dict['Pose'])

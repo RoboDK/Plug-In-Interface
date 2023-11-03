@@ -7,18 +7,18 @@
     <dc:creator>RoboDK</dc:creator>
     <dc:description>The OpenGL Plug-in for RoboDK shows how to call plain OpenGL commands with RoboDK.</dc:description>
     <dc:identifier>com.robodk.plugin.pluginopengl</dc:identifier>
-    <cp:keywords></cp:keywords>
+    <cp:keywords/>
     <dc:language>eng</dc:language>
-    <cp:lastModifiedBy></cp:lastModifiedBy>
-    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-11T02:21:23.031127Z</dcterms:modified>
+    <cp:lastModifiedBy/>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-11-03T19:50:57.733977Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>OpenGL</dc:title>
     <cp:version>1.0.0</cp:version>
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
-    <documentation></documentation>
-    <repository></repository>
+    <documentation/>
+    <repository/>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>
   </extraProperties>

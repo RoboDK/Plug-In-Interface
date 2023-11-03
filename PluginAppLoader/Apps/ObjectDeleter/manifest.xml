@@ -10,7 +10,7 @@
     <cp:keywords/>
     <dc:language>eng</dc:language>
     <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
-    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-16T21:00:40.472794Z</dcterms:modified>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-11-03T19:56:43.153893Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Object Deleter</dc:title>
     <cp:version>1.0.0</cp:version>
@@ -23,7 +23,6 @@
     <email>info@robodk.com</email>
     <icon>/icon.svg</icon>
   </extraProperties>
-  <dependencies/>
   <assets>
     <asset cpu="any" system="any" target="$(SourcePath)">/ObjectDeleter/AddDeleteObjectsLoopScript.png</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ObjectDeleter/AddDeleteObjectsLoopScript.py</asset>

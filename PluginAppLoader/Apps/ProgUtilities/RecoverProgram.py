@@ -82,7 +82,7 @@ def get_frame_from_inst(inst_frame_name, RDK):
 
 
 def get_tool_from_inst(inst_tool_name, RDK):
-    """Get a target item from an instruction"""
+    """Get a tool item from an instruction"""
     r = RE_TOOL.search(inst_tool_name)
     if not r:
         return None

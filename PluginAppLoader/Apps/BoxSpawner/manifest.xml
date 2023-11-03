@@ -10,7 +10,7 @@
     <cp:keywords/>
     <dc:language>eng</dc:language>
     <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
-    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-16T21:00:39.945263Z</dcterms:modified>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-11-03T19:56:42.865876Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Box Spawner</dc:title>
     <cp:version>1.0.0</cp:version>
@@ -23,7 +23,6 @@
     <email>info@robodk.com</email>
     <icon>/icon.svg</icon>
   </extraProperties>
-  <dependencies/>
   <assets>
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/AddSpawnBoxScript.png</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/AddSpawnBoxScript.py</asset>

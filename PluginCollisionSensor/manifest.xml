@@ -7,10 +7,10 @@
     <dc:creator>RoboDK</dc:creator>
     <dc:description>The Collision Sensor Plug-in for RoboDK adds the ability to simulate sensors, such as a laser sensors or contact switches.</dc:description>
     <dc:identifier>com.robodk.plugin.plugincollisionsensor</dc:identifier>
-    <cp:keywords></cp:keywords>
+    <cp:keywords/>
     <dc:language>eng</dc:language>
-    <cp:lastModifiedBy></cp:lastModifiedBy>
-    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-11T02:21:21.645367Z</dcterms:modified>
+    <cp:lastModifiedBy/>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-11-03T19:50:57.345133Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Collision Sensor</dc:title>
     <cp:version>1.0.0</cp:version>

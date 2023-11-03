@@ -7,18 +7,18 @@
     <dc:creator>RoboDK</dc:creator>
     <dc:description>The Example Plug-in is a RoboDK Plugin that showcases the Plug-in Interface.</dc:description>
     <dc:identifier>com.robodk.plugin.pluginexample</dc:identifier>
-    <cp:keywords></cp:keywords>
+    <cp:keywords/>
     <dc:language>eng</dc:language>
-    <cp:lastModifiedBy></cp:lastModifiedBy>
-    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-11T02:21:22.102701Z</dcterms:modified>
+    <cp:lastModifiedBy/>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-11-03T19:50:57.469722Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Plug-in Example</dc:title>
     <cp:version>1.0.0</cp:version>
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
-    <documentation></documentation>
-    <repository></repository>
+    <documentation/>
+    <repository/>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>
   </extraProperties>
