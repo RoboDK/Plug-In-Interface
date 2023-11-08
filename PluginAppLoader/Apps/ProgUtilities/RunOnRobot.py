@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Expand program calls of the selected program(s) into new program(s).
+# Toggle Run on Robot for programs, including their sub-programs.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -17,9 +17,9 @@ from robodk import robolink, roboapps
 import Settings
 
 
-def ExpandPrograms(RDK=None, S=None, progs=None):
+def RunOnRobots(RDK=None, S=None, progs=None):
     """
-    Inline all instructions from a program to another program for every program provided.
+    Toggle Run on Robot for programs, including their sub-programs.
     """
     if RDK is None:
         RDK = robolink.Robolink()
@@ -28,13 +28,13 @@ def ExpandPrograms(RDK=None, S=None, progs=None):
         S = Settings.Settings()
         S.Load(RDK)
 
-    # Get program(s) to expand..
+    # Get program(s) to process..
     if progs is None:
         # ..from tree selection
         progs = [x for x in RDK.Selection() if x.Type() == robolink.ITEM_TYPE_PROGRAM]
         if not progs:
             # ..or user selection
-            prog = RDK.ItemUserPick('Select the program to expand', robolink.ITEM_TYPE_PROGRAM)
+            prog = RDK.ItemUserPick('Select the program to run on robot', robolink.ITEM_TYPE_PROGRAM)
             if not prog.Valid():
                 return
             progs = [prog]
@@ -44,14 +44,23 @@ def ExpandPrograms(RDK=None, S=None, progs=None):
         if not progs:
             return
 
+    RDK.Render(False)
+
     for prog in progs:
-        ExpandProgram(RDK, S, prog)
+        robot = prog.getLink(robolink.ITEM_TYPE_ROBOT)
+        if not robot.Valid():
+            robot = RDK.ItemUserPick("Select the program's robot", robolink.ITEM_TYPE_ROBOT)
+            if not robot.Valid():
+                continue
+            prog.setRobot(robot)
+
+        run_type = robolink.PROGRAM_RUN_ON_SIMULATOR if prog.RunType() == robolink.PROGRAM_RUN_ON_ROBOT else robolink.PROGRAM_RUN_ON_ROBOT
+        RunOnRobot(RDK, S, prog, robot_root=robot, run_type=run_type)
 
 
-def ExpandProgram(RDK=None, S=None, prog_from=None, prog_to=None, prog_root=None):
+def RunOnRobot(RDK=None, S=None, prog_from=None, prog_root=None, robot_root=None, run_type=None, progs: set = None):
     """
-    Inline all instructions from a program to another program.
-    For recursive calls only, the initial root program must be provided to avoid loopholes.
+    Toggle Run on Robot for programs, including their sub-programs.
     """
     if RDK is None:
         RDK = robolink.Robolink()
@@ -60,51 +69,49 @@ def ExpandProgram(RDK=None, S=None, prog_from=None, prog_to=None, prog_root=None
         S = Settings.Settings()
         S.Load(RDK)
 
-    # Get program to expand..
+    # Get program to procress..
     if prog_from is None:
         # ..from tree selection
         progs = [x for x in RDK.Selection() if x.Type() == robolink.ITEM_TYPE_PROGRAM]
         if not progs or len(progs) != 1:
-            prog_from = RDK.ItemUserPick('Select the program to expand', robolink.ITEM_TYPE_PROGRAM)
+            prog_from = RDK.ItemUserPick('Select the program to run on robot', robolink.ITEM_TYPE_PROGRAM)
         else:
             prog_from = progs[0]
 
     if not prog_from.Valid():
         return
 
-    RDK.Render(False)
+    # Keep track of the programs we already parsed
+    if progs is None:
+        progs = set()
 
-    # Get the robot parameters of this program
+    if prog_from in progs:
+        return
+
+    # Get the robot of this program, as we only want to activate run on robot for this robot
     robot = prog_from.getLink(robolink.ITEM_TYPE_ROBOT)
     if not robot.Valid():
         robot = RDK.ItemUserPick("Select the program's robot", robolink.ITEM_TYPE_ROBOT)
         if not robot.Valid():
             robot = 0
 
-    # Create a new empty program to expand into
-    if prog_to is None:
-        prog_to = RDK.AddProgram(f"{prog_from.Name()} {S.EXPAND_PROG_SUFFIX.strip()}", robot)
-        prog_to.setParent(prog_from.Parent())
-
     # Ensure we avoid loopholes
-    if S.EXPAND_RECURSIVELY and prog_root == prog_from:
-        raise Exception("Attempting to expand %s, which recursively calls itself in %s" % (prog_root.Name(), prog_from.Name()))
+    if prog_root == prog_from:
+        raise Exception("Attempting to process %s, which recursively calls itself in %s" % (prog_root.Name(), prog_from.Name()))
 
     # Inline any sub programs into the new program
-    RDK.ShowMessage('Expanding program: "' + prog_from.Name() + '" to "' + prog_to.Name() + '"', False)
-    inst_count = prog_from.InstructionCount()
-    for i in range(inst_count):
+    if robot == robot_root:
+        prog_from.setRunType(run_type)
+
+    for i in range(prog_from.InstructionCount()):
         instruction_dict = prog_from.setParam(i)
 
-        if instruction_dict['Type'] == robolink.INS_TYPE_CODE and S.EXPAND_RECURSIVELY:
+        if instruction_dict['Type'] == robolink.INS_TYPE_CODE and instruction_dict['Behavior'] == 0:
             sub_prog = RDK.Item(instruction_dict['Code'], robolink.ITEM_TYPE_PROGRAM)
-            if sub_prog.Valid() and instruction_dict['Name'].startswith('Call'):
-                ExpandProgram(RDK, S, sub_prog, prog_to, prog_from if prog_root is None else prog_root)
-                continue  # continue, as program calls to non-program are valid
+            if sub_prog.Valid():
+                RunOnRobot(RDK, S, sub_prog, prog_from if prog_root is None else prog_root, robot_root, run_type, progs)
 
-        prog_to.setParam("Add", instruction_dict)
-
-    RDK.Render(True)
+    progs.add(prog_from)
 
 
 def runmain():
@@ -116,7 +123,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        ExpandPrograms()
+        RunOnRobots()
 
 
 if __name__ == '__main__':

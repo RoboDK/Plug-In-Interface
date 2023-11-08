@@ -13,7 +13,7 @@
     <dcterms:modified xsi:type="dcterms:W3CDTF">2023-11-03T19:56:43.296245Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Program Utilities</dc:title>
-    <cp:version>1.0.1</cp:version>
+    <cp:version>1.1.0</cp:version>
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
@@ -44,6 +44,8 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/ProgUtilities/RecoverProgram.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ProgUtilities/RecoverPrograms.rdk</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ProgUtilities/ReverseProgram.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ProgUtilities/RunOnRobot.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ProgUtilities/RunOnRobot.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ProgUtilities/Settings.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ProgUtilities/Settings.svg</asset>
   </assets>
