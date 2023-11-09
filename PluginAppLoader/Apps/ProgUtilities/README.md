@@ -36,6 +36,12 @@ A new program will be created.
 - Right-click one or more robots in the tree to show the targets linked to the robot(s) and hide all others.
 - Right-click one or more targets in the tree to set the visibility of joint, cartesian or all targets.
 
+### Others
+- Toggle "Run on Robot" for a program and all its subprograms
+- Recover a program with missing item links (deleted robots, copied from another station, etc.)
+- Reverse a program, taking motion type into account (auto backward exit)
+- Start/stop all programs in the station
+
 ## Prerequisites
 - [RoboDK](https://robodk.com/download)
 - [RoboDK API](https://pypi.org/project/robodk/) (bundled with RoboDK)
