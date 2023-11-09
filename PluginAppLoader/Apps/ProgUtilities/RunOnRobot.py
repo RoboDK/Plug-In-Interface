@@ -69,7 +69,7 @@ def RunOnRobot(RDK=None, S=None, prog_from=None, prog_root=None, robot_root=None
         S = Settings.Settings()
         S.Load(RDK)
 
-    # Get program to procress..
+    # Get program to process..
     if prog_from is None:
         # ..from tree selection
         progs = [x for x in RDK.Selection() if x.Type() == robolink.ITEM_TYPE_PROGRAM]
