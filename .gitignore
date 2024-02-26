@@ -70,3 +70,4 @@ build-AppLoader-Desktop_Qt_5_15_5_MSVC2019_32bit-Profile/release/moc_predefs.h
 build-AppLoader-Desktop_Qt_5_15_5_MSVC2019_32bit-Profile/release/AppLoader.vc.pdb
 
 __pycache__/
+moc_predefs.h
