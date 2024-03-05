@@ -31,26 +31,34 @@ def PaintCurvesPreset1(RDK=None, S=None, curves=None):
     # Get curve(s) to color..
     if curves is None:
         # ..from tree selection
-        curves = [x for x in RDK.Selection() if x.Type() in [robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_CURVE]]
+        curves = [x for x in RDK.Selection() if x.Type() in [robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_CURVE, robolink.ITEM_TYPE_MACHINING]]
         if not curves:
             # ..or user selection
-            curve = RDK.ItemUserPick('Select the curve', RDK.ItemList(robolink.ITEM_TYPE_OBJECT) + RDK.ItemList(robolink.ITEM_TYPE_CURVE))
+            curve = RDK.ItemUserPick('Select the curve', RDK.ItemList(robolink.ITEM_TYPE_OBJECT) + RDK.ItemList(robolink.ITEM_TYPE_CURVE) + RDK.ItemList(robolink.ITEM_TYPE_MACHINING))
             if not curve.Valid():
                 return
+                
             curves = [curve]
     else:
         # ..as provided
-        curves = [x for x in curves if x.Type() in [robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_CURVE]]
+        curves = [x for x in curves if x.Type() in [robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_CURVE, robolink.ITEM_TYPE_MACHINING]]
         if not curves:
             return
 
     for curve in curves:
         # Set the curve color
         r, g, b, a = S.CURVE_1_COLOR
-        curve.setColorCurve(Settings.rgba2f(r, g, b, a))
+        
+        if curve.type == robolink.ITEM_TYPE_MACHINING:
+            curve.setColor(Settings.rgba2f(r, g, b, a))
+            
+        else:
+            curve.setColorCurve(Settings.rgba2f(r, g, b, a))
 
-        # Change the size of displayed curves:
-        curve.setParam('Display', f'LINEW={S.CURVE_1_LINE_WEIGHT}')
+            # Change the size of displayed curves:
+            curve.setParam('Display', f'LINEW={S.CURVE_1_LINE_WEIGHT}')
+            
+        # curve.setVisible(True)
 
 
 def runmain():
