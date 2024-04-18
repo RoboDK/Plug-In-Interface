@@ -3,6 +3,7 @@
   <cp:coreProperties>
     <cp:category>Application</cp:category>
     <dcterms:created xsi:type="dcterms:W3CDTF">2024-04-18T11:58:15.425Z</dcterms:created>
+	<dc:description>The Import-Export Settings App allows you to export and import RoboDK settings as an INI file.</dc:description>
     <dc:identifier>app.settingsimport-export</dc:identifier>
     <dc:language>en</dc:language>
     <dcterms:modified xsi:type="dcterms:W3CDTF">2024-04-18T11:58:15.425Z</dcterms:modified>
@@ -10,6 +11,13 @@
     <dc:title>Settings Import-Export</dc:title>
     <cp:version>1.0.0</cp:version>
   </cp:coreProperties>
+    <extraProperties>
+    <website>https://robodk.com/</website>
+    <documentation>https://robodk.com/doc/en/Add-ins.html</documentation>
+    <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/SettingsImportExport</repository>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
+  </extraProperties>
   <dependencies/>
   <assets>
     <asset cpu="any" system="any" version="">/SettingsImportExport/README.md</asset>

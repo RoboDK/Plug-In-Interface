@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# App settings example.
+# App settings action: when this action is executed it will show the settings we can configure for this App.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -17,10 +17,7 @@ from robodk import roboapps
 
 class Settings(roboapps.AppSettings):
     """
-    App Template's App Settings.
-    
-    Use robodk.roboapps.AppSettings to create auto-generated user interface for your App's settings.
-    Settings are automatically saved in your station and are accessible from anywhere in your App.
+    Settings class to define configurable settings for the Import-Export Settings App
     """
 
     def __init__(self, settings_param='Import-Export-Settings'):
@@ -29,8 +26,8 @@ class Settings(roboapps.AppSettings):
         from collections import OrderedDict
         self._FIELDS_UI = OrderedDict()  # _FIELDS_UI are optional, but provides better descriptions to the user
 
-        self._FIELDS_UI['SettingsName'] = "Default settings file name"
-        self.SettingsName = 'RoboDK-Settings.ini'
+        self._FIELDS_UI['SETTINGS_NAME'] = "Default settings file name"
+        self.SETTINGS_NAME = 'RoboDK-Settings.ini'
 
 
 def runmain():

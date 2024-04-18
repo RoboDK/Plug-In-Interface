@@ -1,7 +1,7 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Momentary action example.
+# Action to import RoboDK settings as an INI file
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -18,8 +18,8 @@ import os
 ACTION_NAME = os.path.basename(__file__)
 
 
-def SettingsExport():
-    """Action to perform when the action is clicked in RoboDK."""
+def SettingsImport():
+    """Import the settings"""
     # path_files = RDK.getParam('PATH_OPENSTATION')
     from AppSettings import Settings
     
@@ -27,7 +27,7 @@ def SettingsExport():
     
     S = Settings()
     S.Load()
-    file_name = S.SettingsName    
+    file_name = S.SETTINGS_NAME    
     #file_name = "RoboDK-Settings.ini"
 
     file_path = robodialogs.getOpenFileName(strtitle="Load RoboDK settings", path_preference=path_files, strfile=file_name, defaultextension='.ini', filetypes=[("INI files", "*.ini"), ("All files", "*.*")])
@@ -49,7 +49,7 @@ def runmain():
     if roboapps.Unchecked():
         roboapps.Exit()
     else:
-        SettingsExport()
+        SettingsImport()
 
 
 if __name__ == '__main__':
