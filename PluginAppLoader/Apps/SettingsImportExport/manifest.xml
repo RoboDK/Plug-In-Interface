@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
+  <cp:coreProperties>
+    <cp:category>Application</cp:category>
+    <dcterms:created xsi:type="dcterms:W3CDTF">2024-04-18T11:58:15.425Z</dcterms:created>
+    <dc:identifier>app.settingsimport-export</dc:identifier>
+    <dc:language>en</dc:language>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2024-04-18T11:58:15.425Z</dcterms:modified>
+    <cp:revision>1</cp:revision>
+    <dc:title>Settings Import-Export</dc:title>
+    <cp:version>1.0.0</cp:version>
+  </cp:coreProperties>
+  <dependencies/>
+  <assets>
+    <asset cpu="any" system="any" version="">/SettingsImportExport/README.md</asset>
+    <asset cpu="any" system="any" version="">/SettingsImportExport/AppConfig.ini</asset>
+    <asset cpu="any" system="any" version="">/SettingsImportExport/AppSettings.py</asset>
+    <asset cpu="any" system="any" version="">/SettingsImportExport/AppSettings.svg</asset>
+    <asset cpu="any" system="any" version="">/SettingsImportExport/Export.py</asset>
+    <asset cpu="any" system="any" version="">/SettingsImportExport/Import.py</asset>
+    <asset cpu="any" system="any" version="">/SettingsImportExport/LICENSE.md</asset>
+  </assets>
+</packageManifest>
