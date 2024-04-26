@@ -129,18 +129,21 @@ QString PluginExample::PluginCommand(const QString &command, const QString &valu
     return "";
 }
 
-void PluginExample::PluginEvent(TypeEvent event_type){
-    switch (event_type) {
+void PluginExample::PluginEvent(TypeEvent event_type) {
+    switch (event_type)
+    {
     case EventRender:
         /// Display/Render the 3D scene.
         /// At this moment we can call RDK->DrawGeometry to customize the displayed scene
-        //qDebug() << "(EventRender)";
+        /// qDebug() << "==== EventRender ====";
         break;
+
     case EventMoved:
         /// qDebug() << "Something has moved, such as a robot, reference frame, object or tool.
         /// It is very likely that an EventRender will be triggered immediately after this event
         /// qDebug() << "==== EventMoved ====";
         break;
+
     case EventChanged:
         /// qDebug() << "An item has been added or deleted. Current station: " << RDK->getActiveStation()->Name();
         /// If we added a new item (for example, a reference frame) it is very likely that an EventMoved will follow with the updated position of the newly added item(s)
@@ -153,30 +156,143 @@ void PluginExample::PluginEvent(TypeEvent event_type){
         //    LoadSettings(); // will select the robot if there are settings.
         //}
         qDebug() << "==== EventChanged ====";
-        if (form_robotpilot != nullptr){
+        if (form_robotpilot != nullptr) {
             form_robotpilot->SelectRobot();
         }
         break;
+
+    case EventChangedStation:
+        qDebug() << "==== EventChangedStation ====";
+        break;
+
     case EventAbout2Save:
         qDebug() << "==== EventAbout2Save ====";
         /// The user requested to save the project and the RDK file will be saved to disk. It is recommended to save all station-specific settings at this moment.
         /// For example, you can use RDK.setParam("ParameterName", "ParameterValue") or RDK.setData("ParameterName", bytearray)
         //SaveSettings();
         break;
+
     case EventAbout2ChangeStation:
         /// The user requested to open a new RoboDK station (RDK file) or the user is navigating among different stations. This event is triggered before the current station looses focus.
         qDebug() << "==== EventAbout2ChangeStation ====";
         //SaveSettings();
         break;
+
     case EventAbout2CloseStation:
         /// The user requested to close the currently open RoboDK station (RDK file). The RDK file may be saved if the user and the corresponding event will be triggered.
         qDebug() << "==== EventAbout2CloseStation ====";
         //SaveSettings();
         //ROBOT = nullptr;
         break;
-    default:
-        qDebug() << "Unknown/future event: " << event_type;
 
+    case EventTrajectoryStep:
+        qDebug() << "==== EventTrajectoryStep ====";
+        break;
+
+    default:
+        if (event_type < EventApiMask) {
+            qDebug() << "Unknown/future event: " << event_type;
+            return;
+        }
+        break;
+    }
+
+    if (event_type < EventApiMask) {
+        return;
+    }
+
+    int apiEvent = event_type & (EventApiMask - 1);
+
+    // API Events
+    switch (apiEvent)
+    {
+    case EVENT_SELECTIONTREE_CHANGED:
+        qDebug() << "EVENT_SELECTIONTREE_CHANGED";
+        break;
+
+    case EVENT_ITEM_MOVED:
+        qDebug() << "EVENT_ITEM_MOVED";
+        break;
+
+    case EVENT_REFERENCE_PICKED:
+        qDebug() << "EVENT_REFERENCE_PICKED";
+        break;
+
+    case EVENT_REFERENCE_RELEASED:
+        qDebug() << "EVENT_REFERENCE_RELEASED";
+        break;
+
+    case EVENT_TOOL_MODIFIED:
+        qDebug() << "EVENT_TOOL_MODIFIED";
+        break;
+
+    case EVENT_CREATED_ISOCUBE:
+        qDebug() << "EVENT_CREATED_ISOCUBE";
+        break;
+
+    case EVENT_SELECTION3D_CHANGED:
+        qDebug() << "EVENT_SELECTION3D_CHANGED";
+        break;
+
+    case EVENT_VIEWPOSE_CHANGED:
+        qDebug() << "EVENT_VIEWPOSE_CHANGED";
+        break;
+
+    case EVENT_ROBOT_MOVED:
+        qDebug() << "EVENT_ROBOT_MOVED";
+        break;
+
+    case EVENT_KEY:
+        qDebug() << "EVENT_KEY";
+        break;
+
+    case EVENT_ITEM_MOVED_POSE:
+        qDebug() << "EVENT_ITEM_MOVED_POSE";
+        break;
+
+    case EVENT_COLLISIONMAP_RESET:
+        qDebug() << "EVENT_COLLISIONMAP_RESET";
+        break;
+
+    case EVENT_COLLISIONMAP_TOO_LARGE:
+        qDebug() << "EVENT_COLLISIONMAP_TOO_LARGE";
+        break;
+
+    case EVENT_CALIB_MEASUREMENT:
+        qDebug() << "EVENT_CALIB_MEASUREMENT";
+        break;
+
+    case EVENT_SELECTION3D_CLICK:
+        qDebug() << "EVENT_SELECTION3D_CLICK";
+        break;
+
+    case EVENT_CHANGED:
+        qDebug() << "EVENT_CHANGED";
+        break;
+
+    case EVENT_RENAME:
+        qDebug() << "EVENT_RENAME";
+        break;
+
+    case EVENT_SETVISIBLE:
+        qDebug() << "EVENT_SETVISIBLE";
+        break;
+
+    case EVENT_STATIONCHANGED:
+        qDebug() << "EVENT_STATIONCHANGED";
+        break;
+
+    case EVENT_PROGSLIDER_CHANGED:
+        qDebug() << "EVENT_PROGSLIDER_CHANGED";
+        break;
+
+    case EVENT_PROGSLIDER_SET:
+        qDebug() << "EVENT_PROGSLIDER_SET";
+        break;
+
+    default:
+        qDebug() << "Unknown/future API event: " << apiEvent;
+        break;
     }
 }
 
@@ -254,13 +370,9 @@ void PluginExample::callback_information(){
 
 
     QTextEdit *text_editor = new QTextEdit("Plugin timing summary");
-    QDockWidget *dockwidget = AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
     text_editor->setHtml(text_message_html);
-    //text_editor->show();
 
-    // close the dock:
-    //dockwidget->close();
-
+    AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
 }
 
 void PluginExample::callback_robotpilot(){

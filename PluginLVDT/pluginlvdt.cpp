@@ -28,6 +28,8 @@ QString PluginLVDT::PluginName(){
 
 
 QString PluginLVDT::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings){
+    Q_UNUSED(menubar)
+
     RDK = rdk;
     MainWindow = mw;
     StatusBar = statusbar;
@@ -67,6 +69,8 @@ void PluginLVDT::PluginUnload(){
 
 
 void PluginLVDT::PluginLoadToolbar(QMainWindow *mw, int icon_size){
+    Q_UNUSED(mw)
+    Q_UNUSED(icon_size)
 }
 
 

@@ -272,13 +272,9 @@ void PluginExample::callback_information(){
 
 
     QTextEdit *text_editor = new QTextEdit("Plugin timing summary");
-    QDockWidget *dockwidget = AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
     text_editor->setHtml(text_message_html);
-    //text_editor->show();
 
-    // close the dock:
-    //dockwidget->close();
-
+    AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
 }
 
 void PluginExample::callback_robotpilot(){
