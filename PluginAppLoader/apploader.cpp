@@ -693,7 +693,15 @@ void AppLoader::AppsSearch(bool install_requirements){
             }
 
             // create the new action
-            QAction *action = new QAction(*icon, displayName);
+            QString displayNameAction(displayName);
+#ifdef Q_OS_MAC
+            if (displayName.compare("Settings", Qt::CaseInsensitive) == 0 || displayName.compare("Options", Qt::CaseInsensitive) == 0 || displayName.compare("Preferences", Qt::CaseInsensitive) == 0){
+                // MacOS place the options menu under the RoboDK main menu
+                // This overrides the RoboDK Options default menu, which is already placed there
+                displayNameAction = tr("Add-in") + " " + displayName;
+            }
+#endif
+            QAction *action = new QAction(*icon, displayNameAction);
 
             // apply shortcut, if available
             if (!shortcutstr.isEmpty()){
