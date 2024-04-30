@@ -174,6 +174,8 @@ QString PluginAttachView::PluginName(){
 
 
 QString PluginAttachView::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings){
+    Q_UNUSED(menubar)
+
     RDK = rdk;
     MainWindow = mw;
     StatusBar = statusbar;
@@ -222,6 +224,8 @@ void PluginAttachView::PluginUnload(){
 
 
 void PluginAttachView::PluginLoadToolbar(QMainWindow *mw, int icon_size){
+    Q_UNUSED(mw)
+    Q_UNUSED(icon_size)
 }
 
 

@@ -1,4 +1,4 @@
-#include "pluginopengl.h".h"
+#include "pluginopengl.h"
 #include "robodktools.h"
 #include "irobodk.h"
 #include "iitem.h"
@@ -90,6 +90,8 @@ void PluginExample::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 
 
 bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
+    Q_UNUSED(menu)
+
     qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
     return false;
 }

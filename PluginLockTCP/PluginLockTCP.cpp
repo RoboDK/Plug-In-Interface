@@ -13,6 +13,8 @@ QString PluginLockTCP::PluginName(){
 
 
 QString PluginLockTCP::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings){
+    Q_UNUSED(menubar)
+
     RDK = rdk;
     MainWindow = mw;
     StatusBar = statusbar;

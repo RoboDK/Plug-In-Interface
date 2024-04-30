@@ -74,15 +74,21 @@ void RoboUI::PluginUnload()
 void RoboUI::PluginLoadToolbar(QMainWindow* mainWindow, int iconSize)
 {
     Q_UNUSED(mainWindow)
+    Q_UNUSED(iconSize)
 }
 
 bool RoboUI::PluginItemClick(Item item, QMenu* menu, TypeClick clickType)
 {
+    Q_UNUSED(item)
+    Q_UNUSED(menu)
+    Q_UNUSED(clickType)
     return false;
 }
 
 QString RoboUI::PluginCommand(const QString& command, const QString& value)
 {
+    Q_UNUSED(command)
+    Q_UNUSED(value)
     return QString();
 }
 
@@ -116,11 +122,16 @@ void RoboUI::PluginEvent(TypeEvent eventType)
 
 bool RoboUI::PluginItemClickMulti(QList<Item>& itemList, QMenu* menu, TypeClick clickType)
 {
+    Q_UNUSED(itemList)
+    Q_UNUSED(menu)
+    Q_UNUSED(clickType)
     return false;
 }
 
 bool RoboUI::eventFilter(QObject* object, QEvent* event)
 {
+    Q_UNUSED(object)
+
     ImGuiIO& io = ImGui::GetIO();
     if (event->type() == QEvent::MouseMove)
     {

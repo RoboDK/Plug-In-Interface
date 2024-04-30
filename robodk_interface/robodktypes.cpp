@@ -303,7 +303,7 @@ double Mat::Get(int i, int j) const{
 }
 
 Mat Mat::inv() const{
-    return this->inverted();
+    return Mat(this->inverted());
 }
 
 

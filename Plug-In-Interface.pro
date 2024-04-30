@@ -22,6 +22,7 @@ win32 {
 SUBDIRS += Plugin-OPC-UA/PluginOPCUA.pro
 SUBDIRS += PluginOpenGL/PluginOpengl.pro
 SUBDIRS += PluginOpenGL-Shaders/PluginChip8Opengl.pro
+SUBDIRS += PluginRoboUI/roboui.pro
 }
 SUBDIRS += PluginRealTime/PluginRealTime.pro
 SUBDIRS += PluginRobotPilot/PluginRobotPilot.pro

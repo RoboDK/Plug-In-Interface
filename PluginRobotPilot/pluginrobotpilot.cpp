@@ -25,6 +25,8 @@ QString PluginExample::PluginName(){
 
 
 QString PluginExample::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings){
+    Q_UNUSED(settings)
+
     RDK = rdk;
     MainWindow = mw;
     StatusBar = statusbar;
@@ -80,6 +82,9 @@ void PluginExample::PluginUnload(){
 }
 
 void PluginExample::PluginLoadToolbar(QMainWindow *mw, int icon_size){
+    Q_UNUSED(mw)
+    Q_UNUSED(icon_size)
+
     // Create a new toolbar:
     /*
     toolbar1 = mw->addToolBar("Plugin Example Toolbar");
@@ -97,6 +102,8 @@ void PluginExample::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 
 
 bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
+    Q_UNUSED(click_type)
+
     if (item->Type() == IItem::ITEM_TYPE_ROBOT){
         menu->actions().insert(0, action_robotpilot); // add action at the beginning
         //menu->addAction(action_robotpilot); // add action at the end
@@ -106,6 +113,8 @@ bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
 }
 
 QString PluginExample::PluginCommand(const QString &command, const QString &value){
+    Q_UNUSED(value)
+
     if (command.compare("RobotPilot", Qt::CaseInsensitive) == 0){
         callback_robotpilot();
         return "Done";

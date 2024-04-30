@@ -206,6 +206,9 @@ void PluginChip8::PluginUnload(){
 
 ///Called on plugin loading, used to configure the custom toolbar
 void PluginChip8::PluginLoadToolbar(QMainWindow *mw, int icon_size){
+    Q_UNUSED(mw)
+    Q_UNUSED(icon_size)
+
     // Create a new toolbar:
     toolbar1 = nullptr;
 
@@ -222,6 +225,8 @@ void PluginChip8::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 
 
 bool PluginChip8::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
+    Q_UNUSED(menu)
+
     qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
     return false;
 }

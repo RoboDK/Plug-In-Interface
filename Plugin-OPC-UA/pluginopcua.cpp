@@ -214,6 +214,8 @@ void PluginOPCUA::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 
 
 bool PluginOPCUA::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
+    Q_UNUSED(menu)
+
     qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
 /*
     if (item->Type() == IItem::ITEM_TYPE_OBJECT){
