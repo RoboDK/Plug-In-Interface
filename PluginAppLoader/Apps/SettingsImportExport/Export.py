@@ -13,7 +13,7 @@
 # --------------------------------------------
 
 from robodk import robolink, roboapps, robodialogs
-import os
+import os, time
 
 ACTION_NAME = os.path.basename(__file__)
 
@@ -36,7 +36,20 @@ def SettingsExport():
         return
 
     RDK = robolink.Robolink()
-    if RDK.Command("Settings", "Save=" + file_path) == "OK" and os.path.exists(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    status = RDK.Command("Settings", "Save=" + file_path)
+    exists = False
+    for i in range(10):
+        # This strange workaround is needed for MacOS, apparently it take some time for the file to be visible by the OS
+        if os.path.exists(file_path):
+            exists = True
+            break
+        
+        time.sleep(0.05)
+        
+    if status == "OK" and exists:
         RDK.ShowMessage("Successfully saved RoboDK settings to " + file_path, False)
     else:
         RDK.ShowMessage("Failed to export RoboDK settings. Make sure you are using the latest version of RoboDK.")
