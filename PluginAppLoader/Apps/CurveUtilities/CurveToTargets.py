@@ -15,22 +15,9 @@
 
 from robodk import robolink, robomath, roboapps
 
+import _cutools as cutools
+
 import Settings
-
-
-def GetObjectCurves(object_item, feature_id=-1):
-    if feature_id != -1:
-        return [object_item.GetPoints(robolink.FEATURE_CURVE, feature_id)[0]]
-
-    object_curves = []
-    i = 0
-    while True:
-        curve = object_item.GetPoints(robolink.FEATURE_CURVE, i)[0]
-        if not curve:
-            break
-        object_curves.append(curve)
-        i += 1
-    return object_curves
 
 
 def PointToTarget(RDK=None, S=None, objects=None):
@@ -61,7 +48,7 @@ def PointToTarget(RDK=None, S=None, objects=None):
 
     for object_item in objects:
 
-        curves = GetObjectCurves(object_item)
+        curves = cutools.get_curves(object_item)
         if not curves:
             continue
 

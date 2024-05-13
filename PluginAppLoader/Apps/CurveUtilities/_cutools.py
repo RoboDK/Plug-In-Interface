@@ -179,6 +179,8 @@ def merge_curves(curves):
 
 def get_curve(object_item, curve_id=0):
     """Retrieve the curve of an object item, as specified by the curve ID."""
+    if object_item.type != robolink.ITEM_TYPE_OBJECT:
+        return []
     return object_item.GetPoints(robolink.FEATURE_CURVE, curve_id)[0]
 
 
@@ -187,7 +189,7 @@ def get_curves(object_item):
     object_curves = []
     i = 0
     while True:
-        curve = object_item.GetPoints(robolink.FEATURE_CURVE, i)[0]
+        curve = get_curve(object_item, i)
         if not curve:
             break
         object_curves.append(curve)
@@ -195,10 +197,17 @@ def get_curves(object_item):
     return object_curves
 
 
+def get_points(object_item):
+    if object_item.type != robolink.ITEM_TYPE_OBJECT:
+        return []
+
+    return object_item.GetPoints(robolink.FEATURE_POINT)[0]
+
+
 def sort_curve_segments(segments, start=None, reverse_segments=False):
     """
     Sort the order of segments (list of curves) by distance from the end of a segment to the start of the next segment.
-    Optionally, check both ends of the segments reverse the order of the matched segment.
+    Optionally, check both ends of the segments and reverse the order of the matched segment.
     Returns a sorted copy.
     """
     if start is None:
@@ -320,7 +329,7 @@ def get_start_point(object_item, show_message=''):
             point_mouse, _ = object_item.GetPoints(robolink.FEATURE_SURFACE)
             if not point_mouse:
                 continue
-            curve, _ = object_item.GetPoints(robolink.FEATURE_CURVE, feature_id)
+            curve, _ = get_curve(object_item, feature_id)
             xyzijk = closest_point(curve, point_mouse[0][:6])
             print('Selection error: %.3f mm' % robomath.distance(xyzijk[:3], point_mouse[0][:3]))
 

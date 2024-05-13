@@ -20,15 +20,13 @@ ACTION_NAME = os.path.basename(__file__)
 
 def SettingsImport():
     """Import the settings"""
-    # path_files = RDK.getParam('PATH_OPENSTATION')
     from AppSettings import Settings
-    
+
     path_files = os.path.expanduser("~/Desktop")
-    
+
     S = Settings()
     S.Load()
-    file_name = S.SETTINGS_NAME    
-    #file_name = "RoboDK-Settings.ini"
+    file_name = S.SETTINGS_NAME
 
     file_path = robodialogs.getOpenFileName(strtitle="Load RoboDK settings", path_preference=path_files, strfile=file_name, defaultextension='.ini', filetypes=[("INI files", "*.ini"), ("All files", "*.*")])
     if not file_path:
@@ -39,6 +37,7 @@ def SettingsImport():
         RDK.ShowMessage("Successfully imported RoboDK settings from " + file_path, False)
     else:
         RDK.ShowMessage("Failed to import RoboDK settings. Make sure you are using the latest version of RoboDK.")
+
 
 def runmain():
     """

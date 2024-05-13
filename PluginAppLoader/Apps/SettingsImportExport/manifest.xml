@@ -1,31 +1,37 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
   <cp:coreProperties>
     <cp:category>Application</cp:category>
+    <cp:contentStatus>Final</cp:contentStatus>
     <dcterms:created xsi:type="dcterms:W3CDTF">2024-04-18T11:58:15.425Z</dcterms:created>
-	<dc:description>The Import-Export Settings App allows you to export and import RoboDK settings as an INI file.</dc:description>
-    <dc:identifier>app.settingsimport-export</dc:identifier>
-    <dc:language>en</dc:language>
+    <dc:creator/>
+    <dc:description>The Import-Export Settings App for RoboDK allows you to export and import RoboDK settings as an INI file.</dc:description>
+    <dc:identifier>com.robodk.app.settingsimportexport</dc:identifier>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
+    <cp:lastModifiedBy/>
     <dcterms:modified xsi:type="dcterms:W3CDTF">2024-04-18T11:58:15.425Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Settings Import-Export</dc:title>
     <cp:version>1.0.0</cp:version>
   </cp:coreProperties>
-    <extraProperties>
+  <extraProperties>
     <website>https://robodk.com/</website>
     <documentation>https://robodk.com/doc/en/Add-ins.html</documentation>
     <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/SettingsImportExport</repository>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>
+    <icon>/icon.svg</icon>
   </extraProperties>
-  <dependencies/>
   <assets>
-    <asset cpu="any" system="any" version="">/SettingsImportExport/README.md</asset>
-    <asset cpu="any" system="any" version="">/SettingsImportExport/AppConfig.ini</asset>
-    <asset cpu="any" system="any" version="">/SettingsImportExport/AppSettings.py</asset>
-    <asset cpu="any" system="any" version="">/SettingsImportExport/AppSettings.svg</asset>
-    <asset cpu="any" system="any" version="">/SettingsImportExport/Export.py</asset>
-    <asset cpu="any" system="any" version="">/SettingsImportExport/Import.py</asset>
-    <asset cpu="any" system="any" version="">/SettingsImportExport/LICENSE.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/AppConfig.ini</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/AppSettings.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/AppSettings.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/Export.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/Export.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/Import.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/Import.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/LICENSE.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SettingsImportExport/README.md</asset>
   </assets>
 </packageManifest>
