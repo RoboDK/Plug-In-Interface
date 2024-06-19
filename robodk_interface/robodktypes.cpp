@@ -111,7 +111,7 @@ QString tJoints::ToString(const QString &separator, int precision) const {
     return values;
 }
 bool tJoints::FromString(const QString &str){
-    QStringList jnts_list = QString(str).replace(";",",").replace("\t",",").split(",", QString::SkipEmptyParts);
+    QStringList jnts_list = QString(str).replace(";",",").replace("\t",",").split(",", Qt::SkipEmptyParts);
     _nDOFs = qMin(jnts_list.length(), RDK_SIZE_JOINTS_MAX);
     for (int i=0; i<_nDOFs; i++){
         QString stri(jnts_list.at(i));
@@ -303,7 +303,7 @@ double Mat::Get(int i, int j) const{
 }
 
 Mat Mat::inv() const{
-    return Mat(this->inverted());
+    return this->inverted();
 }
 
 
@@ -438,7 +438,7 @@ QString Mat::ToString(const QString &separator, int precision, bool xyzwpr_only)
     return str;
 }
 bool Mat::FromString(const QString &pose_str){
-    QStringList values_list = QString(pose_str).replace(";",",").replace("\t",",").split(",", QString::SkipEmptyParts);
+    QStringList values_list = QString(pose_str).replace(";",",").replace("\t",",").split(",", Qt::SkipEmptyParts);
     int nvalues = qMin(values_list.length(), 6);
     tXYZWPR xyzwpr;
     for (int i=0; i<6; i++){

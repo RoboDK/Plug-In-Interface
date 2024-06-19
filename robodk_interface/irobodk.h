@@ -938,7 +938,7 @@ public:
     /// </summary>
     /// <param name="mode_type">The mode type defines what accion occurs when the 3D view is selected (Select object, Pan, Rotate, Zoom, Move Objects, ...)</param>
     /// <param name="default_ref_flags">When a movement is specified, we can provide what motion we allow by default with respect to the coordinate system (set apropriate flags)</param>
-    /// <param name="custom_object">Provide a list of optional items to customize the move behavior for these specific items (important: the lenght of custom_ref_flags must match)</param>
+    /// <param name="custom_object">Provide a list of optional items to customize the move behavior for these specific items (important: the length of custom_ref_flags must match)</param>
     /// <param name="custom_ref_flags">Provide a matching list of flags to customize the movement behavior for specific items</param>
     virtual void setInteractiveMode(int mode_type, int default_ref_flags, const QList<Item> *custom_object=nullptr, int custom_ref_flags=0)=0;
 

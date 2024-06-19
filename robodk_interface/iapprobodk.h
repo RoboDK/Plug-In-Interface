@@ -42,7 +42,7 @@
 *
 * More information about the RoboDK API is available here:
 * - IRoboDK: C++ reference for the plugin.
-* - Python Reference (using standard API): https://robodk.com/doc/en/PythonAPI/index.html.
+* - Python Reference (using standard API): https://robodk.com/doc/en/PythonAPI/robolink.html.
 *
 *
 *
@@ -51,7 +51,7 @@
 * Item is a pointer to IItem. Items should be deleted using class: IItem::Delete (not using the class destructor).
 *
 * More information about the RoboDK Item class (based on the Python API) is available here:
-* - https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Item.
+* - https://robodk.com/doc/en/PythonAPI/robolink.html#robolink-item.
 *
 *
 * \subsubsection LinkTypes RoboDK types file
@@ -98,8 +98,8 @@
 * Requirements to make RoboDK Plug-Ins work:
 * - Install RoboDK (v3.5.4 or later): https://robodk.com/download
 * - Make sure you compile your plugin using the correct version of Qt and compiler:
-*   - Qt version 5.15.6 on Windows (MSVC2019).
-*   - Qt version 5.15.2 on Mac (clang 64 bit).
+*   - Qt version 5.15 on Windows (MSVC2019).
+*   - Qt version 5.15 on Mac (clang 64 bit).
 *   - Qt version 5.12 on Linux.
 * - It is possible to run in \ref LinkDebug debug mode on Windows.
 *
@@ -158,12 +158,11 @@
 * \section LinkRefs Useful Links
 * Useful links involving the RoboDK API:
 * - Standard RoboDK API Introduction: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
-* - Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/index.html.
+* - Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/robolink.html.
 * - Latest RoboDK API on GitHub (you'll find RoboDK Plugins in a subfolder): https://github.com/RoboDK/RoboDK-API.
 * - RoboDK API Introductory video: https://www.youtube.com/watch?v=3I6OK1Kd2Eo.
 *
 */
-
 
 
 #ifndef IAPPROBODK_H
