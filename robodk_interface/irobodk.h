@@ -19,8 +19,8 @@ public:
 
 public:
 
-    /// Instruction types
-    enum {
+    /// Instruction types for programs
+    enum TypeInstruction {
         /// Invalid instruction.
         INS_TYPE_INVALID = -1,
 
@@ -56,7 +56,7 @@ public:
     };
 
     /// Movement types
-    enum {
+    enum TypeMovement {
         /// Invalid robot movement.
         MOVE_TYPE_INVALID = -1,
 
@@ -74,7 +74,7 @@ public:
     };
 
     /// Script execution types used by IRoboDK.setRunMode and IRoboDK.RunMode
-    enum {
+    enum TypeRunMode {
         /// Performs the simulation moving the robot (default)
         RUNMODE_SIMULATE = 1,
 
@@ -95,7 +95,7 @@ public:
     };
 
     /// Program execution type
-    enum {
+    enum TypeProgramRun {
         /// Set the robot program to run on the simulator.
         PROGRAM_RUN_ON_SIMULATOR = 1,
 
@@ -104,7 +104,7 @@ public:
     };
 
     /// TCP calibration types
-    enum {
+    enum TypeCalibrateTCP{
 
         /// Calibrate the TCP by poses touching the same point.
         CALIBRATE_TCP_BY_POINT = 0,
@@ -114,7 +114,7 @@ public:
     };
 
     /// Reference frame calibration types
-    enum {
+    enum TypeCalibrateFrame {
         /// Calibrate by 3 points: [X, X+, Y+] (p1 on X axis).
         CALIBRATE_FRAME_3P_P1_ON_X = 0,
 
@@ -131,8 +131,8 @@ public:
         CALIBRATE_TURNTABLE_2X = 4
     };
 
-    /// projection types (for AddCurve)
-    enum {
+    /// projection types for AddCurve
+    enum TypeProjection {
         /// No curve projection
         PROJECTION_NONE                = 0,
 
@@ -152,8 +152,8 @@ public:
         PROJECTION_RECALC              = 5
     };
 
-    /// Euler type
-    enum {
+    /// Euler angles type
+    enum TypeEuler {
 
         /// joints.
         JOINT_FORMAT      = -1,
@@ -181,8 +181,7 @@ public:
     };
 
     /// State of the RoboDK window
-    enum {
-
+    enum TypeWindowState {
         /// Hide the RoboDK window. RoboDK will keep running as a process.
         WINDOWSTATE_HIDDEN = -1,
 
@@ -212,7 +211,7 @@ public:
     };
 
     /// Instruction program call type:
-    enum {
+    enum TypeInstructionCall {
         /// Instruction to call a program.
         INSTRUCTION_CALL_PROGRAM = 0,
 
@@ -229,8 +228,8 @@ public:
         INSTRUCTION_SHOW_MESSAGE = 4
     };
 
-    /// Object selection features:
-    enum {
+    /// Object features for selection and filtering
+    enum TypeFeature {
         /// No selection
         FEATURE_NONE = 0,
 
@@ -245,14 +244,14 @@ public:
     };
 
     /// Spray gun simulation:
-    enum {
+    enum TypeSpray {
         /// Activate the spray simulation
         SPRAY_OFF = 0,
         SPRAY_ON = 1
     };
 
     /// Collision checking state
-    enum {
+    enum TypeCollision {
         /// Do not use collision checking
         COLLISION_OFF = 0,
 
@@ -261,7 +260,7 @@ public:
     };
 
     /// RoboDK Window Flags
-    enum {
+    enum TypeFlagsRoboDK {
         /// Allow using the RoboDK station tree.
         FLAG_ROBODK_TREE_ACTIVE = 1,
 
@@ -321,7 +320,7 @@ public:
     };
 
     /// RoboDK Item Flags
-    enum {
+    enum TypeFlagsItem {
         /// Allow selecting RoboDK items.
         FLAG_ITEM_SELECTABLE = 1,
 
@@ -352,7 +351,7 @@ public:
     };
 
     /// Different render levels to update the screen
-    enum {
+    enum TypeRender {
         /// Do not render the screen.
         RenderNone = 0,
 
@@ -367,7 +366,7 @@ public:
     };
 
     /// Display geometry in 3D, with respect to the station coordinate system. This should be called using \ref DrawGeometry ONLY when a \ref PluginEvent of type \ref EventRender is triggered.
-    enum {
+    enum TypeDraw {
         /// Draw surfaces
         DrawTriangles = 1,
 

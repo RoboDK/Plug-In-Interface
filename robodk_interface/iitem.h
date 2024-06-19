@@ -15,7 +15,7 @@ class IItem {
 public:
 
     /// Tree item types
-    enum {
+    enum TypeItem {
         /// Any item type
         ITEM_TYPE_ANY = -1,
 

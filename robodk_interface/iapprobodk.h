@@ -1,11 +1,11 @@
-/*! \mainpage RoboDK Plug-In Interface Introduction
+/*! \mainpage RoboDK Plug-In Interface
 *
 * \section LinkIntro Introduction
 *
-* This help document is an introduction to develop Plug-Ins for RoboDK. RoboDK Plug-Ins allow extending RoboDK by using the RoboDK Interface and the RoboDK API.
+* This document introduces the RoboDK Plug-in Interface. The plugin interface allows you to to develop Plug-Ins for RoboDK. RoboDK Plug-Ins allow extending RoboDK by using the RoboDK Interface and the RoboDK API.
 * Contrary to the default RoboDK API (provided in Python, C#, C++, Matlab, etc), this RoboDK Plug-In interface is linked natively into the core of RoboDK.
-* Therefore, when the RoboDK API is used inside the Plugin Interface (using IItem and IRoboDK) the speed is faster than using the default API \ref LinkTiming.
-* However, all RoboDK Plug-In applications must exist within RoboDK's environment.
+* Therefore, when the RoboDK API is used inside the Plugin Interface (using IItem and IRoboDK) the speed is faster than using the default API \ref LinkTiming and it allows you to better filter and synchronize events using the PluginEvent callback.
+* However, contrary to the standard RoboDK API, all RoboDK Plug-In applications must exist within RoboDK's environment.
 *
 * Some RoboDK Example plugins are available here:
 * - https://github.com/RoboDK/Plug-In-Interface
@@ -16,6 +16,8 @@
 *
 * Double click the PluginExample.pro file to start the project with Qt.
 * Make sure to follow the installation requirements section (\ref LinkInstall) to install Qt as a C++ development environment.
+*
+* Important: The plugin inteface can change with different major versions of RoboDK. Make sure to use the right plugin inteface header and source files for your RoboDK version.
 *
 *
 * \section LinkPlugin RoboDK Plug-In Structure
