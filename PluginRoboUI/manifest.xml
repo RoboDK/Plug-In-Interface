@@ -25,5 +25,6 @@
   <assets>
     <asset cpu="any" system="any">/README.md</asset>
     <asset cpu="any" system="any">/RoboUI.dll</asset>
+    <asset cpu="any" system="any">/doc/rdk-imgui.png</asset>
   </assets>
 </packageManifest>
