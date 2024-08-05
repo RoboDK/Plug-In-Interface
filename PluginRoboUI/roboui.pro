@@ -63,7 +63,7 @@ SOURCES += \
     imgui/imgui.cpp \
     imgui/imgui_demo.cpp \
     imgui/imgui_draw.cpp \
-    imgui/imgui_impl_opengl2.cpp \
+    imgui/imgui_impl_qt.cpp \
     imgui/imgui_tables.cpp \
     imgui/imgui_widgets.cpp \
     ../robodk_interface/robodktools.cpp \
@@ -73,7 +73,7 @@ SOURCES += \
 HEADERS += \
     imgui/imconfig.h \
     imgui/imgui.h \
-    imgui/imgui_impl_opengl2.h \
+    imgui/imgui_impl_qt.h \
     imgui/imgui_internal.h \
     imgui/imstb_rectpack.h \
     imgui/imstb_textedit.h \

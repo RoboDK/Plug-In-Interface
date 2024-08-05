@@ -1,120 +1,59 @@
-// dear imgui: Renderer Backend for OpenGL2 (legacy OpenGL, fixed pipeline)
-// This needs to be used along with a Platform Backend (e.g. GLFW, SDL, Win32, custom..)
 
-// Implemented features:
-//  [X] Renderer: User texture binding. Use 'GLuint' OpenGL texture identifier as void*/ImTextureID. Read the FAQ about ImTextureID!
+#include "imgui_impl_qt.h"
 
-// You can use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this.
-// Prefer including the entire imgui/ repository into your project (either as a copy or as a submodule), and only build the backends you need.
-// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
-// Read online: https://github.com/ocornut/imgui/tree/master/docs
+#include <QOpenGLContext>
 
-// **DO NOT USE THIS CODE IF YOUR CODE/ENGINE IS USING MODERN OPENGL (SHADERS, VBO, VAO, etc.)**
-// **Prefer using the code in imgui_impl_opengl3.cpp**
-// This code is mostly provided as a reference to learn how ImGui integration works, because it is shorter to read.
-// If your code is using GL3+ context or any semi modern OpenGL calls, using this is likely to make everything more
-// complicated, will require your code to reset every single OpenGL attributes to their initial state, and might
-// confuse your GPU driver.
-// The GL2 code is unable to reset attributes or even call e.g. "glUseProgram(0)" because they don't exist in that API.
 
-// CHANGELOG
-// (minor and older changes stripped away, please see git history for details)
-//  2022-10-11: Using 'nullptr' instead of 'NULL' as per our switch to C++11.
-//  2021-12-08: OpenGL: Fixed mishandling of the the ImDrawCmd::IdxOffset field! This is an old bug but it never had an effect until some internal rendering changes in 1.86.
-//  2021-06-29: Reorganized backend to pull data from a single structure to facilitate usage with multiple-contexts (all g_XXXX access changed to bd->XXXX).
-//  2021-05-19: OpenGL: Replaced direct access to ImDrawCmd::TextureId with a call to ImDrawCmd::GetTexID(). (will become a requirement)
-//  2021-01-03: OpenGL: Backup, setup and restore GL_SHADE_MODEL state, disable GL_STENCIL_TEST and disable GL_NORMAL_ARRAY client state to increase compatibility with legacy OpenGL applications.
-//  2020-01-23: OpenGL: Backup, setup and restore GL_TEXTURE_ENV to increase compatibility with legacy OpenGL applications.
-//  2019-04-30: OpenGL: Added support for special ImDrawCallback_ResetRenderState callback to reset render state.
-//  2019-02-11: OpenGL: Projecting clipping rectangles correctly using draw_data->FramebufferScale to allow multi-viewports for retina display.
-//  2018-11-30: Misc: Setting up io.BackendRendererName so it can be displayed in the About Window.
-//  2018-08-03: OpenGL: Disabling/restoring GL_LIGHTING and GL_COLOR_MATERIAL to increase compatibility with legacy OpenGL applications.
-//  2018-06-08: Misc: Extracted imgui_impl_opengl2.cpp/.h away from the old combined GLFW/SDL+OpenGL2 examples.
-//  2018-06-08: OpenGL: Use draw_data->DisplayPos and draw_data->DisplaySize to setup projection matrix and clipping rectangle.
-//  2018-02-16: Misc: Obsoleted the io.RenderDrawListsFn callback and exposed ImGui_ImplOpenGL2_RenderDrawData() in the .h file so you can call it yourself.
-//  2017-09-01: OpenGL: Save and restore current polygon mode.
-//  2016-09-10: OpenGL: Uploading font texture as RGBA32 to increase compatibility with users shaders (not ideal).
-//  2016-09-05: OpenGL: Fixed save and restore of current scissor rectangle.
-
-#include "imgui.h"
-#include "imgui_impl_opengl2.h"
-#if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
-#include <stddef.h>     // intptr_t
-#else
-#include <stdint.h>     // intptr_t
-#endif
-
-// Clang/GCC warnings with -Weverything
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-macros"                      // warning: macro is not used
-#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
-#endif
-
-// Include OpenGL header (without an OpenGL loader) requires a bit of fiddling
-#if defined(_WIN32) && !defined(APIENTRY)
-#define APIENTRY __stdcall                  // It is customary to use APIENTRY for OpenGL function pointer declarations on all platforms.  Additionally, the Windows OpenGL header needs APIENTRY.
-#endif
-#if defined(_WIN32) && !defined(WINGDIAPI)
-#define WINGDIAPI __declspec(dllimport)     // Some Windows OpenGL headers need this
-#endif
-#if defined(__APPLE__)
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-
-struct ImGui_ImplOpenGL2_Data
+struct ImGui_ImplQt_Data
 {
     GLuint       FontTexture;
 
-    ImGui_ImplOpenGL2_Data() { memset((void*)this, 0, sizeof(*this)); }
+    ImGui_ImplQt_Data() { memset((void*)this, 0, sizeof(*this)); }
 };
 
 // Backend data stored in io.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
-static ImGui_ImplOpenGL2_Data* ImGui_ImplOpenGL2_GetBackendData()
+static ImGui_ImplQt_Data* ImGui_ImplQt_GetBackendData()
 {
-    return ImGui::GetCurrentContext() ? (ImGui_ImplOpenGL2_Data*)ImGui::GetIO().BackendRendererUserData : nullptr;
+    return ImGui::GetCurrentContext() ? (ImGui_ImplQt_Data*)ImGui::GetIO().BackendRendererUserData : nullptr;
 }
 
 // Functions
-bool    ImGui_ImplOpenGL2_Init()
+bool ImGui_ImplQt_Init()
 {
     ImGuiIO& io = ImGui::GetIO();
     IM_ASSERT(io.BackendRendererUserData == nullptr && "Already initialized a renderer backend!");
 
     // Setup backend capabilities flags
-    ImGui_ImplOpenGL2_Data* bd = IM_NEW(ImGui_ImplOpenGL2_Data)();
+    ImGui_ImplQt_Data* bd = IM_NEW(ImGui_ImplQt_Data)();
     io.BackendRendererUserData = (void*)bd;
-    io.BackendRendererName = "imgui_impl_opengl2";
+    io.BackendRendererName = "imgui_impl_qt";
 
     return true;
 }
 
-void    ImGui_ImplOpenGL2_Shutdown()
+void ImGui_ImplQt_Shutdown()
 {
-    ImGui_ImplOpenGL2_Data* bd = ImGui_ImplOpenGL2_GetBackendData();
+    ImGui_ImplQt_Data* bd = ImGui_ImplQt_GetBackendData();
     IM_ASSERT(bd != nullptr && "No renderer backend to shutdown, or already shutdown?");
     ImGuiIO& io = ImGui::GetIO();
 
-    ImGui_ImplOpenGL2_DestroyDeviceObjects();
+    ImGui_ImplQt_DestroyDeviceObjects();
     io.BackendRendererName = nullptr;
     io.BackendRendererUserData = nullptr;
     IM_DELETE(bd);
 }
 
-void    ImGui_ImplOpenGL2_NewFrame()
+void ImGui_ImplQt_NewFrame()
 {
-    ImGui_ImplOpenGL2_Data* bd = ImGui_ImplOpenGL2_GetBackendData();
+    ImGui_ImplQt_Data* bd = ImGui_ImplQt_GetBackendData();
     IM_ASSERT(bd != nullptr && "Did you call ImGui_ImplOpenGL2_Init()?");
 
     if (!bd->FontTexture)
-        ImGui_ImplOpenGL2_CreateDeviceObjects();
+        ImGui_ImplQt_CreateDeviceObjects();
 }
 
-static void ImGui_ImplOpenGL2_SetupRenderState(ImDrawData* draw_data, int fb_width, int fb_height)
+static void ImGui_ImplQt_SetupRenderState(ImDrawData* draw_data, int fb_width, int fb_height)
 {
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, vertex/texcoord/color pointers, polygon fill.
     glEnable(GL_BLEND);
@@ -161,7 +100,7 @@ static void ImGui_ImplOpenGL2_SetupRenderState(ImDrawData* draw_data, int fb_wid
 // OpenGL2 Render function.
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly.
 // This is in order to be able to run within an OpenGL engine that doesn't do so.
-void ImGui_ImplOpenGL2_RenderDrawData(ImDrawData* draw_data)
+void ImGui_ImplQt_RenderDrawData(ImDrawData* draw_data)
 {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
     int fb_width = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
@@ -179,7 +118,7 @@ void ImGui_ImplOpenGL2_RenderDrawData(ImDrawData* draw_data)
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT);
 
     // Setup desired GL state
-    ImGui_ImplOpenGL2_SetupRenderState(draw_data, fb_width, fb_height);
+    ImGui_ImplQt_SetupRenderState(draw_data, fb_width, fb_height);
 
     // Will project scissor/clipping rectangles into framebuffer space
     ImVec2 clip_off = draw_data->DisplayPos;         // (0,0) unless using multi-viewports
@@ -203,7 +142,7 @@ void ImGui_ImplOpenGL2_RenderDrawData(ImDrawData* draw_data)
                 // User callback, registered via ImDrawList::AddCallback()
                 // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
                 if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
-                    ImGui_ImplOpenGL2_SetupRenderState(draw_data, fb_width, fb_height);
+                    ImGui_ImplQt_SetupRenderState(draw_data, fb_width, fb_height);
                 else
                     pcmd->UserCallback(cmd_list, pcmd);
             }
@@ -242,11 +181,11 @@ void ImGui_ImplOpenGL2_RenderDrawData(ImDrawData* draw_data)
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, last_tex_env_mode);
 }
 
-bool ImGui_ImplOpenGL2_CreateFontsTexture()
+bool ImGui_ImplQt_CreateFontsTexture()
 {
     // Build texture atlas
     ImGuiIO& io = ImGui::GetIO();
-    ImGui_ImplOpenGL2_Data* bd = ImGui_ImplOpenGL2_GetBackendData();
+    ImGui_ImplQt_Data* bd = ImGui_ImplQt_GetBackendData();
     unsigned char* pixels;
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
@@ -271,10 +210,10 @@ bool ImGui_ImplOpenGL2_CreateFontsTexture()
     return true;
 }
 
-void ImGui_ImplOpenGL2_DestroyFontsTexture()
+void ImGui_ImplQt_DestroyFontsTexture()
 {
     ImGuiIO& io = ImGui::GetIO();
-    ImGui_ImplOpenGL2_Data* bd = ImGui_ImplOpenGL2_GetBackendData();
+    ImGui_ImplQt_Data* bd = ImGui_ImplQt_GetBackendData();
     if (bd->FontTexture)
     {
         glDeleteTextures(1, &bd->FontTexture);
@@ -283,16 +222,12 @@ void ImGui_ImplOpenGL2_DestroyFontsTexture()
     }
 }
 
-bool    ImGui_ImplOpenGL2_CreateDeviceObjects()
+bool ImGui_ImplQt_CreateDeviceObjects()
 {
-    return ImGui_ImplOpenGL2_CreateFontsTexture();
+    return ImGui_ImplQt_CreateFontsTexture();
 }
 
-void    ImGui_ImplOpenGL2_DestroyDeviceObjects()
+void ImGui_ImplQt_DestroyDeviceObjects()
 {
-    ImGui_ImplOpenGL2_DestroyFontsTexture();
+    ImGui_ImplQt_DestroyFontsTexture();
 }
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif

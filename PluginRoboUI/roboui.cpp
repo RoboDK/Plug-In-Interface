@@ -6,9 +6,8 @@
 #include <QBuffer>
 #include <QMouseEvent>
 #include <QKeyEvent>
-#include <QtOpenGL/QtOpenGL>
 
-#include <imgui_impl_opengl2.h>
+#include <imgui_impl_qt.h>
 
 
 static ImGuiKey qtKeyToImGuiKey(const QKeyEvent* keyEvent)
@@ -147,14 +146,14 @@ QString RoboUI::PluginLoad(QMainWindow* mainWindow, QMenuBar* menuBar, QStatusBa
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    ImGui_ImplOpenGL2_Init();
+    ImGui_ImplQt_Init();
 
     return QString();
 }
 
 void RoboUI::PluginUnload()
 {
-    ImGui_ImplOpenGL2_Shutdown();
+    ImGui_ImplQt_Shutdown();
     ImGui::DestroyContext();
 
     if (_renderWindow)
@@ -191,7 +190,7 @@ void RoboUI::PluginEvent(TypeEvent eventType)
     {
     case IAppRoboDK::EventRender:
     {
-        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplQt_NewFrame();
         ImGuiIO& io = ImGui::GetIO();
         if (_renderWindow)
             io.DisplaySize = ImVec2(_renderWindow->width(), _renderWindow->height());
@@ -204,7 +203,7 @@ void RoboUI::PluginEvent(TypeEvent eventType)
             show_another_window = false;
         ImGui::End();
         ImGui::Render();
-        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplQt_RenderDrawData(ImGui::GetDrawData());
         break;
     }
 
