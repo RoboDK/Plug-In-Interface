@@ -445,6 +445,7 @@ int opc_server_thread(PluginOPCUA *pPlugin, unsigned short port) {
 
     // load certificate
     config.serverCertificate = loadCertificate();
+    config.usernamePasswordLogins;
 
     UA_Server *server = UA_Server_new(config);
 

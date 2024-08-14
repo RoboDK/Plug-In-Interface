@@ -3,7 +3,8 @@
 #include "pluginopcua.h"
 
 #include <QMessageBox>
-
+#include <QPushButton>
+#include "dialogusernamepassword.h"
 
 FormOpcSettings::FormOpcSettings(RoboDK *rdk, QWidget *parent, PluginOPCUA *pluginopc) :
     QWidget(parent),
@@ -23,10 +24,19 @@ FormOpcSettings::FormOpcSettings(RoboDK *rdk, QWidget *parent, PluginOPCUA *plug
     // Update the form (Status) when the log receives new messages
     connect(pPlugin, SIGNAL(LogUpdated()), this, SLOT(FormUpdate()));
     connect(pPlugin, SIGNAL(UpdateForm()), this, SLOT(FormUpdate()), Qt::QueuedConnection);
+    connect(ui->pbClientConfig,&QPushButton::pressed,this,&FormOpcSettings::dialoglogincreds);
 }
 
 FormOpcSettings::~FormOpcSettings(){
     delete ui;
+}
+
+
+void FormOpcSettings::dialoglogincreds(){
+    dialogUsernamePassword dialogBox(pPlugin->Client->username,pPlugin->Client->password);
+    dialogBox.exec();
+    pPlugin->Client->username = dialogBox.getUsername();
+    pPlugin->Client->password = dialogBox.getPassword();
 }
 
 void FormOpcSettings::FormUpdate(){

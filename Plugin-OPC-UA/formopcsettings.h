@@ -24,6 +24,7 @@ public:
 public slots:
     /// Update the form
     void FormUpdate();
+    void dialoglogincreds();
 
 private slots:
 
