@@ -170,6 +170,7 @@
 #ifndef IAPPROBODK_H
 #define IAPPROBODK_H
 
+#include <QtPlugin>
 #include <QString>
 #include <QList>
 
