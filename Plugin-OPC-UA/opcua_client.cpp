@@ -186,11 +186,10 @@ int opcua_client::Browse(bool close_connection){
         // anonymous connect would be: retval = UA_Client_connect(client, "opc.tcp://localhost:4840");
         // retval = UA_Client_connect_username(client, "opc.tcp://localhost:4840", "user1", "password");
         pPlugin->ShowMessage(tr("Connecting to OPC-UA server %1").arg(EndpointUrl));
-        if (username == "") {
+        if (username.isEmpty()) {
             statusCode = UA_Client_connect(client, EndpointUrl.toUtf8().constData());
         } else {
-            statusCode = UA_Client_connect_username(client, EndpointUrl.toUtf8().constData(),
-                                                    username.toUtf8(),password.toUtf8());
+            statusCode = UA_Client_connect_username(client, EndpointUrl.toUtf8().constData(), username.toUtf8(),password.toUtf8());
         }
 
         if(statusCode != UA_STATUSCODE_GOOD) {

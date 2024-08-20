@@ -71,3 +71,4 @@ build-AppLoader-Desktop_Qt_5_15_5_MSVC2019_32bit-Profile/release/AppLoader.vc.pd
 
 __pycache__/
 moc_predefs.h
+Plugin-OPC-UA/.qtc_clangd/**
