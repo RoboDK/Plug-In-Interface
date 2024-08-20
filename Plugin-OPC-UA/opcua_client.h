@@ -34,6 +34,8 @@ public slots:
 public:
     /// End Point URL: It contains the IP and port (for example: "opc.tcp://localhost:4840")
     QString EndpointUrl;
+    QString username;
+    QString password;
 
     /// Start the OPC-UA client on startup
     bool AutoStart;

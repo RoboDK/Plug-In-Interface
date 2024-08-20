@@ -24,6 +24,9 @@ opcua_client::opcua_client(PluginOPCUA *plugin) : QObject(NULL){
     EndpointUrl = "opc.tcp://localhost:4840";
     AutoStart = false;    
     KeepConnected = true;
+    username = "";
+    password = "";
+
 
     // set interval to retrieve nodes (in milliseconds)
     BrowseServer.setInterval(100);
@@ -183,7 +186,12 @@ int opcua_client::Browse(bool close_connection){
         // anonymous connect would be: retval = UA_Client_connect(client, "opc.tcp://localhost:4840");
         // retval = UA_Client_connect_username(client, "opc.tcp://localhost:4840", "user1", "password");
         pPlugin->ShowMessage(tr("Connecting to OPC-UA server %1").arg(EndpointUrl));
-        statusCode = UA_Client_connect(client, EndpointUrl.toUtf8().constData());
+        if (username.isEmpty()) {
+            statusCode = UA_Client_connect(client, EndpointUrl.toUtf8().constData());
+        } else {
+            statusCode = UA_Client_connect_username(client, EndpointUrl.toUtf8().constData(), username.toUtf8(),password.toUtf8());
+        }
+
         if(statusCode != UA_STATUSCODE_GOOD) {
             UA_Client_delete(client);
             client = nullptr;

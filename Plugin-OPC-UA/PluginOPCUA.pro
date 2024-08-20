@@ -83,6 +83,7 @@ CONFIG(release, debug|release) {
 # Add header and source files (use File->New File or Project and add your files)
 # This can be modified manually or automatically by Qt Creator
 HEADERS += \
+    dialogusernamepassword.h \
     pluginopcua.h \
     opcua_server.h \
     opcua_client.h \
@@ -90,6 +91,7 @@ HEADERS += \
     opcua_tools.h
 
 SOURCES += \
+    dialogusernamepassword.cpp \
     pluginopcua.cpp \
     opcua_server.cpp \
     opcua_client.cpp \
@@ -100,6 +102,7 @@ RESOURCES += \
     resources1.qrc
 
 FORMS += \
+    dialogusernamepassword.ui \
     formopcsettings.ui
 
 
