@@ -438,17 +438,21 @@ QString Mat::ToString(const QString &separator, int precision, bool xyzwpr_only)
     return str;
 }
 bool Mat::FromString(const QString &pose_str){
-    QStringList values_list = QString(pose_str).replace(";",",").replace("\t",",").split(",", Qt::SkipEmptyParts);
-    int nvalues = qMin(values_list.length(), 6);
-    tXYZWPR xyzwpr;
-    for (int i=0; i<6; i++){
-        xyzwpr[i] = 0.0;
+    QString pose_str2(pose_str.trimmed());
+    if (pose_str2.startsWith("Mat(",Qt::CaseInsensitive)){
+        pose_str2.remove(0, 4).trimmed();
     }
-    if (nvalues < 6){
+    if (pose_str2.startsWith("XYZRPW_2_Mat(",Qt::CaseInsensitive)){
+        pose_str2.remove(0, 13).trimmed();
+    }
+
+    QStringList values_list = pose_str2.replace(";",",").replace("\t",",").split(",", Qt::SkipEmptyParts);
+    tXYZWPR xyzwpr = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    if (values_list.length() < 6){
         FromXYZRPW(xyzwpr);
         return false;
     }
-    for (int i=0; i<nvalues; i++){
+    for (int i=0; i<6; i++){
         QString stri(values_list.at(i));
         xyzwpr[i] = stri.trimmed().toDouble();
     }
