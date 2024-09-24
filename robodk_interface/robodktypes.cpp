@@ -445,6 +445,9 @@ bool Mat::FromString(const QString &pose_str){
     if (pose_str2.startsWith("XYZRPW_2_Mat(",Qt::CaseInsensitive)){
         pose_str2.remove(0, 13).trimmed();
     }
+    if (pose_str2.endsWith("))")){
+        pose_str2.chop(2);
+    }
 
     QStringList values_list = pose_str2.replace(";",",").replace("\t",",").split(",", Qt::SkipEmptyParts);
     tXYZWPR xyzwpr = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
