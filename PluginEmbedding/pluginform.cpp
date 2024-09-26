@@ -4,6 +4,7 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QToolBar>
+#include <QCloseEvent>
 
 
 PluginForm::PluginForm(QMainWindow* mainWindow, IRoboDK* rdk, QWidget* parent)
@@ -12,6 +13,7 @@ PluginForm::PluginForm(QMainWindow* mainWindow, IRoboDK* rdk, QWidget* parent)
     , _rdk(rdk)
 {
     setupUi(this);
+    setWindowFlag(Qt::WindowStaysOnTopHint);
 
     auto paletteLabel = _labelDetached->palette();
     auto brushBase = paletteLabel.window();
@@ -76,17 +78,26 @@ void PluginForm::detachRoboDK()
 
 void PluginForm::minimizeRoboDK()
 {
+    if (!_mainWindow)
+        return;
 
+    _mainWindow->showMinimized();
 }
 
 void PluginForm::maximizeRoboDK()
 {
+    if (!_mainWindow)
+        return;
 
+    _mainWindow->showMaximized();
 }
 
 void PluginForm::restoreRoboDK()
 {
+    if (!_mainWindow)
+        return;
 
+    _mainWindow->showNormal();
 }
 
 void PluginForm::hideRoboDKMenu()
@@ -161,4 +172,18 @@ void PluginForm::changeEvent(QEvent* event)
     default:
         break;
     }
+}
+
+void PluginForm::showEvent(QShowEvent*)
+{
+    emit visibilityChanged(true);
+}
+
+void PluginForm::closeEvent(QCloseEvent*)
+{
+    detachRoboDK();
+    showRoboDKMenu();
+    showRoboDKToolBar();
+    showRoboDKStatusBar();
+    emit visibilityChanged(false);
 }

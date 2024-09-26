@@ -31,8 +31,13 @@ public slots:
     void hideRoboDKStatusBar();
     void showRoboDKStatusBar();
 
+signals:
+    void visibilityChanged(bool visible);
+
 protected:
-    void changeEvent(QEvent* event);
+    void changeEvent(QEvent* event) override;
+    void showEvent(QShowEvent*) override;
+    void closeEvent(QCloseEvent*) override;
 
 private:
     QMainWindow* _mainWindow;

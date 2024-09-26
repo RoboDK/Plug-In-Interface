@@ -61,6 +61,27 @@ void PluginEmbedding::createMenu()
     _objectCleaner.add(menu);
     _menuBar->addMenu(menu);
 
-    menu->addAction(tr("Open Control Panel"), _form.data(), &QWidget::show);
-    menu->addAction(tr("Close Control Panel"), _form.data(), &QWidget::close);
+    auto actionOpen = menu->addAction(tr("Open Control Panel"), _form.data(), &QWidget::show);
+    menu->addAction(tr("Move to Control Panel"), [this]
+    {
+        if (!_form)
+            return;
+
+        _form->show();
+        _form->attachRoboDK();
+    });
+    menu->addSeparator();
+    auto actionClose = menu->addAction(tr("Close Control Panel"), _form.data(), &QWidget::close);
+
+    if (actionOpen)
+    {
+        actionOpen->setDisabled(_form->isVisible());
+        connect(_form.data(), &PluginForm::visibilityChanged, actionOpen, &QAction::setDisabled);
+    }
+
+    if (actionClose)
+    {
+        actionClose->setEnabled(_form->isVisible());
+        connect(_form.data(), &PluginForm::visibilityChanged, actionClose, &QAction::setEnabled);
+    }
 }
