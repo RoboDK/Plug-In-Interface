@@ -49,7 +49,7 @@ CONFIG(release, debug|release) {
     } else {
     macx {
         # Default path on MacOS
-        DESTDIR  = ~/RoboDK-Dev/Deploy/RoboDK.app/Contents/MacOS/plugins
+        DESTDIR  = ~/RoboDK/RoboDK.app/Contents/MacOS/plugins
     } else {
         #Default path on Linux
         DESTDIR  = ~/RoboDK/bin/plugins
