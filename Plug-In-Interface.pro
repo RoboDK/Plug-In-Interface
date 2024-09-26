@@ -27,3 +27,4 @@ SUBDIRS += PluginRoboUI/roboui.pro
 SUBDIRS += PluginRealTime/PluginRealTime.pro
 SUBDIRS += PluginRobotPilot/PluginRobotPilot.pro
 SUBDIRS += PluginCollisionSensor/PluginCollisionSensor.pro
+SUBDIRS += PluginEmbedding/PluginEmbedding.pro
