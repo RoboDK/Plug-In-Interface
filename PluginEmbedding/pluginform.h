@@ -18,6 +18,8 @@ class PluginForm : public QWidget, private Ui::PluginForm
 public:
     explicit PluginForm(QMainWindow* mainWindow, IRoboDK* rdk, QWidget* parent = nullptr);
 
+    bool isAttached() const;
+
 public slots:
     void attachRoboDK();
     void detachRoboDK();
@@ -33,6 +35,7 @@ public slots:
 
 signals:
     void visibilityChanged(bool visible);
+    void attachmentChanged(bool attached);
 
 protected:
     void changeEvent(QEvent* event) override;

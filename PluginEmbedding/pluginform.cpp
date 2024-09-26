@@ -47,10 +47,22 @@ PluginForm::PluginForm(QMainWindow* mainWindow, IRoboDK* rdk, QWidget* parent)
     connect(_buttonShowStatusBar, &QAbstractButton::clicked, this, &PluginForm::showRoboDKStatusBar);
 }
 
+bool PluginForm::isAttached() const
+{
+    return (_mainWindow && _mainWindow->parentWidget() == _groupEmbedded);
+}
+
 void PluginForm::attachRoboDK()
 {
     if (!_mainWindow || _mainWindow->parentWidget())
         return;
+
+    auto state = _mainWindow->windowState();
+    if (state.testFlag(Qt::WindowMinimized))
+    {
+        state.setFlag(Qt::WindowMinimized, false);
+        _mainWindow->setWindowState(state);
+    }
 
     _savedGeometry = _mainWindow->saveGeometry();
     _savedState = _mainWindow->saveState();
@@ -59,6 +71,8 @@ void PluginForm::attachRoboDK()
     _mainWindow->setParent(_groupEmbedded);
     _layoutEmbedded->addWidget(_mainWindow);
     _mainWindow->show();
+
+    emit attachmentChanged(true);
 }
 
 void PluginForm::detachRoboDK()
@@ -74,6 +88,8 @@ void PluginForm::detachRoboDK()
 
     _mainWindow->show();
     _labelDetached->show();
+
+    emit attachmentChanged(false);
 }
 
 void PluginForm::minimizeRoboDK()
@@ -82,6 +98,7 @@ void PluginForm::minimizeRoboDK()
         return;
 
     _mainWindow->showMinimized();
+    activateWindow();
 }
 
 void PluginForm::maximizeRoboDK()
@@ -90,6 +107,7 @@ void PluginForm::maximizeRoboDK()
         return;
 
     _mainWindow->showMaximized();
+    activateWindow();
 }
 
 void PluginForm::restoreRoboDK()
@@ -97,7 +115,12 @@ void PluginForm::restoreRoboDK()
     if (!_mainWindow)
         return;
 
-    _mainWindow->showNormal();
+    auto state = _mainWindow->windowState();
+    state.setFlag(Qt::WindowMinimized, false);
+    state.setFlag(Qt::WindowMaximized, false);
+    _mainWindow->setWindowState(state);
+    _mainWindow->show();
+    activateWindow();
 }
 
 void PluginForm::hideRoboDKMenu()

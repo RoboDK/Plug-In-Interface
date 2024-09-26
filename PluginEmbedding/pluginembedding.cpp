@@ -61,24 +61,58 @@ void PluginEmbedding::createMenu()
     _objectCleaner.add(menu);
     _menuBar->addMenu(menu);
 
-    auto actionOpen = menu->addAction(tr("Open Control Panel"), _form.data(), &QWidget::show);
-    menu->addAction(tr("Move to Control Panel"), [this]
+    auto actionOpen = menu->addAction(tr("Open Control Panel"), [this]
     {
         if (!_form)
             return;
 
-        _form->show();
-        _form->attachRoboDK();
-    });
-    menu->addSeparator();
-    auto actionClose = menu->addAction(tr("Close Control Panel"), _form.data(), &QWidget::close);
+        if (_form->isHidden())
+            _form->setGeometry(_mainWindow->geometry());
 
+        if (_mainWindow->isMaximized())
+        {
+            _form->showMaximized();
+        }
+        else
+        {
+            _form->show();
+        }
+        _form->activateWindow();
+    });
     if (actionOpen)
     {
         actionOpen->setDisabled(_form->isVisible());
         connect(_form.data(), &PluginForm::visibilityChanged, actionOpen, &QAction::setDisabled);
     }
 
+    auto actionMove = menu->addAction(tr("Move to Control Panel"), [this]
+    {
+        if (!_form)
+            return;
+
+        if (_form->isHidden())
+            _form->setGeometry(_mainWindow->geometry());
+
+        if (_mainWindow->isMaximized())
+        {
+            _form->showMaximized();
+        }
+        else
+        {
+            _form->show();
+        }
+        _form->attachRoboDK();
+        _form->activateWindow();
+    });
+    if (actionMove)
+    {
+        actionMove->setDisabled(_form->isAttached());
+        connect(_form.data(), &PluginForm::attachmentChanged, actionMove, &QAction::setDisabled);
+    }
+
+    menu->addSeparator();
+
+    auto actionClose = menu->addAction(tr("Close Control Panel"), _form.data(), &QWidget::close);
     if (actionClose)
     {
         actionClose->setEnabled(_form->isVisible());
