@@ -102,7 +102,7 @@ bool PluginLVDT::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
         action_active->blockSignals(false);
         menu->addAction(action_active);
 
-        return true;
+        return false;
     }
 
     return false;

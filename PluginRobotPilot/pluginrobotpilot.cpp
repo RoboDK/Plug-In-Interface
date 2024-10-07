@@ -107,7 +107,7 @@ bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
     if (item->Type() == IItem::ITEM_TYPE_ROBOT){
         menu->actions().insert(0, action_robotpilot); // add action at the beginning
         //menu->addAction(action_robotpilot); // add action at the end
-        return true;
+        return false;
     }
     return false;
 }

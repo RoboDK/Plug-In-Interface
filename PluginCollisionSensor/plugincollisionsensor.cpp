@@ -94,7 +94,7 @@ bool PluginCollisionSensor::PluginItemClick(Item item, QMenu *menu, TypeClick cl
         action_set_as_sensor->blockSignals(false);
         menu->addAction(action_set_as_sensor);
 
-        return true;
+        return false;
     }
 
     return false;

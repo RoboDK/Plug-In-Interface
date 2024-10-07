@@ -129,7 +129,7 @@ bool PluginAttachObject::PluginItemClick(Item item, QMenu *menu, TypeClick click
         }
 
         last_clicked_items.append(process_item);
-        return true;
+        return false;
     } else {
         // A parent can have multiple objects
         bool childs = hasObjects(process_item);
@@ -146,7 +146,7 @@ bool PluginAttachObject::PluginItemClick(Item item, QMenu *menu, TypeClick click
         }
 
         last_clicked_items.append(process_item);
-        return true;
+        return false;
     }
     return false;
 }
@@ -183,7 +183,7 @@ bool PluginAttachObject::PluginItemClickMulti(QList<Item> &item_list, QMenu *men
         }
 
         last_clicked_items = item_list;
-        return true;
+        return false;
     }
     return false;
 }
