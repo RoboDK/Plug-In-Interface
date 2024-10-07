@@ -106,12 +106,12 @@ bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
         //menu->actions().insert(0, action_btn1); // add action at the beginning
         menu->addAction(action_information); // add action at the end
         qDebug() << "Done";
-        return true;
+        return false;
     } else if (item->Type() == IItem::ITEM_TYPE_ROBOT){
         //menu->actions().insert(0, action_robotpilot); // add action at the beginning
         menu->addAction(action_robotpilot); // add action at the end
         qDebug() << "Done";
-        return true;
+        return false;
     }
     return false;
 }

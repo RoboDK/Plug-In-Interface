@@ -256,7 +256,7 @@ bool PluginAttachView::PluginItemClick(Item item, QMenu *menu, TypeClick click_t
         action_slave_anchor_to_view->blockSignals(false);
         menu->addAction(action_slave_anchor_to_view);
 
-        return true;
+        return false;
     }
 
     return false;

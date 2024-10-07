@@ -230,7 +230,7 @@ bool PluginBallbarTracker::PluginItemClick(Item item, QMenu *menu, TypeClick cli
         action_attach->blockSignals(false);
         menu->addAction(action_attach);
 
-        return true;
+        return false;
     }
 
     return false;

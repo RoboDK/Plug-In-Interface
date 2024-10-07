@@ -73,7 +73,7 @@ bool PluginLockTCP::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
         action_lock->blockSignals(false);
         menu->addAction(action_lock);
 
-        return true;
+        return false;
     }
 
     return false;
