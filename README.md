@@ -86,8 +86,8 @@ A RoboDK Plug-In must be created using the Qt Plugin Framework (C++).
 
 This list provides some useful links and tips for programming with Qt:
  * Double click the .pro file to open the example project using Qt Creator.
- * Use Qt signal/slots mechanism for action/button callbacks (http://doc.qt.io/qt-5/signalsandslots.html). Signals and slots are thread safe.
- * Wrap your strings using tr("your string") or QObject::tr("your string") to allow translation using Qt Linguist. For more information: http://doc.qt.io/qt-5/qtlinguist-index.html.
+ * Use Qt signal/slots mechanism for action/button callbacks (https://doc.qt.io/qt-5/signalsandslots.html). Signals and slots are thread safe.
+ * Wrap your strings using tr("your string") or QObject::tr("your string") to allow translation using Qt Linguist. For more information: https://doc.qt.io/qt-5/qtlinguist-index.html.
  * If you experience strange build issues it may be useful to delete the build folder that is automatically created to force a new build.
  * If you experience strange plugin load issues in RoboDK it is recommended to delete the libraries and create the plugin library with a new build.
  * More information about Qt: https://www.qt.io/.

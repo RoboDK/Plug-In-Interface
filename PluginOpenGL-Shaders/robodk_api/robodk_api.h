@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,7 @@
 //     https://robodk.com/help#PostProcessor
 //
 // Visit the Matrix and Quaternions FAQ for more information about pose/homogeneous transformations
-//     http://www.j3d.org/matrix_faq/matrfaq_latest.html
+//     https://www.j3d.org/matrix_faq/matrfaq_latest.html
 //
 //---------------------------------------------
 // TIPS:
@@ -217,8 +217,8 @@
 *
 * This list provides some useful links and tips for programming with Qt:
 * - Double click the RoboDK-API-Cpp-Sample.pro file to open the example project using Qt Creator.
-* - Use Qt signal/slots mechanism for action/button callbacks (http://doc.qt.io/qt-5/signalsandslots.html). Signals and slots are thread safe.
-* - Wrap your strings using tr("your string") or QObject::tr("your string") to allow translation using Qt Linguist. For more information: http://doc.qt.io/qt-5/qtlinguist-index.html.
+* - Use Qt signal/slots mechanism for action/button callbacks (https://doc.qt.io/qt-5/signalsandslots.html). Signals and slots are thread safe.
+* - Wrap your strings using tr("your string") or QObject::tr("your string") to allow translation using Qt Linguist. For more information: https://doc.qt.io/qt-5/qtlinguist-index.html.
 * - If you experience strange build issues it may be useful to delete the build folder that is automatically created to force a new build.
 * - If you experience strange plugin load issues in RoboDK it is recommended to delete the libraries and create the plugin library with a new build.
 * - More information about Qt: https://www.qt.io/.
