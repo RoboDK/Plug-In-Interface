@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
+  <cp:coreProperties>
+    <cp:category>Application</cp:category>
+    <cp:contentStatus>Final</cp:contentStatus>
+    <dcterms:created xsi:type="dcterms:W3CDTF">2023-05-16T17:00:00.000Z</dcterms:created>
+    <dc:creator>RoboDK</dc:creator>
+    <dc:description>The Sound App for RoboDK adds programmable sound effects and background music/noise to RoboDK stations.</dc:description>
+    <dc:identifier>com.robodk.app.sound</dc:identifier>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
+    <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">2023-12-29T13:05:33.677Z</dcterms:modified>
+    <cp:revision>1</cp:revision>
+    <dc:title>Sound</dc:title>
+    <cp:version>1.0.1</cp:version>
+  </cp:coreProperties>
+  <extraProperties>
+    <website>https://robodk.com/</website>
+    <documentation>https://robodk.com/doc/en/Getting-Started.html</documentation>
+    <repository/>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
+    <icon>/icon.svg</icon>
+  </extraProperties>
+  <assets>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/add_script.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/add_script.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/add_sound.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/add_sound.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/AppConfig.ini</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/play_sound.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/README.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/requirements.txt</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sound_emitter.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sound_emitter.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sound_emitterChecked.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sounds/Beeping.wav</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sounds/Conveyor.wav</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sounds/Drilling.wav</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sounds/DrillingShort.wav</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sounds/ServoMotor.wav</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sounds/Vacuum.wav</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sounds/WaterJet.wav</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Sound/sounds/Welding.wav</asset>
+  </assets>
+</packageManifest>
