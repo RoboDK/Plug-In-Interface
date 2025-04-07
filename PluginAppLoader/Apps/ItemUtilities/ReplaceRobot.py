@@ -98,11 +98,12 @@ def ReplaceRobots(robots=None):
         new_robot.setVisible(True)
         new_robot_frame = old_robot_frame
         old_robot_frame.setName(replacement_robot_frame.Name())  # Keeps the Set Ref. links in robot programs valid
-        status = new_robot.setParam("ReorderBefore", str(old_robot.item))
+        new_robot.setParam("ReorderBefore", str(old_robot.item))
         RDK.setSelection([])
 
         # Account for robots where the robot base frame is on J2
         robot_pose = old_robot_pose.copy()
+        different_robot = False
         if CORRECT_BASE_FRAME:
             old_robot.setJoints(old_robot.JointsHome())  # assume the lower point will be the base
             new_robot.setJoints(new_robot.JointsHome())
@@ -112,6 +113,7 @@ def ReplaceRobots(robots=None):
             if abs(z_offset) > 1:
                 new_robot_frame.setPose(new_robot_frame.Pose().Offset(0, 0, z_offset))
                 robot_pose = robot_pose.Offset(0, 0, -z_offset)
+                different_robot = True
                 RDK.Update()
 
         # Migrate tools
@@ -126,12 +128,15 @@ def ReplaceRobots(robots=None):
         RDK.Update()
 
         # Determine wether its the same robot kinematics (same robot), or a completely different robot
-        different_robot = False
-        if new_robot.Pose() != old_robot_home_pose:
-            different_robot = True
+        different_robot = different_robot or (new_robot.Pose() != old_robot_home_pose)
+
+        # Restore original pose, if reachable
+        if different_robot:
             robot_joints = new_robot.SolveIK(robot_pose, new_robot.JointsHome(), new_robot.PoseTool(), new_robot.PoseFrame())
-            if len(robot_joints.tolist()) < new_robot_dof:
+            if len(robot_joints.tolist()) == new_robot_dof:
                 new_robot.setJoints(robot_joints)
+            new_robot.setPose(robot_pose)
+
         else:
             new_robot.setPose(robot_pose)
         RDK.Update()
@@ -147,16 +152,29 @@ def ReplaceRobots(robots=None):
         for robot_link in old_robot_links:
             link_type = robot_link.Type()
             if link_type == robolink.ITEM_TYPE_TARGET:
-                if different_robot and link_type == robolink.ITEM_TYPE_TARGET and robot_link.isJointTarget():
+                if different_robot:
+                    # Update the stored joint configuration for cartesian targets, without changing the pose
+                    # NOTE: This uses the active tool, which might not result in the right config if another tool is expected.
                     robot_joints = new_robot.SolveIK(robot_link.PoseWrt(new_robot.Parent()), new_robot.JointsHome(), new_robot.PoseTool(), new_robot.PoseFrame())
-                    if len(robot_joints.tolist()) < new_robot_dof:
+                    if len(robot_joints.tolist()) == new_robot_dof:
                         robot_link.setJoints(robot_joints)
-                status = robot_link.setParam('Recalculate')
+                        if not robot_link.isJointTarget():
+                            robot_link.setPose(robot_link.Pose())
+                    else:
+                        print(f'Target {robot_link.Name()} is not reachable')
+
+                if (robot_link.setParam('Recalculate') != '0'):
+                    print(f'Error recalculating target {robot_link.Name()}')
+
             elif link_type in [robolink.ITEM_TYPE_PROGRAM]:
-                status = robot_link.setParam('RecalculateTargets')
-            elif UPDATE_PROGRAMS and link_type in [robolink.ITEM_TYPE_MACHINING, robolink.ITEM_TYPE_PROGRAM]:
+                if (robot_link.setParam('RecalculateTargets') != 'OK'):
+                    print(f'Error recalculating program {robot_link.Name()}')
+
+            if UPDATE_PROGRAMS and link_type in [robolink.ITEM_TYPE_MACHINING, robolink.ITEM_TYPE_PROGRAM]:
                 valid_instructions, program_time, program_distance, valid_ratio, readable_msg = robot_link.Update()  # Update will trigger a render
                 RDK.Render(False)
+                if valid_ratio < 1.0:
+                    print(f'Error updating program {robot_link.Name()}: {readable_msg}')
 
         # Remove the old robot
         old_robot.Delete()

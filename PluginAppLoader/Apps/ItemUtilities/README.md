@@ -14,7 +14,7 @@ The Item Utilities App for RoboDK adds utility functions to manipulate Items, su
 - Replace a robot, taking account the robot base offset and the program/target links
 - Attach an object to a robot link (permanently)
 - Scale an object
-- Simply meshes
+- Simplify meshes
 
 ## Prerequisites
 - [RoboDK](https://robodk.com/download)
