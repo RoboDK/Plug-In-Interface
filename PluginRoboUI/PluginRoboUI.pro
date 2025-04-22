@@ -5,7 +5,7 @@ QT += widgets network svg opengl
 TEMPLATE = lib
 CONFIG += plugin
 
-TARGET = RoboUI
+TARGET = PluginRoboUI
 
 CONFIG += c++17
 
