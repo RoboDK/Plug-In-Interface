@@ -1,12 +1,5 @@
 # This file builds all plugins from the public repository RoboDK/Plug-In-Interface
 
-linux{
-#QMAKE_CXXFLAGS_WARN_OFF -= -Wunused-parameter
-QMAKE_CXXFLAGS+=-Wno-unused-parameter
-QMAKE_CXXFLAGS+=-Wno-unused-variable
-QMAKE_CXXFLAGS+=-Wno-comment
-}
-
 # CONFIG += ordered
 
 TEMPLATE = subdirs
