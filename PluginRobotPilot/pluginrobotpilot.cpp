@@ -181,9 +181,8 @@ void PluginExample::PluginEvent(TypeEvent event_type){
             dock_robotpilot = nullptr;
         }
         break;
-    //default:
-        //qDebug() << "Unknown/future event: " << event_type;
-
+    default:
+        break;
     }
 }
 

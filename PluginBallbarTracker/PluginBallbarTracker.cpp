@@ -27,34 +27,6 @@ static QList<Item> getAncestors(Item item, QList<int> filters = {}){
     return parents;
 }
 
-
-// Finds the lowest common ancestor (LCA) between two Items in the Station's tree.
-static Item getLowestCommonAncestor(Item item1, Item item2){
-
-    // Make an ordered list of parents (backwards). Iter on it until the parent differs.. and you get the lowest common ancestor (LCA)
-    QList<Item> parents1 = getAncestors(item1);
-    QList<Item> parents2 = getAncestors(item2);
-
-    Item lca = nullptr;
-    int size = std::min(parents1.size(), parents2.size());
-    for (int i = 0; i < size; ++i){
-        if (parents1.back() != parents2.back()){
-            break;
-        }
-
-        lca = parents1.back();
-        parents1.pop_back();
-        parents2.pop_back();
-    }
-
-    if (lca == nullptr){
-        qDebug() << item1->Name() << " does not share an ancestor with " << item2->Name();
-    }
-
-    return lca;
-}
-
-
 // Gets the pose between two Items that have a hierarchical relationship in the Station's tree.
 static Mat getAncestorPose(Item item_child, Item item_parent){
 

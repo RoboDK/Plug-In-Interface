@@ -22,6 +22,10 @@ TEMPLATE        = lib
 CONFIG         += plugin
 #------------------------------------
 
+!win32-msvc {
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy-with-user-provided-copy
+}
 
 # Add any Qt libraries you would like to use:
 #QT += core gui

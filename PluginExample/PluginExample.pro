@@ -32,7 +32,10 @@ QT += network   # Allows using QTcpSocket
 # Define your plugin name (name of the DLL file generated)
 TARGET          = PluginExample
 
-
+!win32-msvc {
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy-with-user-provided-copy
+}
 
 #-----------------------------------------------------
 # Define the location to place the plugin library (release and/or debug binaries)
