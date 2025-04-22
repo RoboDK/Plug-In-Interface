@@ -33,7 +33,6 @@ QT += network   # Allows using QTcpSocket
 TARGET          = OPC-UA
 
 
-
 #-----------------------------------------------------
 # Define the location to place the plugin library (release and/or debug binaries)
 exists( "$$PWD/../../destdir_rdk_plugins.pri" ) {
@@ -127,7 +126,13 @@ INCLUDEPATH += ../robodk_interface
 
 # ------------------------
 # Flag to compile Open62541 source for any platform
-QMAKE_CFLAGS += -std=c99
+win32-msvc {
+    QMAKE_CXXFLAGS_WARN_ON += -wd4100
+    QMAKE_CFLAGS_WARN_ON += -wd4100
+    QMAKE_CFLAGS += -std:clatest
+} else {
+    QMAKE_CFLAGS += -std=c99
+}
 #--------------------------
 # Header and source files required for OPC UA
 HEADERS += opcua/open62541.h
