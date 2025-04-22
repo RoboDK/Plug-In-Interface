@@ -299,6 +299,7 @@ void PluginBallbarTracker::PluginEvent(TypeEvent event_type){
     case EventChangedStation:
     case EventAbout2ChangeStation:
     case EventAbout2CloseStation:
+        last_clicked_item = nullptr;
         attached_ballbars.clear();
     default:
         break;

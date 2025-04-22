@@ -181,6 +181,22 @@ void PluginChip8::pluginIntegrationInit() {
     return;
 }
 
+void PluginChip8::pluginStop() {
+    chip8EndEmulationLoop();
+    if (SimulationThread.isRunning()) {
+        SimulationThread.waitForFinished();
+    }
+
+    if (PlayerEmulator && PlayerEmulator->isRunning()) {
+        PlayerEmulator->requestInterruption();
+    }
+
+    buttonList.clear();
+
+    ScreenRef = nullptr;
+    robotItem = nullptr;
+}
+
 ///Cleans up the plugins state when it's unloaded, stops other threads.
 void PluginChip8::PluginUnload(){
     // Cleanup the plugin
@@ -245,16 +261,13 @@ QString PluginChip8::PluginCommand(const QString &command, const QString &value)
 void PluginChip8::PluginEvent(TypeEvent event_type){
     switch (event_type) {
     case EventChanged:
-        //qDebug() << "An item has been added or deleted. Current station: " << RDK->getActiveStation()->Name();
-        // Use: RDK->getActiveStation() to get the open station. This call always returns a valid pointer
-        // Use: RDK->Valid(item ) to check if an item exists (it could have been deleted! Therefore, provoke a crash when using a method)
-        /*if (!RDK->Valid(Robot)){
-            Robot = nullptr;
-        }*/
-
-        /*if (!RDK->Valid(Robot)) {
-            Robot = nullptr;
-        }*/
+        if (!robotItem || !ScreenRef || !RDK->Valid(robotItem) || !RDK->Valid(ScreenRef)) {
+            pluginStop();
+        }
+        break;
+    case EventAbout2ChangeStation:
+    case EventAbout2CloseStation:
+        pluginStop();
         break;
     case EventMoved:
         break;

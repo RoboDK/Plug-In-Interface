@@ -185,6 +185,19 @@ void PluginExample::PluginEvent(TypeEvent event_type){
             form_robotpilot->SelectRobot();
         }
         break;
+    case EventChangedStation:
+    case EventAbout2ChangeStation:
+    case EventAbout2CloseStation:
+        RobotList.clear();
+        if (dock_robotpilot) {
+            dock_robotpilot->close();
+            dock_robotpilot = nullptr;
+        }
+        if (form_robotpilot) {
+            delete form_robotpilot;
+            form_robotpilot = nullptr;
+        }
+        break;
     case EventMoved:
         RDK->setSimulationSpeed(1.0);
         //qDebug() << "Something has moved, such as a robot, reference frame, object or tool (usually, a render event follows)";
