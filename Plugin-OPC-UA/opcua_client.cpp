@@ -50,6 +50,7 @@ void opcua_client::Start(){
         BrowseServer.stop();
         int status = Browse(true);
         bool success = status == 0;
+        Q_UNUSED(success)
 
         // change button status
         pPlugin->action_StartClient->setChecked(false);
@@ -114,7 +115,7 @@ static UA_StatusCode callbackNodeIter(UA_NodeId childId, UA_Boolean isInverse, U
     if(childId.identifierType == UA_NODEIDTYPE_NUMERIC) {
         str_identifier = QString::number(childId.identifier.numeric);
     } else if (childId.identifierType == UA_NODEIDTYPE_STRING){
-        str_identifier = QString::fromUtf8((const char*)childId.identifier.string.data, childId.identifier.string.length);
+        str_identifier = QString::fromUtf8((const char*)childId.identifier.string.data, (int)childId.identifier.string.length);
     } else {
         str_identifier = "Uknown";
     }
@@ -143,16 +144,16 @@ static UA_StatusCode callbackNodeIter(UA_NodeId childId, UA_Boolean isInverse, U
             strvalue = QString::number(value);
         } else if (nodeValue->type->typeId.identifier.numeric == UA_TYPES[UA_TYPES_STRING].typeId.identifier.numeric) {
             UA_String *value = (UA_String*) nodeValue->data;
-            strvalue = QString::fromUtf8((const char*)value->data, value->length);
+            strvalue = QString::fromUtf8((const char*)value->data, (int)value->length);
         } else if (nodeValue->type->typeId.identifier.numeric == UA_TYPES[UA_TYPES_DATETIME].typeId.identifier.numeric) {
             UA_DateTime *value = (UA_DateTime*) nodeValue->data;
             UA_String strval = UA_DateTime_toString(*value);
             //QString str(name->data, name->length);
-            strvalue = QString::fromUtf8((const char*)strval.data, strval.length);
+            strvalue = QString::fromUtf8((const char*)strval.data, (int)strval.length);
         } else {
             strvalue = QObject::tr("Unknown value type %1").arg(nodeValue->type->typeId.identifier.numeric);
         }
-        QString displayname = QString::fromUtf8((const char*)nodeDisplayName.text.data, nodeDisplayName.text.length);
+        QString displayname = QString::fromUtf8((const char*)nodeDisplayName.text.data, (int)nodeDisplayName.text.length);
 
         // important: skip reserved variables used by the server to update other parameters
         if (displayname != "StationParameter" && displayname != "StationValue"){

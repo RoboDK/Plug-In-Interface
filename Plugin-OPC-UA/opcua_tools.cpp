@@ -38,7 +38,7 @@ bool Var_2_Str(const UA_Variant *var, QString &str){
     }
     UA_String *name = (UA_String*) var->data;
     //QString str(name->data, name->length);
-    str = QString::fromUtf8((const char*)name->data, name->length);
+    str = QString::fromUtf8((const char*)name->data, (int)name->length);
     qDebug() << "Received array: " << str;
     return true;
 }
