@@ -1044,7 +1044,7 @@ Item Item::setMachiningParameters(QString ncfile, Item part_obj, QString options
     _RDK->_TIMEOUT = 3600 * 1000;
     Item program = _RDK->_recv_Item();
     _RDK->_TIMEOUT = ROBODK_API_TIMEOUT;
-    double status = _RDK->_recv_Int() / 1000.0;
+    _RDK->_recv_Int();
     _RDK->_check_status();
     return program;
 }
@@ -1180,7 +1180,7 @@ void Item::JointLimits(tJoints *lower_limits, tJoints *upper_limits){
     _RDK->_send_Item(this);
     _RDK->_recv_Array(lower_limits);
     _RDK->_recv_Array(upper_limits);
-    double joints_type = _RDK->_recv_Int() / 1000.0;
+    _RDK->_recv_Int();
     _RDK->_check_status();
 }
 
@@ -1348,7 +1348,6 @@ tMatrix2D* Item::SolveIK_All_Mat2D(const Mat &pose, const Mat *tool, const Mat *
 QList<tJoints> Item::SolveIK_All(const Mat &pose, const Mat *tool, const Mat *ref){
     tMatrix2D *mat2d = SolveIK_All_Mat2D(pose, tool, ref);
     QList<tJoints> jnts_list;
-    int ndofs = Matrix2D_Size(mat2d, 1) - 2;
     int nsol = Matrix2D_Size(mat2d, 2);
     for (int i=0; i<nsol; i++){
         tJoints jnts = tJoints(mat2d, i);
@@ -2132,7 +2131,7 @@ quint64 RoboDK::ProcessID(){
 }
 
 quint64 RoboDK::WindowID(){
-    qint64 window_id;
+    qint64 window_id = 0;
     if (window_id == 0) {
         QString response = Command("MainWindow_ID");
         window_id = response.toInt();
@@ -2286,7 +2285,7 @@ QString RoboDK::Version()
     _check_connection();
     _send_Line("Version");
     QString appName = _recv_Line();
-    int bitArch = _recv_Int();
+    _recv_Int();
     QString ver4 = _recv_Line();
     QString dateBuild = _recv_Line();
     _check_status();
@@ -2811,7 +2810,7 @@ QList<Item> RoboDK::getCollisionItems(QList<int> link_id_list)
         if (!link_id_list.isEmpty()){
             link_id_list.append(linkId);
         }
-        int collisionTimes = _recv_Int();
+        _recv_Int();
     }
     _check_status();
     return itemList;
@@ -3108,7 +3107,7 @@ Item RoboDK::getCursorXYZ(int x, int y, tXYZ xyzStation)
     _send_Line("Proj2d3d");
     _send_Int(x);
     _send_Int(y);
-    int selection = _recv_Int();
+    _recv_Int();
     Item selectedItem = _recv_Item();
     tXYZ xyz;
     _recv_XYZ(xyz);
@@ -3293,7 +3292,7 @@ bool RoboDK::EventsListen()
     _send_Int(0, _COM_EVT);
     QString response = _recv_Line(_COM_EVT);
     qDebug() << response;
-    int ver_evt = _recv_Int(_COM_EVT);
+    _recv_Int(_COM_EVT);
     int status = _recv_Int(_COM_EVT);
     if (response != "RDK_EVT" || status != 0)
     {

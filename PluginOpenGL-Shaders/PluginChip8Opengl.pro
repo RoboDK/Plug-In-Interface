@@ -119,7 +119,6 @@ HEADERS += \
 SOURCES += \
     pluginchip8.cpp \
     chip8core.cpp \
-    robodk_api/robodk_api.cpp \
     robotplayer.cpp
 
 
