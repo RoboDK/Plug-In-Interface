@@ -11,12 +11,15 @@ bool ItemValid(const Item item){
 QDockWidget* AddDockWidget(QMainWindow *mw, QWidget *widget, const QString &strtitle, Qt::DockWidgetAreas allowed, Qt::DockWidgetArea add_where, bool closable, bool delete_on_close){
     QDockWidget *dockwidget = new QDockWidget(strtitle, mw);//"Robot properties view"
     dockwidget->setObjectName(strtitle); // added on 2018-08-24
-    if (closable){
-        dockwidget->setFeatures(QDockWidget::AllDockWidgetFeatures);//{ DockWidgetClosable, DockWidgetMovable, DockWidgetFloatable, DockWidgetVerticalTitleBar, AllDockWidgetFeatures, NoDockWidgetFeatures }
-    } else {
-        dockwidget->setFeatures(QDockWidget::DockWidgetMovable|QDockWidget::DockWidgetFloatable);
+
+    QDockWidget::DockWidgetFeatures features =
+        QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable;
+
+    if (closable) {
+        features.setFlag(QDockWidget::DockWidgetClosable);
     }
 
+    dockwidget->setFeatures(features);
     dockwidget->setWidget(widget);
     if (delete_on_close){
         dockwidget->setAttribute(Qt::WA_DeleteOnClose);
@@ -32,13 +35,19 @@ QDockWidget* AddDockWidget(QMainWindow *mw, QWidget *widget, const QString &strt
     return dockwidget;
 }
 
-void string_2_doubles(const QString &str, double *values, int *size_inout, const QString &separator){
+void string_2_doubles(const QString &str, double *values, int *size_inout, const QString &separator) {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
+    QString::SplitBehavior behavior = QString::SkipEmptyParts;
+#else
+    Qt::SplitBehavior behavior = Qt::SkipEmptyParts;
+#endif
+
     bool isok;
     QString line;
     QString strnum;
     QRegExp rx(separator);
     line = str.trimmed();
-    QStringList strfloats = line.split(rx,QString::SkipEmptyParts);
+    QStringList strfloats = line.split(rx, behavior);
     *size_inout = qMin(strfloats.size(), *size_inout);
     int countok = 0;
     for (int i=0; i<strfloats.size(); i++){
