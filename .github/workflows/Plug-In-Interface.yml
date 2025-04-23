@@ -27,20 +27,20 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2019
             OUTPUT_DIR: C:/RoboDK/bin/plugins
             QT_VERSION: "5.15.2"
 
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             OUTPUT_DIR: ~/RoboDK/bin/plugins
             QT_VERSION: "5.15.2"
 
-          - os: macos-latest
+          - os: macos-13
             OUTPUT_DIR: ~/RoboDK-Dev/Deploy/RoboDK.app/Contents/MacOS/plugins
             QT_VERSION: "5.15.2"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -69,7 +69,7 @@ jobs:
         shell: bash
 
       - name: Upload runtime artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Plug-In-Interface-Runtime-${{ matrix.os }}-${{ env.BUILD_TYPE }}
           if-no-files-found: error
@@ -79,7 +79,7 @@ jobs:
             ${{ matrix.OUTPUT_DIR }}/*.dylib
 
       - name: Upload buildtime artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Plug-In-Interface-Buildtime-${{ matrix.os }}-${{ env.BUILD_TYPE }}
           if-no-files-found: warn
