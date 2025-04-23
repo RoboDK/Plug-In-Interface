@@ -27,15 +27,15 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: windows-2019
+          - os: windows-latest
             OUTPUT_DIR: C:/RoboDK/bin/plugins
             QT_VERSION: "5.15.2"
 
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             OUTPUT_DIR: ~/RoboDK/bin/plugins
             QT_VERSION: "5.15.2"
 
-          - os: macos-13
+          - os: macos-latest
             OUTPUT_DIR: ~/RoboDK-Dev/Deploy/RoboDK.app/Contents/MacOS/plugins
             QT_VERSION: "5.15.2"
 
@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           tools: "tools_qtcreator,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
