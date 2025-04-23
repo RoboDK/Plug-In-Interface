@@ -83,7 +83,9 @@ private:
     void UpdateRoboDK();
     //New
     void pluginIntegrationInit();
+    void pluginStop();
     void LoadRom(int rom_id);
+
     QList<Item> buttonList;
     Item ScreenRef;
     Item robotItem;

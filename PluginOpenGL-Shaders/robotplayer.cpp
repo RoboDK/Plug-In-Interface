@@ -17,9 +17,10 @@
 //using namespace RoboDK_API;
 
 RobotPlayer::RobotPlayer(QObject *pPlugin, const QString &robot_name, bool &paused) :
-    RobotName(robot_name),
-    isPaused(paused)
+    isPaused(paused),
+    RobotName(robot_name)
 {
+    Q_UNUSED(pPlugin);
     // Example to connect a signal to a callback in another thread
     // connect(this,SIGNAL(SignalToOtherThread), pPlugin, SLOT(Callback(double*)));
 

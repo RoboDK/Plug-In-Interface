@@ -5,11 +5,19 @@ QT += widgets network svg opengl
 TEMPLATE = lib
 CONFIG += plugin
 
-TARGET = RoboUI
+TARGET = PluginRoboUI
 
 CONFIG += c++17
 
-#DEFINES += QT_ASCII_CAST_WARNINGS QT_NO_CAST_FROM_ASCII
+*-clang* {
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy-with-user-provided-copy
+}
+
+*-g++* {
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-comment
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy
+}
 
 win32 {
     RC_FILE = roboui.rc

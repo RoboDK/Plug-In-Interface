@@ -32,7 +32,15 @@ QT += network   # Allows using QTcpSocket
 # Define your plugin name (name of the DLL file generated)
 TARGET          = OPC-UA
 
+*-clang* {
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy-with-user-provided-copy
+}
 
+*-g++* {
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-comment
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy
+}
 
 #-----------------------------------------------------
 # Define the location to place the plugin library (release and/or debug binaries)
@@ -127,7 +135,13 @@ INCLUDEPATH += ../robodk_interface
 
 # ------------------------
 # Flag to compile Open62541 source for any platform
-QMAKE_CFLAGS += -std=c99
+win32-msvc {
+    QMAKE_CXXFLAGS_WARN_ON += -wd4100
+    QMAKE_CFLAGS_WARN_ON += -wd4100
+    QMAKE_CFLAGS += -std:clatest
+} else {
+    QMAKE_CFLAGS += -std=c99
+}
 #--------------------------
 # Header and source files required for OPC UA
 HEADERS += opcua/open62541.h

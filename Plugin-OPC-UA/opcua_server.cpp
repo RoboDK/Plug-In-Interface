@@ -163,7 +163,7 @@ static void stopHandler(int sign) {
 
 // Get time according to RoboDK's computer
 static UA_StatusCode read_Time(void *h, const UA_NodeId nodeId, UA_Boolean sourceTimeStamp, const UA_NumericRange *range, UA_DataValue *value) {
-    PluginOPCUA *plugin = (PluginOPCUA*)h;
+    Q_UNUSED(h)
     if(range) {
         value->hasStatus = true;
         value->status = UA_STATUSCODE_BADINDEXRANGEINVALID;
@@ -248,7 +248,7 @@ UA_StatusCode write_OpenStationName(void *h, const UA_NodeId nodeid, const UA_Va
     return UA_STATUSCODE_GOOD;
 }
 static UA_StatusCode read_StationParameter(void *h, const UA_NodeId nodeid, UA_Boolean sourceTimeStamp, const UA_NumericRange *range, UA_DataValue *value) {
-    PluginOPCUA *plugin = (PluginOPCUA*)h;
+    Q_UNUSED(h)
     if(range) {
         value->hasStatus = true;
         value->status = UA_STATUSCODE_BADINDEXRANGEINVALID;

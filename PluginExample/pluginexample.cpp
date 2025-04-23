@@ -163,6 +163,11 @@ void PluginExample::PluginEvent(TypeEvent event_type) {
 
     case EventChangedStation:
         qDebug() << "==== EventChangedStation ====";
+
+        if (dock_robotpilot) {
+            dock_robotpilot->close();
+            dock_robotpilot = nullptr;
+        }
         break;
 
     case EventAbout2Save:
@@ -176,6 +181,10 @@ void PluginExample::PluginEvent(TypeEvent event_type) {
         /// The user requested to open a new RoboDK station (RDK file) or the user is navigating among different stations. This event is triggered before the current station looses focus.
         qDebug() << "==== EventAbout2ChangeStation ====";
         //SaveSettings();
+        if (dock_robotpilot) {
+            dock_robotpilot->close();
+            dock_robotpilot = nullptr;
+        }
         break;
 
     case EventAbout2CloseStation:
@@ -183,6 +192,10 @@ void PluginExample::PluginEvent(TypeEvent event_type) {
         qDebug() << "==== EventAbout2CloseStation ====";
         //SaveSettings();
         //ROBOT = nullptr;
+        if (dock_robotpilot) {
+            dock_robotpilot->close();
+            dock_robotpilot = nullptr;
+        }
         break;
 
     case EventTrajectoryStep:

@@ -23,6 +23,15 @@ TEMPLATE        = lib
 CONFIG         += plugin
 #------------------------------------
 
+*-clang* {
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy-with-user-provided-copy
+}
+
+*-g++* {
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-comment
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy
+}
 
 # Add any Qt libraries you would like to use:
 #QT += core gui

@@ -111,6 +111,11 @@ void PluginLockTCP::PluginEvent(TypeEvent event_type){
 
         break;
     }
+    case EventAbout2ChangeStation:
+    case EventAbout2CloseStation:
+        last_clicked_item = nullptr;
+        locked_items.clear();
+        break;
     case EventMoved:
         // Update the pose of locked TCPs
         update_tcp_pose();
