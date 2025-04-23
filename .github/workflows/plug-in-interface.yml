@@ -1,4 +1,4 @@
-name: Build plugins
+name: Build Plug-in Interface
 
 on:
   #push:
