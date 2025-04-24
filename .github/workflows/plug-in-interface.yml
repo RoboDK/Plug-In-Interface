@@ -1,4 +1,4 @@
-name: Build plugins
+name: Build Plug-in Interface
 
 on:
   #push:
@@ -27,7 +27,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2019
             OUTPUT_DIR: C:/RoboDK/bin/plugins
             QT_VERSION: "5.15.2"
 
@@ -40,10 +40,10 @@ jobs:
             QT_VERSION: "5.15.2"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           tools: "tools_qtcreator,qt.tools.qtcreator"
           version: ${{ matrix.QT_VERSION }}
@@ -69,7 +69,7 @@ jobs:
         shell: bash
 
       - name: Upload runtime artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Plug-In-Interface-Runtime-${{ matrix.os }}-${{ env.BUILD_TYPE }}
           if-no-files-found: error
@@ -79,7 +79,7 @@ jobs:
             ${{ matrix.OUTPUT_DIR }}/*.dylib
 
       - name: Upload buildtime artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Plug-In-Interface-Buildtime-${{ matrix.os }}-${{ env.BUILD_TYPE }}
           if-no-files-found: warn
