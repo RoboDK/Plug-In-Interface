@@ -33,6 +33,9 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/Record.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/Record.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/RecordChecked.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Record/RecordSequence.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Record/RecordSequence.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Record/RecordSequenceChecked.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/SetSize.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/SetSize.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/Settings.py</asset>

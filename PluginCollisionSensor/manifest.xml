@@ -9,7 +9,7 @@
     <dc:identifier>com.robodk.plugin.plugincollisionsensor</dc:identifier>
     <cp:keywords/>
     <dc:language>eng</dc:language>
-    <cp:lastModifiedBy/>
+    <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
     <dcterms:modified xsi:type="dcterms:W3CDTF">2023-11-03T19:50:57.345133Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Collision Sensor</dc:title>

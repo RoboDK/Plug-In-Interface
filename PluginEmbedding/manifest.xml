@@ -4,23 +4,23 @@
     <cp:category>Plugin</cp:category>
     <cp:contentStatus>Final</cp:contentStatus>
     <dcterms:created xsi:type="dcterms:W3CDTF">2024-10-10T17:20:22.096047Z</dcterms:created>
-    <dc:creator/>
+    <dc:creator>RoboDK</dc:creator>
     <dc:description>Embedding Example Plug-in for RoboDK</dc:description>
     <dc:identifier>com.robodk.plugin.pluginembedding</dc:identifier>
     <cp:keywords/>
     <dc:language>eng</dc:language>
-    <cp:lastModifiedBy/>
+    <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
     <dcterms:modified xsi:type="dcterms:W3CDTF">2024-10-10T17:20:22.096047Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Embedding Example</dc:title>
     <cp:version>1.0.0</cp:version>
   </cp:coreProperties>
   <extraProperties>
-    <website/>
+    <website>https://robodk.com/</website>
     <documentation/>
     <repository/>
-    <company/>
-    <email/>
+    <company>RoboDK Inc.</company>
+    <email>info@robodk.com</email>
   </extraProperties>
   <assets>
     <asset cpu="any" system="any">/PluginEmbedding.dll</asset>

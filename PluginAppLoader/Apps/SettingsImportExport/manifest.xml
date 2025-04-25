@@ -4,12 +4,12 @@
     <cp:category>Application</cp:category>
     <cp:contentStatus>Final</cp:contentStatus>
     <dcterms:created xsi:type="dcterms:W3CDTF">2024-04-18T11:58:15.425Z</dcterms:created>
-    <dc:creator/>
+    <dc:creator>RoboDK</dc:creator>
     <dc:description>The Import-Export Settings App for RoboDK allows you to export and import RoboDK settings as an INI file.</dc:description>
     <dc:identifier>com.robodk.app.settingsimportexport</dc:identifier>
     <cp:keywords/>
     <dc:language>eng</dc:language>
-    <cp:lastModifiedBy/>
+    <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
     <dcterms:modified xsi:type="dcterms:W3CDTF">2024-04-18T11:58:15.425Z</dcterms:modified>
     <cp:revision>1</cp:revision>
     <dc:title>Settings Import-Export</dc:title>
