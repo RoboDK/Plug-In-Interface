@@ -33,7 +33,7 @@ jobs:
 
           - os: ubuntu-latest
             OUTPUT_DIR: ~/RoboDK/bin/plugins
-            QT_VERSION: "5.15.2"
+            QT_VERSION: "5.12.0"
 
           - os: macos-latest
             OUTPUT_DIR: ~/RoboDK-Dev/Deploy/RoboDK.app/Contents/MacOS/plugins
