@@ -1,4 +1,4 @@
-AppLoader plug-in for RoboDK
+AppLoader Plug-in for RoboDK
 ===========================
 
 The App loader plug-in allows you to easily load scripts and executable files as if they were plug-ins in RoboDK software. 
@@ -25,6 +25,9 @@ You can optionally provide INI files to customize integration (order of appearan
 If the INI file does not exist it will be automatically generated the first time a new folder inside Apps is found.
 
 This plugin is provided with RoboDK by default. You don't need to change it or rebuild it to create and distribute your Apps in RoboDK. This document provides general information about how apps work in RoboDK and how you can easily customize RoboDK for your specific simulation and offline programing needs using this plugin.
+
+You can find more information about RoboDK Add-ins here:
+* https://robodk.com/doc/en/Add-ins.html
 
 More information about the RoboDK API for Python here:
 * https://github.com/RoboDK/RoboDK-API/tree/master/Python
