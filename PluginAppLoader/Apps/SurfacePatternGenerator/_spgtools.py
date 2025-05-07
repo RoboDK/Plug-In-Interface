@@ -157,8 +157,8 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
         return
 
     # Remove any previously generated objects with the same name as the reference frame:
-    obj_delete = RDK.Item(REF_NAME, robolink.ITEM_TYPE_OBJECT)
-    if obj_delete.Valid():
+    obj_delete = RDK.Item(REF_NAME + " (SPG)", robolink.ITEM_TYPE_OBJECT)
+    if obj_delete.Valid() and obj_delete != PART:
         obj_delete.Delete()
 
     ShowMsg("Projecting %s to surface..." % REF_NAME)
@@ -228,7 +228,7 @@ def CreatePaths(REF, PART, SIZE_X, SIZE_Y, STEP_X, STEP_Y, REPEAT_TIMES=1, REPEA
                 points_object = RDK.AddCurve(curve, projection_type=robolink.PROJECTION_NONE)
                 # Add the points to the reference and set the reference name
                 points_object.setParent(REF)
-                points_object.setName(REF_NAME)
+                points_object.setName(REF_NAME + " (SPG)")
             else:
                 # Add curve to existing object
                 RDK.AddCurve(curve, points_object, True, projection_type=robolink.PROJECTION_NONE)
@@ -257,7 +257,7 @@ def CreateProgram(REF, SPEED_OPERATION, ANGLE_TCP_X, ANGLE_TCP_Y):
     ShowMsg("Working with %s ..." % REF_NAME)
 
     # Remove any previously generated objects with the same name as the reference frame:
-    points_object = RDK.Item(REF_NAME, robolink.ITEM_TYPE_OBJECT)
+    points_object = RDK.Item(REF_NAME + " (SPG)", robolink.ITEM_TYPE_OBJECT)
     if not points_object.Valid():
         print("No projection found for %s" % REF_NAME)
         return
