@@ -45,7 +45,7 @@ void string_2_doubles(const QString &str, double *values, int *size_inout, const
     bool isok;
     QString line;
     QString strnum;
-    QRegExp rx(separator);
+    QRegularExpression rx(separator);
     line = str.trimmed();
     QStringList strfloats = line.split(rx, behavior);
     *size_inout = qMin(strfloats.size(), *size_inout);
