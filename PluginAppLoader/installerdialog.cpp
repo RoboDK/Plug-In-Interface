@@ -10,6 +10,8 @@
 #include <QSettings>
 #include <QComboBox>
 #include <QDebug>
+#include <QString>
+
 
 
 InstallerDialog::InstallerDialog(AppLoader* apploader, QWidget* parent) :
@@ -83,7 +85,7 @@ bool InstallerDialog::processPackage(const QString& package){
 
         QString name = unzipper.entryName();
         int slash = name.indexOf('/');
-        if (slash < 0 || name.midRef(slash).compare(QString("/AppConfig.ini")) != 0)
+        if (slash < 0 || name.mid(slash).compare(QString("/AppConfig.ini")) != 0)
             continue;
 
         name.truncate(slash);
@@ -308,7 +310,7 @@ void InstallerDialog::on_buttonBox_accepted(){
             if (!name.startsWith(entity.name + "/"))
                 continue;
 
-            QFileInfo fileInfo = folder.absoluteFilePath(name);
+            QFileInfo fileInfo(folder.absoluteFilePath(name));
             folder.mkpath(fileInfo.absolutePath());
             unzipper.entryExtract(fileInfo.absoluteFilePath());
         }
