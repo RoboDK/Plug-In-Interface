@@ -37,7 +37,7 @@ CONFIG         += plugin
 #QT += core gui
 QT += widgets
 QT += network   # Allows using QTcpSocket
-QT += core5compat
+# QT += core5compat
 
 # Define your plugin name (name of the DLL file generated)
 TARGET          = AppLoader
