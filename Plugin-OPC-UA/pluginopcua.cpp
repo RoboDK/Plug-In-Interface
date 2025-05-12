@@ -17,6 +17,7 @@
 #include <QDesktopServices>
 #include <QSettings>
 #include <QDateTime>
+#include <QIODevice>
 
 
 // only for Sleep()
@@ -348,7 +349,7 @@ void PluginOPCUA::SaveSettings(){
 
     qDebug() << "Saving OPC-UA plugin settings...";
     QByteArray data;
-    QDataStream ds(&data, QDataStream::WriteOnly);
+    QDataStream ds(&data, QIODevice::WriteOnly);
     qint64 version = 2;
     ds << version;
     ds << Server->Port;
