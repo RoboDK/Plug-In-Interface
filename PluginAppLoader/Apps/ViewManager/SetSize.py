@@ -30,7 +30,7 @@ def SetSize(RDK=None):
     if len(current_size.split('x', maxsplit=2)) == 2:
         entry = current_size.split('x')
 
-    newsize = robodialogs.InputDialog("Set the screen size (size of the 3D window).\nEnter ' ' to unlock the screen\nWidth x Height:", entry=entry)
+    newsize = robodialogs.InputDialog("Set the screen size (size of the 3D window).\nEnter ' ' to unlock the screen\nWidth x Height:", value=entry)
     if newsize is None:
         return
 
