@@ -136,6 +136,7 @@ INCLUDEPATH += ../robodk_interface
 # ------------------------
 # Flag to compile Open62541 source for any platform
 win32-msvc {
+    DEFINES += _CRT_SECURE_NO_WARNINGS
     QMAKE_CXXFLAGS_WARN_ON += -wd4100
     QMAKE_CFLAGS_WARN_ON += -wd4100
     QMAKE_CFLAGS += -std:clatest

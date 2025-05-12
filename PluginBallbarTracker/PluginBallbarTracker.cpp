@@ -329,7 +329,8 @@ void PluginBallbarTracker::update_ballbar_pose(){
             double rho = 90.0 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.z() / std::max(1e-6, r)));
 
             // Theta θ
-            double theta = 180 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.x() / std::max(1e-6, qSqrt(pillar_2_tool_vec.x() * pillar_2_tool_vec.x() + pillar_2_tool_vec.y() * pillar_2_tool_vec.y()))));
+            double xy_length = qSqrt(pillar_2_tool_vec.x() * pillar_2_tool_vec.x() + pillar_2_tool_vec.y() * pillar_2_tool_vec.y());
+            double theta = 180 - qRadiansToDegrees(qAcos(pillar_2_tool_vec.x() / std::max(1e-6, xy_length)));
             if (pillar_2_tool_vec.y() > 0){
                 theta = -theta;
             }

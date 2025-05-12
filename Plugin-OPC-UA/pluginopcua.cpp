@@ -17,6 +17,7 @@
 #include <QDesktopServices>
 #include <QSettings>
 #include <QDateTime>
+#include <QIODevice>
 
 
 // only for Sleep()

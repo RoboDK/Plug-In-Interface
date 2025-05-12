@@ -218,7 +218,7 @@ void PluginExample::callback_information(){
 
     // Perform some timing tests using the RoboDK API
     RDK->ShowMessage("Starting timing tests", false);
-    QString text_message_html("<strong>Plugin Timing Tests Summary on " + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + ":</strong><br>");
+    QString text_message_html("<strong>Plugin Timing Tests Summary on " + QDateTime::currentDateTime().toString() + ":</strong><br>");
 
     int ntests=10000;
     //Item robot = RDK->getItem("", IItem::ITEM_TYPE_ROBOT);

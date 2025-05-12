@@ -24,6 +24,7 @@
 #include <QTimer>
 #include <QSysInfo>
 #include <QBuffer>
+#include <QActionGroup>
 
 // Function to check and sort priority of apps
 struct CheckPriority {
@@ -779,8 +780,8 @@ void AppLoader::AppsSearch(bool install_requirements){
         }
 
         // Sort actions for the menu and the toolbar
-        qSort(menuActions.begin(),    menuActions.end(),    CheckPriority());
-        qSort(toolbarActions.begin(), toolbarActions.end(), CheckPriority());
+        std::sort(menuActions.begin(),    menuActions.end(),    CheckPriority());
+        std::sort(toolbarActions.begin(), toolbarActions.end(), CheckPriority());
 
         // Add menu actions to the menu
         for (int i=0; i<menuActions.length(); i++){
@@ -795,17 +796,17 @@ void AppLoader::AppsSearch(bool install_requirements){
 
     // Sort all actions
     if (ListActions.length() > 1){
-        qSort(ListActions.begin(), ListActions.end(), CheckPriority());
+        std::sort(ListActions.begin(), ListActions.end(), CheckPriority());
     }
 
     // Sort menus
     if (ListMenus.length() > 1){
-        qSort(ListMenus.begin(), ListMenus.end(), CheckPriority());
+        std::sort(ListMenus.begin(), ListMenus.end(), CheckPriority());
     }
 
     // Sort toolbars
     if (ListToolbars.length() > 1){
-        qSort(ListToolbars.begin(), ListToolbars.end(), CheckPriority());
+        std::sort(ListToolbars.begin(), ListToolbars.end(), CheckPriority());
     }
 
     // Append Apps directories to RoboDK's PYTHONPATH
@@ -1012,8 +1013,7 @@ void AppLoader::onRunScript(){
     if (action->isCheckable()){
         if (action->isChecked()){
             // make sure we uncheck the action if the process ends or stops
-            connect(proc, static_cast<void(QProcess::*)(int)>(&QProcess::finished), proc, [action]() {
-
+            connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), proc, [action]() {
                 QActionGroup *grp = action->actionGroup();
                 if (grp != nullptr && grp->checkedAction() == action){
                     emit grp->triggered(action); // important to reset the group lastaction static variable
