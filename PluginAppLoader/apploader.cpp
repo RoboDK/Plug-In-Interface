@@ -1013,7 +1013,7 @@ void AppLoader::onRunScript(){
     if (action->isCheckable()){
         if (action->isChecked()){
             // make sure we uncheck the action if the process ends or stops
-            connect(proc, &QProcess::finished, proc, [action]() {
+            connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), proc, [action]() {
                 QActionGroup *grp = action->actionGroup();
                 if (grp != nullptr && grp->checkedAction() == action){
                     emit grp->triggered(action); // important to reset the group lastaction static variable

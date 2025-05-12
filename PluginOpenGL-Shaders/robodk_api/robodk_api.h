@@ -1,8 +1,8 @@
-// Copyright 2015-2020 - RoboDK Inc. - https://robodk.com/
+// Copyright 2015-2021 - RoboDK Inc. - https://robodk.com/
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// https://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,7 @@
 //     https://robodk.com/help#PostProcessor
 //
 // Visit the Matrix and Quaternions FAQ for more information about pose/homogeneous transformations
-//     https://www.j3d.org/matrix_faq/matrfaq_latest.html
+//     http://www.j3d.org/matrix_faq/matrfaq_latest.html
 //
 //---------------------------------------------
 // TIPS:
@@ -69,7 +69,7 @@
 * The RoboDK class defines the interface to the RoboDK API. The original Python reference is available here: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
 *
 * More information about the RoboDK API is available here:
-* - Python Reference: https://robodk.com/doc/en/PythonAPI/index.html
+* - Python Reference: https://robodk.com/doc/en/PythonAPI/robodk.html#robolink-py
 *
 * \subsection LinkItem Item class
 * The Item class can be used to operate on any item available in the RoboDK tree. Use functions such as class: IRoboDK::getItem or class: IRoboDK::getItemList to retrieve items from the RoboDK station tree.
@@ -217,8 +217,8 @@
 *
 * This list provides some useful links and tips for programming with Qt:
 * - Double click the RoboDK-API-Cpp-Sample.pro file to open the example project using Qt Creator.
-* - Use Qt signal/slots mechanism for action/button callbacks (https://doc.qt.io/qt-5/signalsandslots.html). Signals and slots are thread safe.
-* - Wrap your strings using tr("your string") or QObject::tr("your string") to allow translation using Qt Linguist. For more information: https://doc.qt.io/qt-5/qtlinguist-index.html.
+* - Use Qt signal/slots mechanism for action/button callbacks (http://doc.qt.io/qt-5/signalsandslots.html). Signals and slots are thread safe.
+* - Wrap your strings using tr("your string") or QObject::tr("your string") to allow translation using Qt Linguist. For more information: http://doc.qt.io/qt-5/qtlinguist-index.html.
 * - If you experience strange build issues it may be useful to delete the build folder that is automatically created to force a new build.
 * - If you experience strange plugin load issues in RoboDK it is recommended to delete the libraries and create the plugin library with a new build.
 * - More information about Qt: https://www.qt.io/.
@@ -227,7 +227,7 @@
 * \section LinkRefs Useful Links
 * Useful links involving the RoboDK API:
 * - Standard RoboDK API Introduction: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
-* - Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/index.html.
+* - Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/robodk.html#robolink-py.
 * - Latest RoboDK API on GitHub (you'll find RoboDK C++ in a subfolder): https://github.com/RoboDK/RoboDK-API.
 * - RoboDK API Introductory video: https://www.youtube.com/watch?v=3I6OK1Kd2Eo.
 * - RoboDK API using the Plugin Interface: https://robodk.com/doc/en/PlugIns/index.html.
@@ -263,7 +263,7 @@
 #include <QDebug>
 
 
-class QTcpSocket;
+class QAbstractSocket;
 
 
 #ifndef RDK_SKIP_NAMESPACE
@@ -275,6 +275,7 @@ namespace RoboDK_API {
 
 class Item;
 class RoboDK;
+struct GetPointsResult;
 
 
 /// maximum size of robot joints (maximum allowed degrees of freedom for a robot)
@@ -488,10 +489,8 @@ public:
     double _Values[RDK_SIZE_JOINTS_MAX];
 
     /// joint values (floats, used to return a copy as a float pointer)
-    float _ValuesF[RDK_SIZE_JOINTS_MAX];
+    mutable float _ValuesF[RDK_SIZE_JOINTS_MAX];
 };
-
-
 
 
 /// \brief The Mat class represents a 4x4 pose matrix. The main purpose of this object is to represent a pose in the 3D space (position and orientation).
@@ -742,6 +741,7 @@ public:
     /// </returns>
     static Mat rotz(double rz);
 
+
 private:
     /// Flags if a matrix is not valid.
     bool _valid;
@@ -749,7 +749,7 @@ private:
 // this is a dummy variable to easily obtain a pointer to a 16-double-array for matrix multiplications
 private:
     /// Copy of the data as a double array.
-    double _ddata16[16];
+    mutable double _ddata16[16];
 
 };
 
@@ -762,7 +762,8 @@ class ROBODK RoboDK {
     friend class RoboDK_API::Item;
 
 public:
-    RoboDK(const QString &robodk_ip="", int com_port=-1, const QString &args="", const QString &path="");
+    explicit RoboDK(QAbstractSocket *socket, bool fUseExceptions = false);
+    RoboDK(const QString &robodk_ip="", int com_port=-1, const QString &args="", const QString &path="", bool fUseExceptions = false);
     ~RoboDK();
 
     quint64 ProcessID();
@@ -1072,7 +1073,7 @@ public:
     /// </summary>
     /// <param name="link_id_list">List of robot link IDs that are in collision (0 for objects and tools).</param>
     /// <returns>List of items that are in a collision state.</returns>
-    QList<Item> getCollisionItems(QList<int> link_id_list);
+    QList<Item> getCollisionItems(QList<int>& link_id_list);
 
     /// <summary>
     /// Sets the current simulation speed. Set the speed to 1 for a real-time simulation. The slowest speed allowed is 0.001 times the real speed. Set to a high value (>100) for fast simulation results.
@@ -1219,6 +1220,32 @@ public:
     Mat ViewPose();
 
     /// <summary>
+    /// Add a simulated 2D or depth camera as an item. Use Delete to delete it.
+    /// </summary>
+    /// <param name="item_object">Reference or object to attach the camera</param>
+    /// <param name="cam_params">Camera settings as described here: https://robodk.com/doc/en/PythonAPI/robodk.html#robodk.robolink.Robolink.Cam2D_Add</param>
+    /// <param name="cam_item">Provide an existing camera item to modify it</param>
+    /// <returns>Camera item</returns>
+    Item Cam2D_Add(const Item &item_object, const QString &cam_params, const Item *cam_item=nullptr);
+
+    /// <summary>
+    /// Take a snapshot of a simulated camera and save it as an image.
+    /// </summary>
+    /// <param name="file_save_img">file path to save. Formats supported include PNG, JPEG, TIFF, ...</param>
+    /// <param name="cam_item">Camera item</param>
+    /// <param name="params">additional options (use, "Grayscale", "Depth" or "Color" to modify the output of a camera snapshot)</param>
+    /// <returns>Returns 1 if success, 0 otherwise</returns>
+    int Cam2D_Snapshot(const QString &file_save_img, const Item &cam_item, const QString &params="");
+
+     /// <summary>
+     /// Set the camera parameters.
+     /// </summary>
+     /// <param name="cam_params">Camera parameters: The same parameters that can be set using Cam2D_Add()</param>
+     /// <param name="cam_item">Camera item</param>
+     /// <returns>Returns 1 if success, 0 otherwise</returns>
+     int Cam2D_SetParams(const QString &cam_params, const Item &cam_item);
+
+    /// <summary>
     /// Set the nominal robot parameters.
     /// </summary>
     /// <param name="robot"></param>
@@ -1240,6 +1267,13 @@ public:
     Item getCursorXYZ(int x = -1, int y = -1, tXYZ xyzStation = nullptr);
 
     /// <summary>
+    /// Retrieves the object under the mouse cursor.
+    /// </summary>
+    /// <param name="featureType">Set to FEATURE_HOVER_OBJECT_MESH to retrieve object under the mouse cursor, the selected feature and mesh, or FEATURE_HOVER_OBJECT if you don't need the mesh (faster).</param>
+    /// <returns>GetPointsResult object.</returns>
+    GetPointsResult GetPoints(int featureType = FEATURE_HOVER_OBJECT_MESH);
+
+    /// <summary>
     /// Returns the license as a readable string (same name shown in the RoboDK's title bar, on top of the main menu).
     /// </summary>
     /// <returns></returns>
@@ -1256,6 +1290,16 @@ public:
     /// </summary>
     /// <returns>List of items to set as selected</returns>
     void setSelection(QList<Item> list_items);
+	
+	/// <summary>
+	/// Load or unload the specified plugin (path to DLL, dylib or SO file). If the plugin is already loaded it will unload the plugin and reload it. Pass an empty plugin_name to reload all plugins.
+	/// </summary>
+	void PluginLoad(const QString &pluginName, int load=1);	
+	
+	/// <summary>
+	/// Send a specific command to a RoboDK plugin. The command and value (optional) must be handled by your plugin. It returns the result as a string.
+	/// </summary>
+	QString PluginCommand(const QString &pluginName, const QString &pluginCommand, const QString &pluginValue="");
 
     /// <summary>
     /// Show the popup menu to create the ISO9283 path for position accuracy, repeatability and path accuracy performance testing.
@@ -1542,7 +1586,24 @@ public:
         FEATURE_CURVE = 2,
 
         /// Point selection
-        FEATURE_POINT = 3
+        FEATURE_POINT = 3,
+
+        /// Object mesh (using ID) feature type flag
+        FEATURE_OBJECT_MESH = 7,
+
+        /// Surface preview feature type flag
+        FEATURE_SURFACE_PREVIEW = 8,
+
+        /// Mesh (under the mouse cursor) feature flag
+        FEATURE_MESH = 9,
+
+        // The following do not require providing an object
+
+        /// Object mesh (under the mouse cursor) feature type flag
+        FEATURE_HOVER_OBJECT_MESH = 10,
+
+        /// Object feature (under the mouse cursor) feature type flag
+        FEATURE_HOVER_OBJECT = 11
     };
 
     /// Spray gun simulation:
@@ -1660,8 +1721,10 @@ public:
     };
 
 private:
-    QTcpSocket *_COM;
-    QTcpSocket *_COM_EVT;
+    QAbstractSocket *_COM;
+    bool _USE_EXCPETIONS;
+    bool _OWN_SOCKET;
+    QAbstractSocket *_COM_EVT;
     QString _IP;
     int _PORT;
     int _TIMEOUT;
@@ -1678,25 +1741,27 @@ private:
     bool _check_connection();
     bool _check_status();
 
-    bool _waitline(QTcpSocket *com = nullptr);
-    QString _recv_Line(QTcpSocket *com = nullptr);//QString &string);
-    bool _send_Line(const QString &string,QTcpSocket *com = nullptr);
-    int _recv_Int(QTcpSocket *com = nullptr);//qint32 &value);
-    bool _send_Int(const qint32 value,QTcpSocket *com = nullptr);
-    Item _recv_Item(QTcpSocket *com = nullptr);//Item *item);
+    bool _waitline(QAbstractSocket *com = nullptr);
+    QString _recv_Line(QAbstractSocket *com = nullptr);//QString &string);
+    bool _send_Line(const QString &string,QAbstractSocket *com = nullptr);
+    int _recv_Int(QAbstractSocket *com = nullptr);//qint32 &value);
+    bool _send_Int(const qint32 value,QAbstractSocket *com = nullptr);
+    Item _recv_Item(QAbstractSocket *com = nullptr);//Item *item);
     bool _send_Item(const Item *item);
     bool _send_Item(const Item &item);
-    Mat _recv_Pose(QTcpSocket *com = nullptr);//Mat &pose);
+    Mat _recv_Pose(QAbstractSocket *com = nullptr);//Mat &pose);
     bool _send_Pose(const Mat &pose);
     bool _recv_XYZ(tXYZ pos);
     bool _send_XYZ(const tXYZ pos);
-    bool _recv_Array(double *values, int *psize=nullptr,QTcpSocket *com = nullptr);
+    bool _recv_Array(double *values, int *psize=nullptr,QAbstractSocket *com = nullptr);
     bool _send_Array(const double *values, int nvalues);
     bool _recv_Array(tJoints *jnts);
     bool _send_Array(const tJoints *jnts);
     bool _send_Array(const Mat *mat);
     bool _recv_Matrix2D(tMatrix2D **mat);
     bool _send_Matrix2D(tMatrix2D *mat);
+    bool _send_Bytes(const QByteArray &data, QAbstractSocket *com = nullptr);
+    QByteArray _recv_Bytes(QAbstractSocket *com = nullptr);
 
 
     void _moveX(const Item *target, const tJoints *joints, const Mat *mat_target, const Item *itemrobot, int movetype, bool blocking);
@@ -1931,6 +1996,25 @@ public:
     /// </summary>
     /// <param name="scale">scale to apply as [scale_x, scale_y, scale_z]</param>
     void Scale(double scale_xyz[3]);
+
+
+    /// <summary>
+    /// Retrieves the point under the mouse cursor, a curve or the 3D points of an object.
+    /// The points are provided in [XYZijk] format in relative coordinates.
+    /// The XYZ are the local point coordinate and ijk is the normal of the surface.
+    /// </summary>
+    /// <param name="featureType">The type of geometry (FEATURE_SURFACE, FEATURE_POINT, ...). Set to FEATURE_SURFACE and if not point or curve was selected, the name of the geometry will be 'point on surface'.</param>
+    /// <param name="featureId">The internal ID to retrieve the right geometry from the object (use SelectedFeature).</param>
+    /// <returns>GetPointsResult object.</returns>
+    GetPointsResult GetPoints(int featureType = RoboDK::FEATURE_SURFACE, int featureId = 0);
+
+    /// <summary>
+    /// Retrieve the currently selected feature for this object.
+    /// </summary>
+    /// <param name="featureType">The type of geometry, FEATURE_SURFACE, FEATURE_POINT, ... </param>
+    /// <param name="featureId">The internal ID to retrieve the raw geometry (use GetPoints)</param>
+    /// <returns>True if the object is selected</returns>
+    bool SelectedFeature(int &featureType, int &featureId);
 
     /// <summary>
     /// Update the robot milling path input and parameters. Parameter input can be an NC file (G-code or APT file) or an object item in RoboDK. A curve or a point follow project will be automatically set up for a robot manufacturing project.
@@ -2430,6 +2514,19 @@ public:
     QString setParam(const QString &param, const QString &value);
 
     /// <summary>
+    /// Set a specific binary item parameter.
+    /// </summary>
+    /// <param name="param">item parameter</param>
+    /// <param name="value">binary data</param>
+    void setParam(const QString &param, const QByteArray &value);
+
+    /// <summary>
+    /// Get a specific binary item parameter.
+    /// </summary>
+    /// <param name="param">item parameter</param>
+    QByteArray getParam(const QString &param);
+
+    /// <summary>
     /// Disconnect from the RoboDK API. This flushes any pending program generation.
     /// </summary>
     /// <returns></returns>
@@ -2449,6 +2546,17 @@ private:
 
     /// Item type
     qint32 _TYPE;
+};
+
+
+/// \brief The GetPointsResult method represents the results of executing the GetPoints function.
+struct GetPointsResult
+{
+    Item item;
+    int featureType;
+    int featureId;
+    QString featureName;
+    tMatrix2D* points;
 };
 
 

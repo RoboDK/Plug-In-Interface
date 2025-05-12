@@ -348,7 +348,7 @@ void PluginOPCUA::SaveSettings(){
 
     qDebug() << "Saving OPC-UA plugin settings...";
     QByteArray data;
-    QDataStream ds(&data, QIODevice::WriteOnly);
+    QDataStream ds(&data, QDataStream::WriteOnly);
     qint64 version = 2;
     ds << version;
     ds << Server->Port;

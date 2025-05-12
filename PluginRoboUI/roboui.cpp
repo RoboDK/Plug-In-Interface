@@ -226,7 +226,12 @@ bool RoboUI::eventFilter(QObject* object, QEvent* event)
     if (object == _renderWindow && event->type() == QEvent::MouseMove)
     {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
         QPointF pos = mouseEvent->localPos();
+#else
+        QPointF pos = mouseEvent->position();
+#endif
+
         io.AddMousePosEvent(pos.x(), pos.y());
         _rdk->Render(IRoboDK::RenderScreen);
         //ImGui::UpdateInputEvents()
@@ -240,7 +245,12 @@ bool RoboUI::eventFilter(QObject* object, QEvent* event)
         event->type() == QEvent::MouseButtonRelease))
     {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
         QPointF pos = mouseEvent->localPos();
+#else
+        QPointF pos = mouseEvent->position();
+#endif
+
         io.AddMousePosEvent(pos.x(), pos.y());
         int button = -1;
         switch (mouseEvent->button())
