@@ -377,7 +377,10 @@ public:
         DrawPoints = 3,
 
         /// Draw spheres
-        DrawSpheres = 4
+        DrawSpheres = 4,
+
+        /// Draw a coordinate system
+        DrawFrame = 5
     };
 
 
