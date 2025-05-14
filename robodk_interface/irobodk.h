@@ -240,13 +240,30 @@ public:
         FEATURE_CURVE = 2,
 
         /// Point selection
-        FEATURE_POINT = 3
+        FEATURE_POINT = 3,
+
+        /// Object mesh (using ID)
+        FEATURE_OBJECT_MESH = 7,
+
+        /// Surface preview
+        FEATURE_SURFACE_PREVIEW = 8,
+
+        /// Mesh (under the mouse cursor)
+        FEATURE_MESH = 9,
+
+        /// Object mesh (under the mouse cursor)
+        FEATURE_HOVER_OBJECT_MESH = 10,
+
+        /// Object feature (under the mouse cursor)
+        FEATURE_HOVER_OBJECT = 11
     };
 
     /// Spray gun simulation:
     enum TypeSpray {
-        /// Activate the spray simulation
+        /// Disable spray simulation
         SPRAY_OFF = 0,
+
+        /// Enable spray simulation
         SPRAY_ON = 1
     };
 
