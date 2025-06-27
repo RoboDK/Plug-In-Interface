@@ -50,73 +50,105 @@ typedef ::QMatrix4x4 BaseMatrix4x4;
 namespace robodk
 {
 
+/*!
+    \class Matrix4x4
+    \brief The Matrix4x4 class represents a 4x4 transformation matrix in 3D space.
+
+    The Matrix4x4 class in general is treated as a row-major matrix, in that the
+    constructors and operator() functions take data in row-major format, as is
+    familiar in C-style usage.
+
+    Internally the data is stored as column-major format.
+
+    When using these functions be aware that they return data in \b column-major format:
+    - data()
+    - constData()
+*/
 class Matrix4x4 : public BaseMatrix4x4
 {
 public:
-    /// Create the identity matrix
+    /*!
+        Constructs an identity matrix.
+    */
     Matrix4x4();
 
-    /// Create a valid or an invalid matrix
+    /*!
+        Constructs a valid or an invalid identity matrix.
+    */
     explicit Matrix4x4(bool valid);
 
-    /// Create a copy of the matrix
+    /*!
+        Constructs this Matrix4x4 object as a copy of matrix.
+    */
     Matrix4x4(const Matrix4x4& matrix);
 
-    /// \brief Create a homogeneoux matrix given a one dimensional 16-value array (doubles)
-    /// \param values [nx,ny,nz,0, ox,oy,oz,0, ax,ay,az,0,  tx,ty,tz,1]
-    /// <returns> \f$ \begin{bmatrix} n_x & o_x & a_x & x \\
-    /// n_y & o_y & a_y & y \\
-    /// n_z & o_z & a_z & z \\
-    /// 0 & 0 & 0 & 1 \end{bmatrix} \f$
-    /// </returns>
+    /*!
+        \brief Constructs a matrix from the given 16 double-precision \a values.
+
+        The contents of the array \a values is assumed to be in \b column-major order.
+
+        \param values
+            \f$ \begin{bmatrix}
+                v_1 & v_2 & v_3 & v_4 & v_5 & v_6 & v_7 & v_8 &
+                v_9 & v_{10} & v_{11} & v_{12} & v_{13} & v_{14} & v_{15} & v_{16}
+            \end{bmatrix} \f$
+
+        \returns New Matrix4x4 object with the following structure:
+            \f$ \begin{bmatrix}
+                v_1 & v_5 & v_9    & v_{13} \\
+                v_2 & v_6 & v_{10} & v_{14} \\
+                v_3 & v_7 & v_{11} & v_{15} \\
+                v_4 & v_8 & v_{12} & v_{16}
+            \end{bmatrix} \f$
+    */
     Matrix4x4(const double* values);
 
-    /// \brief Create a homogeneoux matrix given a one dimensional 16-value array (floats)
-    /// \param values [nx,ny,nz,0, ox,oy,oz,0, ax,ay,az,0,  tx,ty,tz,1]
-    /// <returns> \f$ transl(x,y,z) rotx(r) roty(p) rotz(w) = \\
-    /// \begin{bmatrix} n_x & o_x & a_x & x \\
-    /// n_y & o_y & a_y & y \\
-    /// n_z & o_z & a_z & z \\
-    /// 0 & 0 & 0 & 1 \end{bmatrix} \f$
-    /// </returns>
+    /*!
+        \brief Constructs a matrix from the given 16 single-precision \a values.
+
+        The contents of the array \a values is assumed to be in \b column-major order.
+
+        \param values
+            \f$ \begin{bmatrix}
+                v_1 & v_2 & v_3 & v_4 & v_5 & v_6 & v_7 & v_8 &
+                v_9 & v_{10} & v_{11} & v_{12} & v_{13} & v_{14} & v_{15} & v_{16}
+            \end{bmatrix} \f$
+
+        \returns New Matrix4x4 object with the following structure:
+            \f$ \begin{bmatrix}
+                v_1 & v_5 & v_9    & v_{13} \\
+                v_2 & v_6 & v_{10} & v_{14} \\
+                v_3 & v_7 & v_{11} & v_{15} \\
+                v_4 & v_8 & v_{12} & v_{16}
+            \end{bmatrix} \f$
+    */
     Matrix4x4(const float* values);
 
-    /// <summary>
-    /// Create a translation matrix.
-    /// </summary>
-    /// <param name="x">translation along X (mm)</param>
-    /// <param name="y">translation along Y (mm)</param>
-    /// <param name="z">translation along Z (mm)</param>
-    /// <returns>
-    /// \f$ rotx(\theta) = \begin{bmatrix} 1 & 0 & 0 & x \\
-    /// 0 & 1 & 0 & y \\
-    /// 0 & 0 & 1 & z \\
-    /// 0 & 0 & 0 & 1 \\
-    /// \end{bmatrix} \f$
-    /// </returns>
+    /*!
+        \brief Constructs a matrix that translates coordinates by the components
+        \a x, \a y, and \a z.
+
+        \returns New Matrix4x4 object with the following structure:
+            \f$ \begin{bmatrix}
+                1 & 0 & 0 & x \\
+                0 & 1 & 0 & y \\
+                0 & 0 & 1 & z \\
+                0 & 0 & 0 & 1
+            \end{bmatrix} \f$
+    */
     Matrix4x4(double x, double y, double z);
 
+    /*!
+        \brief Constructs a matrix from the \a N, \a O, \a A, \a T vector components.
 
-    /// <summary>
-    /// Matrix class constructor for a 4x4 homogeneous matrix given N, O, A & T vectors
-    /// </summary>
-    /// <param name="nx">Matrix[0,0]</param>
-    /// <param name="ox">Matrix[0,1]</param>
-    /// <param name="ax">Matrix[0,2]</param>
-    /// <param name="tx">Matrix[0,3]</param>
-    /// <param name="ny">Matrix[1,0]</param>
-    /// <param name="oy">Matrix[1,1]</param>
-    /// <param name="ay">Matrix[1,2]</param>
-    /// <param name="ty">Matrix[1,3]</param>
-    /// <param name="nz">Matrix[2,0]</param>
-    /// <param name="oz">Matrix[2,1]</param>
-    /// <param name="az">Matrix[2,2]</param>
-    /// <param name="tz">Matrix[2,3]</param>
-    /// <returns> \f$ \begin{bmatrix} n_x & o_x & a_x & x \\
-    /// n_y & o_y & a_y & y \\
-    /// n_z & o_z & a_z & z \\
-    /// 0 & 0 & 0 & 1 \end{bmatrix} \f$
-    /// </returns>
+        \returns New Matrix4x4 object with the following structure:
+            \f$ \begin{bmatrix}
+                n_x & o_x & a_x & t_x \\
+                n_y & o_y & a_y & t_y \\
+                n_z & o_z & a_z & t_z \\
+                0   & 0   & 0   & 1
+            \end{bmatrix} \f$
+    */
     Matrix4x4(
         double nx,
         double ox,
@@ -341,11 +373,12 @@ public:
 #endif
 
 private:
-    /// Flags if a matrix is not valid
-    double _valid;
+    /*! \cond */
 
-    /// Copy of the data as a double array
+    double _valid;
     mutable double _md[16];
+
+    /*! \endcond */
 };
 
 } // namespace robodk

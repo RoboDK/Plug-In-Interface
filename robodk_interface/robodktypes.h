@@ -238,16 +238,27 @@ void Matrix2D_Load(QDataStream *st, tMatrix2D **emx);
 
 typedef robodk::Joints tJoints;
 
+/*!
+    \typedef Mat
+    \brief The Mat class represents a 4x4 pose matrix.
 
-/// \brief The Mat class represents a 4x4 pose matrix. The main purpose of this object is to represent a pose in the 3D space (position and orientation).
-/// In other words, a pose is a 4x4 matrix that represents the position and orientation of one reference frame with respect to another one, in the 3D space.
-/// Poses are commonly used in robotics to place objects, reference frames and targets with respect to each other.
-/// <br>
-/// \f$ transl(x,y,z) rotx(r) roty(p) rotz(w) = \\
-/// \begin{bmatrix} n_x & o_x & a_x & x \\
-/// n_y & o_y & a_y & y \\
-/// n_z & o_z & a_z & z \\
-/// 0 & 0 & 0 & 1 \end{bmatrix} \f$
+    The main purpose of this object is to represent a pose
+    in the 3D space (position and orientation).
+
+    In other words, a pose is a 4x4 matrix that represents
+    the position and orientation of one reference frame with
+    respect to another one, in the 3D space.
+
+    Poses are commonly used in robotics to place objects,
+    reference frames and targets with respect to each other.
+
+    <br>
+    \f$ transl(x,y,z) rotx(r) roty(p) rotz(w) = \\
+    \begin{bmatrix} n_x & o_x & a_x & x \\
+    n_y & o_y & a_y & y \\
+    n_z & o_z & a_z & z \\
+    0 & 0 & 0 & 1 \end{bmatrix} \f$
+*/
 typedef robodk::Matrix4x4 Mat;
 
 /// Translation matrix class: Mat::transl.
