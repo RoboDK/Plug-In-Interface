@@ -74,8 +74,6 @@ SOURCES += \
     imgui/imgui_impl_qt.cpp \
     imgui/imgui_tables.cpp \
     imgui/imgui_widgets.cpp \
-    ../robodk_interface/robodktools.cpp \
-    ../robodk_interface/robodktypes.cpp \
     roboui.cpp
 
 HEADERS += \
@@ -86,13 +84,26 @@ HEADERS += \
     imgui/imstb_rectpack.h \
     imgui/imstb_textedit.h \
     imgui/imstb_truetype.h \
-    ../robodk_interface/iapprobodk.h \
-    ../robodk_interface/iitem.h \
-    ../robodk_interface/irobodk.h \
-    ../robodk_interface/robodk_interface.h \
-    ../robodk_interface/robodktools.h \
-    ../robodk_interface/robodktypes.h \
     roboui.h
+
+HEADERS += \
+    ../robodk_interface/iitem.h \
+    ../robodk_interface/irobodk.h\
+    ../robodk_interface/iapprobodk.h \
+    ../robodk_interface/robodktypes.h \
+    ../robodk_interface/robodktools.h \
+    ../robodk_interface/matrix4x4.h \
+    ../robodk_interface/vector3.h \
+    ../robodk_interface/deprecated.h \
+    ../robodk_interface/constants.h \
+    ../robodk_interface/joints.h \
+
+SOURCES += \
+    ../robodk_interface/robodktools.cpp \
+    ../robodk_interface/robodktypes.cpp \
+    ../robodk_interface/matrix4x4.cpp \
+    ../robodk_interface/vector3.cpp \
+    ../robodk_interface/joints.cpp
 
 RESOURCES += \
     roboui.qrc
