@@ -78,7 +78,7 @@ public:
     explicit Matrix4x4(bool valid);
 
     /*!
-        Constructs this Matrix4x4 object as a copy of matrix.
+        Constructs this Matrix4x4 object as a copy of \a matrix.
     */
     Matrix4x4(const Matrix4x4& matrix);
 
@@ -165,210 +165,337 @@ public:
 
     ~Matrix4x4() = default;
 
-    /// Set the X vector values (N vector)
+    /*!
+        Sets the X vector (N vector).
+    */
     void setVX(const Vector3& n);
 
-    /// Set the Y vector values (O vector)
+    /*!
+        Sets the Y vector (O vector).
+    */
     void setVY(const Vector3& o);
 
-    /// Set the Z vector values (A vector)
+    /*!
+        Sets the Z vector (A vector).
+    */
     void setVZ(const Vector3& a);
 
-    /// Set the X vector values (N vector)
+    /*!
+        Sets the X vector values (N vector).
+    */
     void setVX(double x, double y, double z);
 
-    /// Set the Y vector values (O vector)
+    /*!
+        Sets the Y vector values (O vector).
+    */
     void setVY(double x, double y, double z);
 
-    /// Set the Z vector values (A vector)
+    /*!
+        Sets the Z vector values (A vector).
+    */
     void setVZ(double x, double y, double z);
 
-    /// Set the position (T position) in mm
+    /*!
+        Sets the position (T).
+    */
     void setPos(double x, double y, double z);
 
-    /// Set the X vector values (N vector)
+    /*!
+        Sets the X vector values (N vector).
+    */
     void setVX(const double* xyz);
 
-    /// Set the Y vector values (O vector)
+    /*!
+        Sets the Y vector values (O vector).
+    */
     void setVY(const double* xyz);
 
-    /// Set the Z vector values (A vector)
+    /*!
+        Sets the Z vector values (A vector).
+    */
     void setVZ(const double* xyz);
 
-    /// Set the position (T position) in mm
+    /*!
+        Sets the position (T).
+    */
     void setPos(const double* xyz);
 
-    /// Set the pose values
+    /*!
+        \brief Sets the elements of matrix from the given 16 double-precision \a values.
+
+        The contents of the array \a values is assumed to be in \b column-major order.
+
+        \f$ \begin{bmatrix}
+            v_1 & v_5 & v_9    & v_{13} \\
+            v_2 & v_6 & v_{10} & v_{14} \\
+            v_3 & v_7 & v_{11} & v_{15} \\
+            v_4 & v_8 & v_{12} & v_{16}
+        \end{bmatrix} \f$
+
+        \param values
+            \f$ \begin{bmatrix}
+                v_1 & v_2 & v_3 & v_4 & v_5 & v_6 & v_7 & v_8 &
+                v_9 & v_{10} & v_{11} & v_{12} & v_{13} & v_{14} & v_{15} & v_{16}
+            \end{bmatrix} \f$
+    */
     void setValues(const double* values);
 
-    /// Get the X vector (N vector)
+    /*!
+        Returns the X vector (N vector).
+    */
     Vector3 vx() const;
 
-    /// Get the Y vector (O vector)
+    /*!
+        Returns the Y vector (O vector).
+    */
     Vector3 vy() const;
 
-    /// Get the Z vector (A vector)
+    /*!
+        Returns the Z vector (A vector).
+    */
     Vector3 vz() const;
 
-    /// Get the X vector (N vector)
+    /*!
+        Writes the X vector (N vector) into array of 3 double-precision \a xyz values.
+    */
     void VX(double* xyz) const;
 
-    /// Get the Y vector (O vector)
+    /*!
+        Writes the Y vector (O vector) into array of 3 double-precision \a xyz values.
+    */
     void VY(double* xyz) const;
 
-    /// Get the Z vector (A vector)
+    /*!
+        Writes the Z vector (A vector) into array of 3 double-precision \a xyz values.
+    */
     void VZ(double* xyz) const;
 
-    /// Get the position (T position), in mm
+    /*!
+        Writes the position (T vector) into array of 3 double-precision \a xyz values.
+    */
     void Pos(double* xyz) const;
 
-    /// \brief Set a matrix value
-    /// \param r row
-    /// \param c column
-    /// \param value value
-    void Set(int r, int c, double value);
+    /*!
+        Sets a new \a value to the element at position (\a row, \a column) in this matrix.
+    */
+    void Set(int row, int column, double value);
 
-    /// \brief Get a matrix value
-    /// \param r row
-    /// \param c column
-    /// \return value
-    double Get(int r, int c) const;
+    /*!
+        Returns the value of the element at position (\a row, \a column) in this matrix.
+    */
+    double Get(int row, int column) const;
 
-    /// Invert the pose (homogeneous matrix assumed)
+    /*!
+        Returns the inverse of this matrix. Returns the identity if
+        this matrix cannot be inverted; i.e. determinant() is zero.
+    */
     Matrix4x4 inv() const;
 
-    /// Returns true if the matrix is homogeneous, otherwise it returns false
+    /*!
+        Returns \c true if the matrix is homogeneous; false otherwise.
+    */
     bool isHomogeneous() const;
 
-    /// Forces 4x4 matrix to be homogeneous (vx,vy,vz must be unitary vectors and respect: vx x vy = vz). Returns True if the matrix was not homogeneous and it was be modified to make it homogeneous.
+    /*!
+        \brief Forces this matrix to be homogeneous.
+        The \a vx, \a vy, \a vz must be unitary vectors and respect: vx x vy = vz.
+        Returns \c true if the matrix was not homogeneous and it was modified to be homogeneous.
+    */
     bool MakeHomogeneous();
 
-    /// <summary>
-    /// Calculates the equivalent position and euler angles ([x,y,z,r,p,w] vector) of the given pose
-    /// Note: transl(x,y,z)*rotz(w*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
-    /// See also: FromXYZRPW()
-    /// </summary>
-    /// <returns>XYZWPR translation and rotation in mm and degrees</returns>
+    /*!
+        \brief Calculates the position and euler angles ([x,y,z,r,p,w] vector) from this matrix.
+
+        Note: transl(x, y, z) * rotz(w * pi / 180) * roty(p * pi / 180) * rotx(r * pi / 180)
+
+        \returns The XYZWPR translation and rotation in the length units and degrees.
+        \sa FromXYZRPW()
+    */
     void ToXYZRPW(double* xyzwpr) const;
 
-    /// <summary>
-    /// Calculates the pose from the position and euler angles ([x,y,z,r,p,w] vector)
-    /// The result is the same as:
-    /// <br>
-    /// H = transl(x,y,z)*rotz(w*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
-    /// </summary>
-    /// <returns>Homogeneous matrix (4x4)</returns>
+    /*!
+        \brief Calculates this matrix from the position and euler angles ([x,y,z,r,p,w] vector).
+
+        The result is the same as:
+        H = transl(x, y, z) * rotz(w * pi / 180) * roty(p * pi / 180) * rotx(r * pi / 180)
+
+        \sa ToXYZRPW()
+    */
     void FromXYZRPW(const double* xyzwpr);
 
-    /// <summary>
-    /// Calculates the pose from the position and euler angles ([x,y,z,r,p,w] vector)
-    /// The result is the same as:
-    /// <br>
-    /// H = transl(x,y,z)*rotz(w*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
-    /// </summary>
-    /// <returns>Homogeneous matrix (4x4)</returns>
+
+    /*!
+        \brief Constructs a matrix from the position and euler angles ([x,y,z,r,p,w] vector).
+
+        The result is the same as:
+        H = transl(x, y, z) * rotz(w * pi / 180) * roty(p * pi / 180) * rotx(r * pi / 180)
+
+        \returns New homogeneous Matrix4x4 object.
+
+        \sa FromXYZRPW()
+    */
     static Matrix4x4 XYZRPW_2_Mat(double x, double y, double z, double r, double p, double w);
+
+    /*!
+        \brief Constructs a matrix from the position and euler angles ([x,y,z,r,p,w] vector).
+
+        The result is the same as:
+        H = transl(x, y, z) * rotz(w * pi / 180) * roty(p * pi / 180) * rotx(r * pi / 180)
+
+        \returns New homogeneous Matrix4x4 object.
+
+        \sa FromXYZRPW()
+    */
     static Matrix4x4 XYZRPW_2_Mat(const double* xyzwpr);
 
-    /// Get a pointer to the 16-digit double array.
+    /*!
+        Returns a constant pointer to the raw data of this matrix as 16 double-precision numbers.
+        This raw data is stored in column-major format.
+
+        \sa Values(), ValuesF(), constData()
+    */
     const double* ValuesD() const;
 
-    /// Get a pointer to the 16-digit array as an array of floats.
+    /*!
+        Returns a constant pointer to the raw data of this matrix as 16 single-precision numbers.
+        This raw data is stored in column-major format.
+
+        \sa Values(), ValuesD(), constData()
+    */
     const float* ValuesF() const;
 
 #ifdef ROBODK_API_FLOATS
-    /// Get a pointer to the 16-digit array (doubles or floats if ROBODK_API_FLOATS is defined).
+    /*!
+        Returns a constant pointer to the raw data of this matrix as
+        16 double- or single-precision numbers.
+        This raw data is stored in column-major format.
+
+        \sa ValuesF(), ValuesD(), constData()
+    */
     const float* Values() const;
 #else
-    /// Get a pointer to the 16-digit array (doubles or floats if ROBODK_API_FLOATS is defined).
+    /*!
+        Returns a constant pointer to the raw data of this matrix as
+        16 double- or single-precision numbers.
+        This raw data is stored in column-major format.
+
+        \sa ValuesF(), ValuesD(), constData()
+    */
     const double* Values() const;
 #endif
 
-    /// Copy the 16-values of the 4x4 matrix to a double array.
-    void Values(double values[16]) const;
+    /*!
+        Writes the contents of this matrix into array of 16 double-precision \a values.
 
-    /// Copy the 16-values of the 4x4 matrix to a double array.
-    void Values(float values[16]) const;
+        \sa Values(), ValuesF(), ValuesD(), constData()
+    */
+    void Values(double* values) const;
 
-    /// Check if the matrix is valid
+    /*!
+        Writes the contents of this matrix into array of 16 single-precision \a values.
+
+        \sa Values(), ValuesF(), ValuesD(), constData()
+    */
+    void Values(float* values) const;
+
+    /*!
+        Returns \c true if the matrix is marked as valid; false otherwise.
+    */
     bool Valid() const;
 
+    /*!
+        Sets this Matrix4x4 object as a copy of \a matrix.
+    */
     Matrix4x4& operator=(const Matrix4x4& matrix);
 
-    /// <summary>
-    /// Return a translation matrix.
-    /// </summary>
-    /// <param name="x">translation along X (mm)</param>
-    /// <param name="y">translation along Y (mm)</param>
-    /// <param name="z">translation along Z (mm)</param>
-    /// <returns>
-    /// \f$ rotx(\theta) = \begin{bmatrix} 1 & 0 & 0 & x \\
-    /// 0 & 1 & 0 & y \\
-    /// 0 & 0 & 1 & z \\
-    /// 0 & 0 & 0 & 1 \\
-    /// \end{bmatrix} \f$
-    /// </returns>
+    /*!
+        \brief Constructs a matrix that translates coordinates by the components
+        \a x, \a y, and \a z.
+
+        \returns New Matrix4x4 object with the following structure:
+            \f$ \begin{bmatrix}
+                1 & 0 & 0 & x \\
+                0 & 1 & 0 & y \\
+                0 & 0 & 1 & z \\
+                0 & 0 & 0 & 1
+            \end{bmatrix} \f$
+    */
     static Matrix4x4 transl(double x, double y, double z);
 
-    /// <summary>
-    /// Return the X-axis rotation matrix.
-    /// </summary>
-    /// <param name="rx">Rotation around X axis (in radians).</param>
-    /// <returns>
-    /// \f$ rotx(\theta) = \begin{bmatrix} 1 & 0 & 0 & 0 \\
-    /// 0 & c_\theta & -s_\theta & 0 \\
-    /// 0 & s_\theta & c_\theta & 0 \\
-    /// 0 & 0 & 0 & 1 \\
-    /// \end{bmatrix} \f$
-    /// </returns>
+    /*!
+        \brief Constructs a matrix that rotates coordinates around X axis.
+        \param rx rotation angle in radians.
+
+        \returns New Matrix4x4 object with the following structure:
+            \f$ \begin{bmatrix}
+                1 & 0       & 0         & 0 \\
+                0 & \cos rx & - \sin rx & 0 \\
+                0 & \sin rx & \cos rx   & 0 \\
+                0 & 0       & 0         & 1
+            \end{bmatrix} \f$
+    */
     static Matrix4x4 rotx(double rx);
 
-    /// <summary>
-    /// Return a Y-axis rotation matrix
-    /// </summary>
-    /// <param name="ry">Rotation around Y axis (in radians)</param>
-    /// <returns>
-    /// \f$ roty(\theta) = \begin{bmatrix} c_\theta & 0 & s_\theta & 0 \\
-    /// 0 & 1 & 0 & 0 \\
-    /// -s_\theta & 0 & c_\theta & 0 \\
-    /// 0 & 0 & 0 & 1 \\
-    /// \end{bmatrix} \f$
-    /// </returns>
+    /*!
+        \brief Constructs a matrix that rotates coordinates around Y axis.
+        \param ry rotation angle in radians.
+
+        \returns New Matrix4x4 object with the following structure:
+            \f$ \begin{bmatrix}
+                \cos ry   & 0 & \sin ry & 0 \\
+                0         & 1 & 0       & 0 \\
+                - \sin ry & 0 & \cos ry & 0 \\
+                0         & 0 & 0       & 1
+            \end{bmatrix} \f$
+    */
     static Matrix4x4 roty(double ry);
 
-    /// <summary>
-    /// Return a Z-axis rotation matrix.
-    /// </summary>
-    /// <param name="rz">Rotation around Z axis (in radians)</param>
-    /// <returns>
-    /// \f$ rotz(\theta) = \begin{bmatrix} c_\theta & -s_\theta & 0 & 0 \\
-    /// s_\theta & c_\theta & 0 & 0 \\
-    /// 0 & 0 & 1 & 0 \\
-    /// 0 & 0 & 0 & 1 \\
-    /// \end{bmatrix} \f$
-    /// </returns>
+    /*!
+        \brief Constructs a matrix that rotates coordinates around Z axis.
+        \param rz rotation angle in radians.
+
+        \returns New Matrix4x4 object with the following structure:
+            \f$ \begin{bmatrix}
+                \cos rz & - \sin rz & 0 & 0 \\
+                \sin rz & \cos rx   & 0 & 0 \\
+                0       & 0         & 1 & 0 \\
+                0       & 0         & 0 & 1
+            \end{bmatrix} \f$
+    */
     static Matrix4x4 rotz(double rz);
 
 #ifdef QT_GUI_LIB
-    /// Create a copy of the matrix
+    /*!
+        Constructs this Matrix4x4 object as a copy of \a matrix.
+    */
     Matrix4x4(const BaseMatrix4x4& matrix);
 
-    /// To String operator (use with qDebug() << tJoints;
+    /*!
+        Returns string representation of this matrix.
+        \sa ToString()
+    */
     inline operator QString() const { return ToString(); }
 
     /// Set the matrix given a XYZRPW string array (6-values)
-    bool FromString(const QString &str);
+    bool FromString(const QString& str);
 
-    /// \brief Retrieve a string representation of the pose
-    /// \param separator String separator
-    /// \param precision Number of decimals
-    /// \param in_xyzwpr if set to true (default), the pose will be represented as XYZWPR 6-dimensional array using ToXYZRPW
-    /// \return
+
+    /*!
+        Returns string representation of this matrix with each element separated by
+        the given \a separator (which can be an empty string).
+        \param separator string that separates elements of the matrix.
+        \param precision represents the number of digits after the decimal point.
+        \param xyzrpwOnly if set to \s true, the pose will be represented as
+        XYZWPR 6-dimensional array using ToXYZRPW().
+    */
     QString ToString(
         const ::QString& separator = QLatin1String(", "),
         int precision = 3,
-        bool xyzrpw_only = false) const;
+        bool xyzrpwOnly = false) const;
 
+    /*!
+        Sets this Matrix4x4 object as a copy of \a matrix.
+    */
     Matrix4x4& operator=(const QMatrix4x4& matrix);
 #endif
 

@@ -267,16 +267,14 @@ void Matrix4x4::setValues(const double* values)
     Set(3,3, values[15]);
 }
 
-void Matrix4x4::Set(int i, int j, double value)
+void Matrix4x4::Set(int row, int column, double value)
 {
-    QVector4D rw(this->row(i));
-    rw[j] = value;
-    setRow(i, rw);
+    (*this)(row, column) = value;
 }
 
-double Matrix4x4::Get(int i, int j) const
+double Matrix4x4::Get(int row, int column) const
 {
-    return row(i)[j];
+    return (*this)(row, column);
 }
 
 Matrix4x4 Matrix4x4::inv() const
@@ -441,7 +439,7 @@ const double* Matrix4x4::Values() const
 }
 #endif
 
-void Matrix4x4::Values(double data[16]) const
+void Matrix4x4::Values(double* data) const
 {
     for(int i = 0; i < 16; ++i)
     {
@@ -449,7 +447,7 @@ void Matrix4x4::Values(double data[16]) const
     }
 }
 
-void Matrix4x4::Values(float data[16]) const
+void Matrix4x4::Values(float* data) const
 {
     for(int i = 0; i < 16; ++i)
     {
@@ -555,7 +553,7 @@ bool Matrix4x4::FromString(const QString &pose_str)
     return true;
 }
 
-QString Matrix4x4::ToString(const QString &separator, int precision, bool xyzwpr_only) const
+QString Matrix4x4::ToString(const QString &separator, int precision, bool xyzrpwOnly) const
 {
     if (!Valid())
     {
@@ -583,7 +581,7 @@ QString Matrix4x4::ToString(const QString &separator, int precision, bool xyzwpr
     }
     str.append("))");
 
-    if (xyzwpr_only)
+    if (xyzrpwOnly)
     {
         return str;
     }
