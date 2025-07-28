@@ -115,105 +115,105 @@ Matrix4x4::Matrix4x4(
 {
 }
 
-void Matrix4x4::setVX(const Vector3& n)
+void Matrix4x4::SetVX(const Vector3& n)
 {
-    (*this)(0, 0) = n.x();
-    (*this)(1, 0) = n.y();
-    (*this)(2, 0) = n.z();
+    (*this)(0, 0) = n.X();
+    (*this)(1, 0) = n.Y();
+    (*this)(2, 0) = n.Z();
 }
 
-void Matrix4x4::setVY(const Vector3& o)
+void Matrix4x4::SetVY(const Vector3& o)
 {
-    (*this)(0, 1) = o.x();
-    (*this)(1, 1) = o.y();
-    (*this)(2, 1) = o.z();
+    (*this)(0, 1) = o.X();
+    (*this)(1, 1) = o.Y();
+    (*this)(2, 1) = o.Z();
 }
 
-void Matrix4x4::setVZ(const Vector3& a)
+void Matrix4x4::SetVZ(const Vector3& a)
 {
-    (*this)(0, 2) = a.x();
-    (*this)(1, 2) = a.y();
-    (*this)(2, 2) = a.z();
+    (*this)(0, 2) = a.X();
+    (*this)(1, 2) = a.Y();
+    (*this)(2, 2) = a.Z();
 }
 
-void Matrix4x4::setVX(double x, double y, double z)
+void Matrix4x4::SetVX(double x, double y, double z)
 {
     Set(0,0, x);
     Set(1,0, y);
     Set(2,0, z);
 }
 
-void Matrix4x4::setVY(double x, double y, double z)
+void Matrix4x4::SetVY(double x, double y, double z)
 {
     Set(0,1, x);
     Set(1,1, y);
     Set(2,1, z);
 }
 
-void Matrix4x4::setVZ(double x, double y, double z)
+void Matrix4x4::SetVZ(double x, double y, double z)
 {
     Set(0,2, x);
     Set(1,2, y);
     Set(2,2, z);
 }
 
-void Matrix4x4::setPos(double x, double y, double z)
+void Matrix4x4::SetPos(double x, double y, double z)
 {
-    Set(0,3, x);
-    Set(1,3, y);
-    Set(2,3, z);
+    Set(0, 3, x);
+    Set(1, 3, y);
+    Set(2, 3, z);
 }
 
-void Matrix4x4::setVX(const double* xyz)
+void Matrix4x4::SetVX(const double* xyz)
 {
-    Set(0,0, xyz[0]);
-    Set(1,0, xyz[1]);
-    Set(2,0, xyz[2]);
+    Set(0, 0, xyz[0]);
+    Set(1, 0, xyz[1]);
+    Set(2, 0, xyz[2]);
 }
 
-void Matrix4x4::setVY(const double* xyz)
+void Matrix4x4::SetVY(const double* xyz)
 {
-    Set(0,1, xyz[0]);
-    Set(1,1, xyz[1]);
-    Set(2,1, xyz[2]);
+    Set(0, 1, xyz[0]);
+    Set(1, 1, xyz[1]);
+    Set(2, 1, xyz[2]);
 }
 
-void Matrix4x4::setVZ(const double* xyz)
+void Matrix4x4::SetVZ(const double* xyz)
 {
-    Set(0,2, xyz[0]);
-    Set(1,2, xyz[1]);
-    Set(2,2, xyz[2]);
+    Set(0, 2, xyz[0]);
+    Set(1, 2, xyz[1]);
+    Set(2, 2, xyz[2]);
 }
 
-void Matrix4x4::setPos(const double* xyz)
+void Matrix4x4::SetPos(const double* xyz)
 {
-    Set(0,3, xyz[0]);
-    Set(1,3, xyz[1]);
-    Set(2,3, xyz[2]);
+    Set(0, 3, xyz[0]);
+    Set(1, 3, xyz[1]);
+    Set(2, 3, xyz[2]);
 }
 
-Vector3 Matrix4x4::vx() const
+Vector3 Matrix4x4::VX() const
 {
     return Vector3(
-        (*this)(0, 0),
-        (*this)(1, 0),
-        (*this)(2, 0));
+        Get(0, 0),
+        Get(1, 0),
+        Get(2, 0));
 }
 
-Vector3 Matrix4x4::vy() const
+Vector3 Matrix4x4::VY() const
 {
     return Vector3(
-        (*this)(0, 1),
-        (*this)(1, 1),
-        (*this)(2, 1));
+        Get(0, 1),
+        Get(1, 1),
+        Get(2, 1));
 }
 
-Vector3 Matrix4x4::vz() const
+Vector3 Matrix4x4::VZ() const
 {
     return Vector3(
-        (*this)(0, 2),
-        (*this)(1, 2),
-        (*this)(2, 2));
+        Get(0, 2),
+        Get(1, 2),
+        Get(2, 2));
 }
 
 void Matrix4x4::VX(double* xyz) const
@@ -244,27 +244,27 @@ void Matrix4x4::Pos(double* xyz) const
     xyz[2] = Get(2, 3);
 }
 
-void Matrix4x4::setValues(const double* values)
+void Matrix4x4::SetValues(const double* values)
 {
-    Set(0,0, values[0]);
-    Set(1,0, values[1]);
-    Set(2,0, values[2]);
-    Set(3,0, values[3]);
+    Set(0, 0, values[0]);
+    Set(1, 0, values[1]);
+    Set(2, 0, values[2]);
+    Set(3, 0, values[3]);
 
-    Set(0,1, values[4]);
-    Set(1,1, values[5]);
-    Set(2,1, values[6]);
-    Set(3,1, values[7]);
+    Set(0, 1, values[4]);
+    Set(1, 1, values[5]);
+    Set(2, 1, values[6]);
+    Set(3, 1, values[7]);
 
-    Set(0,2, values[8]);
-    Set(1,2, values[9]);
-    Set(2,2, values[10]);
-    Set(3,2, values[11]);
+    Set(0, 2, values[8]);
+    Set(1, 2, values[9]);
+    Set(2, 2, values[10]);
+    Set(3, 2, values[11]);
 
-    Set(0,3, values[12]);
-    Set(1,3, values[13]);
-    Set(2,3, values[14]);
-    Set(3,3, values[15]);
+    Set(0, 3, values[12]);
+    Set(1, 3, values[13]);
+    Set(2, 3, values[14]);
+    Set(3, 3, values[15]);
 }
 
 void Matrix4x4::Set(int row, int column, double value)
@@ -277,40 +277,40 @@ double Matrix4x4::Get(int row, int column) const
     return (*this)(row, column);
 }
 
-Matrix4x4 Matrix4x4::inv() const
+Matrix4x4 Matrix4x4::Inverted(bool* invertible) const
 {
-    return this->inverted();
+    return this->inverted(invertible);
 }
 
-bool Matrix4x4::isHomogeneous() const
+bool Matrix4x4::IsHomogeneous() const
 {
-    auto tx = vx();
-    auto ty = vy();
-    auto tz = vz();
+    auto tx = VX();
+    auto ty = VY();
+    auto tz = VZ();
 
     const double tol = 1e-7;
 
-    if (std::fabs(Vector3::dotProduct(tx, ty)) > tol)
+    if (std::fabs(Vector3::DotProduct(tx, ty)) > tol)
     {
         return false;
     }
-    else if (std::fabs(Vector3::dotProduct(tx, tz)) > tol)
+    else if (std::fabs(Vector3::DotProduct(tx, tz)) > tol)
     {
         return false;
     }
-    else if (std::fabs(Vector3::dotProduct(ty, tz)) > tol)
+    else if (std::fabs(Vector3::DotProduct(ty, tz)) > tol)
     {
         return false;
     }
-    else if (std::fabs(tx.length() - 1.0) > tol)
+    else if (std::fabs(tx.Length() - 1.0) > tol)
     {
         return false;
     }
-    else if (std::fabs(ty.length() - 1.0) > tol)
+    else if (std::fabs(ty.Length() - 1.0) > tol)
     {
         return false;
     }
-    else if (std::fabs(tz.length() - 1.0) > tol)
+    else if (std::fabs(tz.Length() - 1.0) > tol)
     {
         return false;
     }
@@ -320,21 +320,21 @@ bool Matrix4x4::isHomogeneous() const
 
 bool Matrix4x4::MakeHomogeneous()
 {
-    auto tx = vx();
-    auto ty = vy();
-    auto tz = vz();
+    auto tx = VX();
+    auto ty = VY();
+    auto tz = VZ();
 
-    bool result = isHomogeneous();
+    bool result = IsHomogeneous();
 
-    tx.normalize();
-    tz = Vector3::crossProduct(tx, ty);
-    tz.normalize();
-    ty = Vector3::crossProduct(tz, tx);
-    ty.normalize();
+    tx.Normalize();
+    tz = Vector3::CrossProduct(tx, ty);
+    tz.Normalize();
+    ty = Vector3::CrossProduct(tz, tx);
+    ty.Normalize();
 
-    setVX(tx);
-    setVY(ty);
-    setVZ(tz);
+    SetVX(tx);
+    SetVY(ty);
+    SetVZ(tz);
 
     (*this)(3, 0) = 0.0f;
     (*this)(3, 1) = 0.0f;
@@ -346,9 +346,9 @@ bool Matrix4x4::MakeHomogeneous()
 
 void Matrix4x4::ToXYZRPW(double* xyzwpr) const
 {
-    double x = Get(0,3);
-    double y = Get(1,3);
-    double z = Get(2,3);
+    double x = Get(0, 3);
+    double y = Get(1, 3);
+    double z = Get(2, 3);
     double w, p, r;
 
     if (Get(2,0) > (1.0 - 1e-6))
@@ -471,7 +471,7 @@ Matrix4x4 Matrix4x4::transl(double x, double y, double z)
 {
     Matrix4x4 mat;
     mat.setToIdentity();
-    mat.setPos(x, y, z);
+    mat.SetPos(x, y, z);
     return mat;
 }
 
@@ -561,7 +561,7 @@ QString Matrix4x4::ToString(const QString &separator, int precision, bool xyzrpw
     }
 
     QString str;
-    if (!isHomogeneous())
+    if (!IsHomogeneous())
     {
         str.append("Warning!! Pose is not homogeneous! Use Matrix4x4::MakeHomogeneous() to make this matrix homogeneous\n");
     }
