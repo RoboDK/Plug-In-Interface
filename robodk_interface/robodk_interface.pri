@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/iitem.h \
     $$PWD/irobodk.h \
     $$PWD/joints.h \
+    $$PWD/legacymatrix2d.h \
     $$PWD/matrix4x4.h \
     $$PWD/robodktools.h \
     $$PWD/robodktypes.h \
@@ -15,6 +16,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/joints.cpp \
+    $$PWD/legacymatrix2d.cpp \
     $$PWD/matrix4x4.cpp \
     $$PWD/robodktools.cpp \
     $$PWD/robodktypes.cpp \

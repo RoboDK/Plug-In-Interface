@@ -32,7 +32,9 @@
 #include <cstring>
 #include <algorithm>
 
-#include "robodktypes.h"
+#include <QStringList>
+
+#include "legacymatrix2d.h"
 
 
 namespace robodk
@@ -47,7 +49,7 @@ Joints::Joints()
 
 Joints::Joints(int ndofs)
 {
-    _dofCount = std::min(ndofs, maximumJoints);
+    _dofCount = std::min(ndofs, MaximumJoints);
     for (int i = 0; i < _dofCount; i++)
     {
         _joints[i] = 0.0;
@@ -61,8 +63,8 @@ Joints::Joints(const double *joints, int ndofs)
 
 Joints::Joints(const float *joints, int ndofs)
 {
-    int ndofs_ok = std::min(ndofs, maximumJoints);
-    double jnts[maximumJoints];
+    int ndofs_ok = std::min(ndofs, MaximumJoints);
+    double jnts[MaximumJoints];
 
     for (int i=0; i < ndofs_ok; i++)
     {
@@ -71,19 +73,19 @@ Joints::Joints(const float *joints, int ndofs)
     SetValues(jnts, ndofs_ok);
 }
 
-Joints::Joints(const tMatrix2D *mat2d, int column, int ndofs)
+Joints::Joints(const legacy::Matrix2D *mat2d, int column, int ndofs)
 {
-    if (column >= Matrix2D_Size(mat2d, 2))
+    if (column >= Matrix2D_GetDimension(mat2d, 2))
     {
         _dofCount = 0;
     }
     if (ndofs < 0)
     {
-        ndofs = Matrix2D_Size(mat2d, 1);
+        ndofs = Matrix2D_GetDimension(mat2d, 1);
     }
-    _dofCount = qMin(ndofs, RDK_SIZE_JOINTS_MAX);
+    _dofCount = qMin(ndofs, MaximumJoints);
 
-    double *ptr = Matrix2D_Get_col(mat2d, column);
+    double *ptr = Matrix2D_GetColumn(mat2d, column);
     SetValues(ptr, _dofCount);
 }
 
@@ -100,7 +102,7 @@ const double* Joints::ValuesD() const
 
 const float* Joints::ValuesF() const
 {
-    for (int i = 0; i < RDK_SIZE_JOINTS_MAX; i++)
+    for (int i = 0; i < MaximumJoints; i++)
     {
         _jointsFloat[i] = _joints[i];
     }
@@ -157,7 +159,7 @@ void Joints::SetValues(const double *values, int ndofs)
 {
     if (ndofs >= 0)
     {
-        _dofCount = qMin(ndofs, RDK_SIZE_JOINTS_MAX);
+        _dofCount = qMin(ndofs, MaximumJoints);
     }
 
     for (int i = 0; i < _dofCount; i++)
@@ -170,7 +172,7 @@ void Joints::SetValues(const float *values, int ndofs)
 {
     if (ndofs >= 0)
     {
-        _dofCount = qMin(ndofs, RDK_SIZE_JOINTS_MAX);
+        _dofCount = qMin(ndofs, MaximumJoints);
     }
 
     for (int i = 0; i < _dofCount; i++)
@@ -219,7 +221,7 @@ bool Joints::FromString(const QString &str)
 #endif
 
     QStringList jointList = s.split(separator, behavior);
-    _dofCount = qMin(jointList.length(), RDK_SIZE_JOINTS_MAX);
+    _dofCount = qMin(jointList.length(), MaximumJoints);
     for (int i = 0; i < _dofCount; i++)
     {
         _joints[i] = jointList[i].trimmed().toDouble();
