@@ -104,24 +104,5 @@ SOURCES += \
 #--------------------------
 # Header and source files required by any RoboDK plugin
 # Do not change this section, make sure to have the robodk_interface folder up one folder
-HEADERS += \
-    ../robodk_interface/iitem.h \
-    ../robodk_interface/irobodk.h\
-    ../robodk_interface/iapprobodk.h \
-    ../robodk_interface/robodktypes.h \
-    ../robodk_interface/robodktools.h \
-    ../robodk_interface/matrix4x4.h \
-    ../robodk_interface/vector3.h \
-    ../robodk_interface/deprecated.h \
-    ../robodk_interface/constants.h \
-    ../robodk_interface/joints.h \
-
-SOURCES += \
-    ../robodk_interface/robodktools.cpp \
-    ../robodk_interface/robodktypes.cpp \
-    ../robodk_interface/matrix4x4.cpp \
-    ../robodk_interface/vector3.cpp \
-    ../robodk_interface/joints.cpp
-
-INCLUDEPATH += ../robodk_interface
+include($$PWD/../robodk_interface/robodk_interface.pri)
 #--------------------------
