@@ -32,15 +32,16 @@
 
 #include <cstdint>
 #include <unordered_map>
+#include <list>
 #include <functional>
 
 #include <QObject>
 #include <QVector>
 #include <QHash>
+#include <QModelIndex>
 
 
 class QIcon;
-class QModelIndex;
 class QTreeWidget;
 class QTreeWidgetItem;
 class IRoboDK;
@@ -66,12 +67,17 @@ public:
         IgnoreChildren         = 0x00000020,
     };
 
+    enum SubmitPolicy
+    {
+        AutoSubmit,
+        ManualSubmit
+    };
+
 public:
     explicit StationTreeEventMonitor(IRoboDK* rdk, QObject* parent = nullptr);
 
     void setFilter(uint32_t filter);
-
-    void test();
+    void setSubmitPolicy(SubmitPolicy policy);
 
 signals:
     void itemNameChanged(IItem* item, const QString& name);
@@ -81,6 +87,7 @@ signals:
 
 public slots:
     void refresh();
+    void submit();
 
 private slots:
     void onModelDataChanged(
@@ -111,15 +118,23 @@ private:
     QTreeWidget* _tree = nullptr;
 
     uint32_t _filter = IgnoreInactiveStations;
+    SubmitPolicy _policy = AutoSubmit;
 
     std::unordered_multimap<QString, IItem*, QStringHash> _nameTable;
     std::unordered_map<IItem*, QString> _nameCache;
+
+    std::list<QModelIndex> _addedIndices;
 };
 
 
 inline void StationTreeEventMonitor::setFilter(uint32_t filter)
 {
     _filter = filter;
+}
+
+inline void StationTreeEventMonitor::setSubmitPolicy(SubmitPolicy policy)
+{
+    _policy = policy;
 }
 
 } // namespace robodk

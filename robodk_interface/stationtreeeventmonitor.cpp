@@ -34,6 +34,7 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QDebug>
+#include <QTimer>
 
 #include "iitem.h"
 
@@ -92,6 +93,44 @@ void StationTreeEventMonitor::refresh()
         _nameTable.insert({name, item});
         _nameCache[item] = name;
     });
+}
+
+void StationTreeEventMonitor::submit()
+{
+    bool child = false;
+
+    auto addItem = [this, &child] (const QModelIndex& index)
+    {
+        auto item = itemFromIndex(index);
+        if (!item)
+            return;
+
+        const QString name = index.data().toString();
+        _nameTable.insert({name, item});
+        _nameCache[item] = name;
+
+        if (_filter & IgnoreAdd)
+            return;
+
+        if ((_filter & IgnoreChildren) && child)
+            return;
+
+        if ((_filter & IgnoreInactiveStations) && !isActiveStationItem(index))
+            return;
+
+        emit itemAdded(item);
+    };
+
+    for (const auto& index : _addedIndices)
+    {
+        child = false;
+        addItem(index);
+
+        child = true;
+        iterateOverTree(index, addItem);
+    }
+
+    _addedIndices.clear();
 }
 
 void StationTreeEventMonitor::onModelDataChanged(
@@ -174,37 +213,15 @@ void StationTreeEventMonitor::onModelDataChanged(
 
 void StationTreeEventMonitor::onModelRowsInserted(const QModelIndex& parent, int first, int last)
 {
-    auto addItem = [this, &parent] (const QModelIndex& index)
-    {
-        auto item = itemFromIndex(index);
-        if (!item)
-            return;
-
-        const QString name = index.data().toString();
-        _nameTable.insert({name, item});
-        _nameCache[item] = name;
-
-        if (_filter & IgnoreAdd)
-            return;
-
-        if ((_filter & IgnoreChildren) && parent != index.parent())
-            return;
-
-        if ((_filter & IgnoreInactiveStations) && !isActiveStationItem(index))
-            return;
-
-        emit itemAdded(item);
-    };
-
     for (int row = first; row <= last; ++row)
     {
         auto index = _tree->model()->index(row, 0, parent);
-        if (!index.isValid())
-            continue;
-
-        addItem(index);
-        iterateOverTree(index, addItem);
+        if (index.isValid())
+            _addedIndices.push_back(index);
     }
+
+    if (_policy == AutoSubmit)
+        QTimer::singleShot(0, this, &StationTreeEventMonitor::submit);
 }
 
 void StationTreeEventMonitor::onModelRowsRemoved(const QModelIndex& parent, int first, int last)
