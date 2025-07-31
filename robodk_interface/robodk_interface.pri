@@ -12,6 +12,7 @@ HEADERS += \
     $$PWD/robodktools.h \
     $$PWD/robodktypes.h \
     $$PWD/robodk_interface.h \
+    $$PWD/stationtreeeventmonitor.h \
     $$PWD/vector3.h
 
 SOURCES += \
@@ -20,4 +21,5 @@ SOURCES += \
     $$PWD/matrix4x4.cpp \
     $$PWD/robodktools.cpp \
     $$PWD/robodktypes.cpp \
+    $$PWD/stationtreeeventmonitor.cpp \
     $$PWD/vector3.cpp
