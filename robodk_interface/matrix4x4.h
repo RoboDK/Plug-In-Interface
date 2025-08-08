@@ -31,6 +31,7 @@
 #define ROBODK_MATRIX4X4_H
 
 
+#include "deprecated.h"
 #include "vector3.h"
 
 
@@ -42,9 +43,9 @@ namespace robodk
 {
 typedef ::QMatrix4x4 BaseMatrix4x4;
 }
-#else
+#else // QT_GUI_LIB
 #error "This class cannot yet be used without the Qt Framework"
-#endif
+#endif // QT_GUI_LIB
 
 
 namespace robodk
@@ -61,8 +62,9 @@ namespace robodk
     Internally the data is stored as column-major format.
 
     When using these functions be aware that they return data in \b column-major format:
-    - data()
-    - constData()
+    - Values()
+    - ValuesD()
+    - ValuesF()
 */
 class Matrix4x4 : public BaseMatrix4x4
 {
@@ -168,57 +170,57 @@ public:
     /*!
         Sets the X vector (N vector).
     */
-    void setVX(const Vector3& n);
+    void SetVX(const Vector3& n);
 
     /*!
         Sets the Y vector (O vector).
     */
-    void setVY(const Vector3& o);
+    void SetVY(const Vector3& o);
 
     /*!
         Sets the Z vector (A vector).
     */
-    void setVZ(const Vector3& a);
+    void SetVZ(const Vector3& a);
 
     /*!
         Sets the X vector values (N vector).
     */
-    void setVX(double x, double y, double z);
+    void SetVX(double x, double y, double z);
 
     /*!
         Sets the Y vector values (O vector).
     */
-    void setVY(double x, double y, double z);
+    void SetVY(double x, double y, double z);
 
     /*!
         Sets the Z vector values (A vector).
     */
-    void setVZ(double x, double y, double z);
+    void SetVZ(double x, double y, double z);
 
     /*!
         Sets the position (T).
     */
-    void setPos(double x, double y, double z);
+    void SetPos(double x, double y, double z);
 
     /*!
         Sets the X vector values (N vector).
     */
-    void setVX(const double* xyz);
+    void SetVX(const double* xyz);
 
     /*!
         Sets the Y vector values (O vector).
     */
-    void setVY(const double* xyz);
+    void SetVY(const double* xyz);
 
     /*!
         Sets the Z vector values (A vector).
     */
-    void setVZ(const double* xyz);
+    void SetVZ(const double* xyz);
 
     /*!
         Sets the position (T).
     */
-    void setPos(const double* xyz);
+    void SetPos(const double* xyz);
 
     /*!
         \brief Sets the elements of matrix from the given 16 double-precision \a values.
@@ -238,22 +240,22 @@ public:
                 v_9 & v_{10} & v_{11} & v_{12} & v_{13} & v_{14} & v_{15} & v_{16}
             \end{bmatrix} \f$
     */
-    void setValues(const double* values);
+    void SetValues(const double* values);
 
     /*!
         Returns the X vector (N vector).
     */
-    Vector3 vx() const;
+    Vector3 VX() const;
 
     /*!
         Returns the Y vector (O vector).
     */
-    Vector3 vy() const;
+    Vector3 VY() const;
 
     /*!
         Returns the Z vector (A vector).
     */
-    Vector3 vz() const;
+    Vector3 VZ() const;
 
     /*!
         Writes the X vector (N vector) into array of 3 double-precision \a xyz values.
@@ -289,12 +291,12 @@ public:
         Returns the inverse of this matrix. Returns the identity if
         this matrix cannot be inverted; i.e. determinant() is zero.
     */
-    Matrix4x4 inv() const;
+    Matrix4x4 Inverted(bool* invertible = nullptr) const;
 
     /*!
         Returns \c true if the matrix is homogeneous; false otherwise.
     */
-    bool isHomogeneous() const;
+    bool IsHomogeneous() const;
 
     /*!
         \brief Forces this matrix to be homogeneous.
@@ -352,7 +354,7 @@ public:
         Returns a constant pointer to the raw data of this matrix as 16 double-precision numbers.
         This raw data is stored in column-major format.
 
-        \sa Values(), ValuesF(), constData()
+        \sa Values(), ValuesF()
     */
     const double* ValuesD() const;
 
@@ -360,7 +362,7 @@ public:
         Returns a constant pointer to the raw data of this matrix as 16 single-precision numbers.
         This raw data is stored in column-major format.
 
-        \sa Values(), ValuesD(), constData()
+        \sa Values(), ValuesD()
     */
     const float* ValuesF() const;
 
@@ -370,7 +372,7 @@ public:
         16 double- or single-precision numbers.
         This raw data is stored in column-major format.
 
-        \sa ValuesF(), ValuesD(), constData()
+        \sa ValuesF(), ValuesD()
     */
     const float* Values() const;
 #else
@@ -379,7 +381,7 @@ public:
         16 double- or single-precision numbers.
         This raw data is stored in column-major format.
 
-        \sa ValuesF(), ValuesD(), constData()
+        \sa ValuesF(), ValuesD()
     */
     const double* Values() const;
 #endif
@@ -387,14 +389,14 @@ public:
     /*!
         Writes the contents of this matrix into array of 16 double-precision \a values.
 
-        \sa Values(), ValuesF(), ValuesD(), constData()
+        \sa Values(), ValuesF(), ValuesD()
     */
     void Values(double* values) const;
 
     /*!
         Writes the contents of this matrix into array of 16 single-precision \a values.
 
-        \sa Values(), ValuesF(), ValuesD(), constData()
+        \sa Values(), ValuesF(), ValuesD()
     */
     void Values(float* values) const;
 
@@ -498,6 +500,16 @@ public:
     */
     Matrix4x4& operator=(const QMatrix4x4& matrix);
 #endif
+
+    /* Deprecated methods */
+public:
+    ROBODK_DEPRECATED("Use Inverted() instead")
+    inline Matrix4x4 inv() { return Inverted(); }
+
+    ROBODK_DEPRECATED("Use SetPos() instead")
+    inline void setPos(double x, double y, double z) { SetPos(x, y, z); }
+
+
 
 private:
     /*! \cond */

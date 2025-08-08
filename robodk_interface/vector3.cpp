@@ -42,31 +42,33 @@ Vector3::Vector3(double x, double y, double z)
     _v[2] = z;
 }
 
-double Vector3::length() const
+double Vector3::Length() const
 {
     return std::sqrt(_v[0] * _v[0] + _v[1] * _v[1] + _v[2] * _v[2]);
 }
 
-void Vector3::normalize()
+void Vector3::Normalize()
 {
-    double len = length();
+    double len = Length();
+    if (std::abs(len) <= 0.000000000001)
+        return;
+
     _v[0] /= len;
     _v[1] /= len;
     _v[2] /= len;
 }
 
-double Vector3::dotProduct(const Vector3& v1, const Vector3& v2)
+double Vector3::DotProduct(const Vector3& v1, const Vector3& v2)
 {
     return v1._v[0] * v2._v[0] + v1._v[1] * v2._v[1] + v1._v[2] * v2._v[2];
 }
 
-Vector3 Vector3::crossProduct(const Vector3& v1, const Vector3& v2)
+Vector3 Vector3::CrossProduct(const Vector3& v1, const Vector3& v2)
 {
     return Vector3(
         v1._v[1] * v2._v[2] - v1._v[2] * v2._v[1],
         v1._v[2] * v2._v[0] - v1._v[0] * v2._v[2],
         v1._v[0] * v2._v[1] - v1._v[1] * v2._v[0]);
 }
-
 
 } // namespace robodk

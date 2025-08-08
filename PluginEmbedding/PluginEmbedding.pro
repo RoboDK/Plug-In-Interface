@@ -96,17 +96,11 @@ SOURCES += \
     pluginembedding.cpp \
     pluginform.cpp
 
+FORMS += \
+    pluginform.ui
 
 #--------------------------
 # Header and source files required by any RoboDK plugin
 # Do not change this section, make sure to have the robodk_interface folder up one folder
-HEADERS += \
-    ../robodk_interface/iitem.h \
-    ../robodk_interface/irobodk.h\
-    ../robodk_interface/iapprobodk.h
-
-INCLUDEPATH += ../robodk_interface
+include($$PWD/../robodk_interface/robodk_interface.pri)
 #--------------------------
-
-FORMS += \
-    pluginform.ui

@@ -37,35 +37,106 @@
 namespace robodk
 {
 
+/*!
+    \class Vector3
+    \brief The Vector3 class represents a vector or vertex in 3D space.
+
+    Vectors are one of the main building blocks of 3D representation and
+    drawing.  They consist of three coordinates, traditionally called
+    x, y, and z.
+*/
 class Vector3
 {
 public:
+    /*!
+        Constructs a null vector, i.e. with coordinates (0, 0, 0).
+    */
     Vector3() = default;
+
+    /*!
+        Constructs a vector with coordinates (\a x, \a y, \a z).
+    */
     Vector3(double x, double y, double z);
+
+    /*!
+        Constructs a vector object as a copy of \a v.
+    */
     Vector3(const Vector3& v) = default;
 
-    double length() const;
+    /*!
+        Returns the length of the vector from the origin.
+    */
+    double Length() const;
 
-    void normalize();
+    /*!
+        Normalizes the currect vector in place. Nothing happens if this
+        vector is a null vector or the length of the vector is very close to 1.
+    */
+    void Normalize();
 
-    inline double x() const { return _v[0]; }
-    inline double y() const { return _v[1]; }
-    inline double z() const { return _v[2]; }
+    /*!
+        Returns the x coordinate of this vector.
+    */
+    inline double X() const { return _v[0]; }
 
-    inline void setX(double x) { _v[0] = x; }
-    inline void setY(double y) { _v[0] = y; }
-    inline void setZ(double z) { _v[0] = z; }
+    /*!
+        Returns the y coordinate of this vector.
+    */
+    inline double Y() const { return _v[1]; }
 
+    /*!
+        Returns the z coordinate of this vector.
+    */
+    inline double Z() const { return _v[2]; }
+
+    /*!
+        Sets the x coordinate of this vector to the given \a x coordinate.
+    */
+    inline void SetX(double x) { _v[0] = x; }
+
+    /*!
+        Sets the y coordinate of this vector to the given \a y coordinate.
+    */
+    inline void SetY(double y) { _v[0] = y; }
+
+    /*!
+        Sets the z coordinate of this vector to the given \a z coordinate.
+    */
+    inline void SetZ(double z) { _v[0] = z; }
+
+    /*!
+        Returns the component of the vector at index position \a i.
+    */
     inline const double& operator[](size_t i) const { return _v[i]; }
+
+    /*!
+        Returns the component of the vector at index position \a i
+        as a modifiable reference.
+    */
     inline double& operator[](size_t i) { return _v[i]; }
 
-    static double dotProduct(const Vector3& v1, const Vector3& v2);
-    static Vector3 crossProduct(const Vector3& v1, const Vector3& v2);
+    /*!
+        Returns the dot product of \a v1 and \a v2.
+    */
+    static double DotProduct(const Vector3& v1, const Vector3& v2);
 
+    /*!
+        Returns the cross-product of vectors \a v1 and \a v2, which corresponds
+        to the normal vector of a plane defined by \a v1 and \a v2.
+    */
+    static Vector3 CrossProduct(const Vector3& v1, const Vector3& v2);
+
+    /*!
+        Sets this Vector3 object as a copy of \a v.
+    */
     Vector3& operator=(const Vector3& v) = default;
 
 private:
+    /*! \cond */
+
     double _v[3] = {0.0, 0.0, 0.0};
+
+    /*! \endcond */
 };
 
 } // namespace robodk

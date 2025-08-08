@@ -7,6 +7,7 @@
 #include <QDebug>
 
 #include "matrix4x4.h"
+#include "legacymatrix2d.h"
 #include "joints.h"
 
 
@@ -136,150 +137,204 @@ struct tColor{
 
 
 
+typedef robodk::legacy::Matrix2D tMatrix2D;
 
+/*!
+    Creates a new \ref Matrix2D object with no dimensions.
 
+    \returns pointer to the Matrix2D object if no allocation errors occurred; nullptr otherwise.
 
-//------------------------------------------------------------------------------------------------------------
+    \sa Matrix2D_Delete()
+*/
+inline tMatrix2D* Matrix2D_Create()
+{
+    return robodk::legacy::Matrix2D_Create();
+}
 
+/*!
+    Deletes an existing \ref Matrix2D object.
 
+    \param matrix pointer of the pointer variable to the matrix object.
 
-/// \brief The tMatrix2D struct represents a variable size 2d Matrix. Use the Matrix2D_... functions to oeprate on this variable sized matrix.
-/// This type of data can be used to get/set a program as a list. This is also useful for backwards compatibility functions related to RoKiSim.
-struct tMatrix2D {
-    /// Pointer to the data
-    double *data;
+    \sa Matrix2D_Create()
+*/
+inline void Matrix2D_Delete(tMatrix2D** matrix)
+{
+    robodk::legacy::Matrix2D_Delete(matrix);
+}
 
-    /// Pointer to the size array.
-    int *size;
+/*!
+    Sets new dimensions for existing matrix object.
 
-    /// Allocated size.
-    int allocatedSize;
+    \param matrix pointer to the matrix object.
+    \param rows number of rows.
+    \param columns number of columns.
 
-    /// Number of dimensions (usually 2)
-    int numDimensions;
+    \sa Matrix2D_Size()
+*/
+inline void Matrix2D_Set_Size(tMatrix2D* matrix, int rows, int columns)
+{
+    robodk::legacy::Matrix2D_SetDimensions(matrix, rows, columns);
+}
 
-    bool canFreeData;
-};
+/*!
+    Returns \a dimension (number of rows or columns) of \a matrix.
 
+    \deprecated Use \ref Matrix2D_ColumnCount() and \ref Matrix2D_RowCount() instead of this one.
 
+    \param matrix pointer to the matrix object.
+    \param dimension may have a value of 1 or 2 to retrieve number of
+        rows or columns respectively.
 
+    \sa Matrix2D_Set_Size(), Matrix2D_Get_ncols(), Matrix2D_Get_nrows()
+*/
+inline int Matrix2D_Size(const tMatrix2D* matrix, int dimension)
+{
+    return robodk::legacy::Matrix2D_GetDimension(matrix, dimension);
+}
 
-// -------------------------------------------
+/*!
+    Returns the total number of columns in the \a matrix.
 
+    \sa Matrix2D_Set_Size(), Matrix2D_Get_nrows()
+*/
+inline int Matrix2D_Get_ncols(const tMatrix2D* matrix)
+{
+    return robodk::legacy::Matrix2D_ColumnCount(matrix);
+}
 
-/// @brief Creates a new 2D matrix \ref Matrix2D.. Use \ref Matrix2D_Delete to delete the matrix (to free the memory).
-/// The Procedure \ref Debug_Matrix2D shows an example to read data from a tMatrix2D
-tMatrix2D* Matrix2D_Create();
+/*!
+    Returns the total number of rows in the \a matrix.
 
-/// @brief Deletes a \ref tMatrix2D.
-/// @param[in] mat: Pointer of the pointer to the matrix
-void Matrix2D_Delete(tMatrix2D **mat);
+    \sa Matrix2D_Set_Size(), Matrix2D_Get_ncols()
+*/
+inline int Matrix2D_Get_nrows(const tMatrix2D* matrix)
+{
+    return robodk::legacy::Matrix2D_RowCount(matrix);
+}
 
-/// @brief Sets the size of a \ref tMatrix2D.
-/// @param[in/out] mat: Pointer to the matrix
-/// @param[in] rows: The number of rows.
-/// @param[in] cols: The number of columns.
-void Matrix2D_Set_Size(tMatrix2D *mat, int rows, int cols);
+/*!
+    Returns the value of the element at position (\a row, \a column) in the \a matrix.
+*/
+inline double Matrix2D_Get_ij(const tMatrix2D* matrix, int row, int column)
+{
+    return robodk::legacy::Matrix2D_Get(matrix, row, column);
+}
 
-/// @brief Sets the size of a \ref tMatrix2D.
-/// @param[in/out] mat: Pointer to the matrix
-/// @param[in] dim: Dimension (1 or 2)
-int Matrix2D_Size(const tMatrix2D *mat, int dim);
+/*!
+    Sets a new \a value to the element at position (\a row, \a column) in the \a matrix.
+*/
+inline void Matrix2D_Set_ij(const tMatrix2D* matrix, int row, int column, double value)
+{
+    robodk::legacy::Matrix2D_Set(matrix, row, column, value);
+}
 
-/// @brief Returns the number of columns of a \ref tMatrix2D.
-/// @param[in] mat: Pointer to the matrix
-/// Returns the number of columns (Second dimension)
-int Matrix2D_Get_ncols(const tMatrix2D *var);
+/*!
+    Returns the elements of \a column as a pointer to its values in the \a matrix.
+*/
+inline double* Matrix2D_Get_col(const tMatrix2D* matrix, int column)
+{
+    return robodk::legacy::Matrix2D_GetColumn(matrix, column);
+}
 
-/// @brief Returns the number of rows of a \ref tMatrix2D.
-/// @param[in] mat: Pointer to the matrix
-/// Returns the number of rows (First dimension)
-int Matrix2D_Get_nrows(const tMatrix2D *var);
+/*!
+    \brief Copies the matrix \a source to the \a destination.
 
-/// @brief Returns the value at location [i,j] of a \ref tMatrix2D.
-/// @param[in] mat: Pointer to the matrix
-/// Returns the value of the cell
-double Matrix2D_Get_ij(const tMatrix2D *var, int i, int j);
+    Both matrices must be initialized and have the same size.
 
-/// @brief Set the value at location [i,j] of a \ref tMatrix2D.
-/// @param[in] mat: Pointer to the matrix
-/// @param[in] i: Row
-/// @param[in] j: Column
-/// @param[in] value: matrix value
-void Matrix2D_Set_ij(const tMatrix2D *var, int i, int j, double value);
+    \returns true if successful; otherwise returns false.
+*/
+inline bool Matrix2D_Copy(const tMatrix2D* source, tMatrix2D* destination)
+{
+    return robodk::legacy::Matrix2D_Copy(source, destination);
+}
 
-/// @brief Returns the pointer of a column of a \ref tMatrix2D.
-/// A column has \ref Matrix2D_Get_nrows(mat) values that can be accessed/modified from the returned pointer continuously.
-/// @param[in] mat: Pointer to the matrix
-/// @param[in] col: Column to retreive.
-/// /return double array (internal pointer) to the column
-double* Matrix2D_Get_col(const tMatrix2D *var, int col);
+/*!
+    Writes the contents of the \a array with \a size elements using qDebug().
+*/
+inline void Debug_Array(const double* array, int size)
+{
+    robodk::legacy::Matrix2D_DebugArray(array, size);
+}
 
-/// @brief Copy a Matrix2D
-bool Matrix2D_Copy(const tMatrix2D *in, tMatrix2D *out);
+/*!
+    Writes the contents of the \a matrix using qDebug().
+*/
+inline void Debug_Matrix2D(const tMatrix2D* matrix)
+{
+    robodk::legacy::Matrix2D_Debug(matrix);
+}
 
-/// @brief Show an array through STDOUT
-/// Given an array of doubles, it generates a string
-void Debug_Array(const double *array, int arraysize);
+/*!
+    \brief Writes the contents of the \a matrix into text \a stream.
 
-/// @brief Display the content of a \ref tMatrix2D through STDOUT. This is only intended for debug purposes.
-/// @param[in] mat: Pointer to the matrix
-void Debug_Matrix2D(const tMatrix2D *mat);
+    The values can be written in the CSV format.
+*/
+inline void Matrix2D_Save(QTextStream* stream, tMatrix2D* matrix, bool csv = false)
+{
+    robodk::legacy::Matrix2D_Save(stream, matrix, csv);
+}
 
-/// @brief Save a matrix as binary data
-void Matrix2D_Save(QDataStream *st, tMatrix2D *emx);
+/*!
+    Writes the contents of the \a matrix into binary \a stream.
+*/
+inline void Matrix2D_Save(QDataStream* stream, tMatrix2D* matrix)
+{
+    robodk::legacy::Matrix2D_Save(stream, matrix);
+}
 
-/// @brief Save a matrix as text
-void Matrix2D_Save(QTextStream *st, tMatrix2D *emx, bool csv=false);
-
-/// @brief Load a matrix
-void Matrix2D_Load(QDataStream *st, tMatrix2D **emx);
+/*!
+    Creates a new \ref Matrix2D object by loading its contents from a binary \a stream.
+*/
+inline void Matrix2D_Load(QDataStream* stream, tMatrix2D** matrix)
+{
+    robodk::legacy::Matrix2D_Load(stream, matrix);
+}
 
 
 typedef robodk::Joints tJoints;
-
-/*!
-    \typedef Mat
-    \brief The Mat class represents a 4x4 pose matrix.
-
-    The main purpose of this object is to represent a pose
-    in the 3D space (position and orientation).
-
-    In other words, a pose is a 4x4 matrix that represents
-    the position and orientation of one reference frame with
-    respect to another one, in the 3D space.
-
-    Poses are commonly used in robotics to place objects,
-    reference frames and targets with respect to each other.
-
-    <br>
-    \f$ transl(x,y,z) rotx(r) roty(p) rotz(w) = \\
-    \begin{bmatrix} n_x & o_x & a_x & x \\
-    n_y & o_y & a_y & y \\
-    n_z & o_z & a_z & z \\
-    0 & 0 & 0 & 1 \end{bmatrix} \f$
-*/
 typedef robodk::Matrix4x4 Mat;
 
-/// Translation matrix class: Mat::transl.
-Mat transl(double x, double y, double z);
+inline Mat transl(double x, double y, double z)
+{
+    return Mat::transl(x,y,z);
+}
 
-/// Translation matrix class: Mat::rotx.
-Mat rotx(double rx);
+inline Mat rotx(double rx)
+{
+    return Mat::rotx(rx);
+}
 
-/// Translation matrix class: Mat::roty.
-Mat roty(double ry);
+inline Mat roty(double ry)
+{
+    return Mat::roty(ry);
+}
 
-/// Translation matrix class: Mat::rotz.
-Mat rotz(double rz);
+inline Mat rotz(double rz)
+{
+    return Mat::rotz(rz);
+}
 
-//QDataStream &operator<<(QDataStream &data, const QMatrix4x4 &);
-inline QDebug operator<<(QDebug dbg, const Mat &m){ return dbg.noquote() << m.ToString(); }
-inline QDebug operator<<(QDebug dbg, const tJoints &jnts){ return dbg.noquote() << jnts.ToString(); }
 
-inline QDebug operator<<(QDebug dbg, const Mat *m){ return dbg.noquote() << (m == nullptr ? "Mat(null)" : m->ToString()); }
-inline QDebug operator<<(QDebug dbg, const tJoints *jnts){ return dbg.noquote() << (jnts == nullptr ? "tJoints(null)" : jnts->ToString()); }
+inline QDebug operator<<(QDebug dbg, const Mat &m)
+{
+    return dbg.noquote() << m.ToString();
+}
 
+inline QDebug operator<<(QDebug dbg, const tJoints &jnts)
+{
+    return dbg.noquote() << jnts.ToString();
+}
+
+inline QDebug operator<<(QDebug dbg, const Mat *m)
+{
+    return dbg.noquote() << (m == nullptr ? "Mat(null)" : m->ToString());
+}
+
+inline QDebug operator<<(QDebug dbg, const tJoints *jnts)
+{
+    return dbg.noquote() << (jnts == nullptr ? "tJoints(null)" : jnts->ToString());
+}
 
 
 #endif // ROBODKTYPES_H

@@ -38,11 +38,13 @@
 #endif
 
 
-struct tMatrix2D;
-
-
 namespace robodk
 {
+
+namespace legacy
+{
+struct Matrix2D;
+}
 
 /// The Joints class represents a joint position of a robot (robot axes).
 class Joints
@@ -75,7 +77,7 @@ public:
     /// \param mat2d
     /// \param column
     /// \param ndofs
-    Joints(const tMatrix2D* mat2d, int column = 0, int ndofs = -1);
+    Joints(const legacy::Matrix2D* mat2d, int column = 0, int ndofs = -1);
 
     /// \brief Convert a string to joint values
     /// \param str Comma separated joint values (spaces or tabs are also accepted)
@@ -154,16 +156,16 @@ public:
 #endif
 
 public:
-    static constexpr int maximumJoints = 12;
+    static constexpr int MaximumJoints = 12;
 
     /// number of degrees of freedom
     int _dofCount;
 
     /// joint values (doubles, used to store the joint values)
-    double _joints[maximumJoints];
+    double _joints[MaximumJoints];
 
     /// joint values (floats, used to return a copy as a float pointer)
-    mutable float _jointsFloat[maximumJoints];
+    mutable float _jointsFloat[MaximumJoints];
 };
 
 
