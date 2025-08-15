@@ -27,7 +27,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: windows-2019
+          - os: windows-latest
             OUTPUT_DIR: C:/RoboDK/bin/plugins
             QT_VERSION: "5.15.2"
 
