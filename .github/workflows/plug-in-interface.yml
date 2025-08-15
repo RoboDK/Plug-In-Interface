@@ -51,14 +51,17 @@ jobs:
           cache: "true"
           cache-key-prefix: "install-qt-action-${{ matrix.os }}"
 
+      - name: Prepare Visual Studio environment on Windows
+        if: startsWith(matrix.os, 'windows')
+        uses: johnnynunez/vsdevenv-shell@v2
+
       - name: Configure and build Plug-In-Interface on Windows
         if: startsWith(matrix.os, 'windows')
         run: |
           cd ${{ github.workspace }}
-          call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
           qmake Plug-In-Interface.pro -spec win32-msvc CONFIG+=qtquickcompiler CONFIG+=${{ env.BUILD_TYPE }}
           call %IQTA_TOOLS%\QtCreator\bin\jom\jom.exe
-        shell: cmd
+        shell: vsdevenv x64 cmd {0}
 
       - name: Configure and build Plug-In-Interface on Unix
         if: (!startsWith(matrix.os, 'windows'))
