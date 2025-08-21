@@ -61,6 +61,11 @@ Requirements
 -------------
 
 Each RoboDK Plug-In must be developed using the Qt Creator and follow Qt's project guidelines.
+For convenience in connecting the Plugin Interface to third-party projects, the `robodk_interface` folder contains a file with all dependencies.
+This file can be included using the `include` directive in the qmake project:
+```
+include($$PWD/../robodk_interface/robodk_interface.pri)
+```
 It is recommended to use the [PluginExample](./PluginExample/) project to get started with your new RoboDK Plug-In (double click PluginExample.pro to open it with Qt Creator).
 
 RoboDK must be installed to develop Plug-Ins. The free version of RoboDK is enough to develop a Plug-In as a proof of concept.

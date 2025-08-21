@@ -65,7 +65,6 @@ exists( "$$PWD/../../destdir_rdk_plugins.pri" ) {
 
 INCLUDEPATH += \
     $${PROJECT_ROOT}/imgui \
-    $${PROJECT_ROOT}/../robodk_interface
 
 SOURCES += \
     imgui/imgui.cpp \
@@ -74,8 +73,6 @@ SOURCES += \
     imgui/imgui_impl_qt.cpp \
     imgui/imgui_tables.cpp \
     imgui/imgui_widgets.cpp \
-    ../robodk_interface/robodktools.cpp \
-    ../robodk_interface/robodktypes.cpp \
     roboui.cpp
 
 HEADERS += \
@@ -86,13 +83,13 @@ HEADERS += \
     imgui/imstb_rectpack.h \
     imgui/imstb_textedit.h \
     imgui/imstb_truetype.h \
-    ../robodk_interface/iapprobodk.h \
-    ../robodk_interface/iitem.h \
-    ../robodk_interface/irobodk.h \
-    ../robodk_interface/robodk_interface.h \
-    ../robodk_interface/robodktools.h \
-    ../robodk_interface/robodktypes.h \
     roboui.h
 
 RESOURCES += \
     roboui.qrc
+
+#--------------------------
+# Header and source files required by any RoboDK plugin
+# Do not change this section, make sure to have the robodk_interface folder up one folder
+include($$PWD/../robodk_interface/robodk_interface.pri)
+#--------------------------
