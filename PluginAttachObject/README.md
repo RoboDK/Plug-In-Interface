@@ -12,7 +12,6 @@ The Attach Object Plug-in for RoboDK can dynamically attach multiple objects to 
 | --------------------------------------- | --------------------------------------- | --------------------------------------------- |
 | ![Parts](./doc/parts-view-portrait.png) | ![Robot](./doc/robot-view-portrait.png) | ![Assembly](./doc/assembly-view-portrait.png) |
 
-
 ## Usage
 
 ### Attaching and detaching objects from RoboDK
@@ -28,7 +27,6 @@ Attach or detach an object or multiple objects to the same robot link by right-c
 If more than one object is present in the station, a selection prompt will appear.
 
 ![Attaching objects](./doc/robot-menus.png)
-
 
 Once the objects an the robot are selected, a prompt will appear to select the link ID to attach. For instance, to attach an object on the last link of a six axis robot, enter 6.
 
@@ -63,32 +61,3 @@ for obj in objects:
     result = RDK.PluginCommand("Plugin Attach Object", "Attach", value)
     RDK.ShowMessage(value + " -> " + result, False)
 ```
-
-
-## Prerequisites
-- [RoboDK](https://robodk.com/download)
-
-
-## Installation
-
-Plug-ins are usually packaged as RoboDK Packages (.rdkp), which are automatically installed when opened with RoboDK.
-To manually install this Plug-in, copy the content of this folder to your RoboDK Plug-ins folder (typically `C:/RoboDK/bin/plugins`).
-
-
-## Configuration
-
-1. Enable the Plug-in (Tools->Add-ins or Shift+I)
-
-
-## About RoboDK Plug-ins
-
-The RoboDK Plug-In Interface allows you to extend or customize RoboDK software with Plug-ins linked natively into the core of RoboDK.
-
-You can integrate your Plug-in as part of the RoboDK user interface and easily customize RoboDK for offline programming and simulation purposes.
-For instance, by adding buttons in the menu and the toolbar, processing events, synchronizing with render, accept API command calls, and more.
-
-Once you complete developing your Plug-in, you can easily distribute your Plug-in as a self-contained package file (.rdkp).
-
-Plug-ins are handled by RoboDK with the Add-in Manager, and the [Plug-In Interface](https://github.com/RoboDK/Plug-In-Interface) provides the necessary C++ tools to build your Plug-in.
-
-You can find more information about the Plug-In Interface and sample Plug-ins in the [Plug-In Interface GitHub](https://github.com/RoboDK/Plug-In-Interface) and the [documentation](https://robodk.com/doc/en/PlugIns/index.html).
