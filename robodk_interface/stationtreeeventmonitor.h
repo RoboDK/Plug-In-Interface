@@ -76,7 +76,10 @@ public:
 public:
     explicit StationTreeEventMonitor(IRoboDK* rdk, QObject* parent = nullptr);
 
-    void setFilter(uint32_t filter);
+    uint32_t filter() const;
+    uint32_t setFilter(uint32_t filter);
+    uint32_t setFilterFlag(uint32_t flag, bool on = true);
+
     void setSubmitPolicy(SubmitPolicy policy);
 
 signals:
@@ -127,9 +130,30 @@ private:
 };
 
 
-inline void StationTreeEventMonitor::setFilter(uint32_t filter)
+inline uint32_t StationTreeEventMonitor::filter() const
 {
+    return _filter;
+}
+
+inline uint32_t StationTreeEventMonitor::setFilter(uint32_t filter)
+{
+    auto result = _filter;
     _filter = filter;
+    return result;
+}
+
+inline uint32_t StationTreeEventMonitor::setFilterFlag(uint32_t flag, bool on)
+{
+    auto result = _filter;
+    if (on)
+    {
+        _filter |= flag;
+    }
+    else
+    {
+        _filter &= ~flag;
+    }
+    return result;
 }
 
 inline void StationTreeEventMonitor::setSubmitPolicy(SubmitPolicy policy)

@@ -77,6 +77,7 @@ StationTreeEventMonitor::StationTreeEventMonitor(IRoboDK* rdk, QObject* parent)
 
 void StationTreeEventMonitor::refresh()
 {
+    _addedIndices.clear();
     _nameTable.clear();
     _nameCache.clear();
 
@@ -213,11 +214,18 @@ void StationTreeEventMonitor::onModelDataChanged(
 
 void StationTreeEventMonitor::onModelRowsInserted(const QModelIndex& parent, int first, int last)
 {
+    if (_filter & IgnoreAdd)
+        return;
+
     for (int row = first; row <= last; ++row)
     {
         auto index = _tree->model()->index(row, 0, parent);
         if (index.isValid())
-            _addedIndices.push_back(index);
+        {
+            auto it = std::find(_addedIndices.begin(), _addedIndices.end(), index);
+            if (it == _addedIndices.end())
+                _addedIndices.push_back(index);
+        }
     }
 
     if (_policy == AutoSubmit)
