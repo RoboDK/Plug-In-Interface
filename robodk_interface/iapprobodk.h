@@ -287,7 +287,10 @@ public:
         EVENT_PROGSLIDER_CHANGED = 20,
 
         /// The index of a program slider changed (RoboDK 5.6.4 required).
-        EVENT_PROGSLIDER_SET = 21
+        EVENT_PROGSLIDER_SET = 21,
+
+        /// The license that applies to the current user changed (RoboDK 5.9.4.25487 required).
+        EVENT_LICENSEUPDATED = 22
     };
 
 
