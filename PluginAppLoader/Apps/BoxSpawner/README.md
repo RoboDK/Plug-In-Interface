@@ -21,10 +21,14 @@ Use the Editor to set the spawner settings.
 - Conveyor relocation: automatically transfer the box to the closest conveyor
 - Randomization: randomize the position, orientation and scale of the box
 
+![Interface](./docs/interface.png)
+
 ### Spawner
 
 Use the spawner button to create a new box in you station using the Editor parameters.
 The spawner button defaults to the spawner ID #0.
+
+![Icons](./docs/icons.png)
 
 ### Add Python Script
 
