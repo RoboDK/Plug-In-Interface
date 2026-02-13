@@ -1,12 +1,15 @@
+/*
+ * Copyright (c) 2026 RoboDK Global. All rights reserved.
+ */
+
+// This is required on top to have M_PI
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "samplekinematics.h"
 
 #include <iostream>
-#include <cmath>
 
-// Some compilers may require this define to expose M_PI
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 // You must remove the line "CONFIG -= qt" from the .pro file if you want to use Qt features like QDebug
 // #include <QDebug>
@@ -190,7 +193,7 @@ void Pose_Inv(const real_T in[16], real_T out[16]){
 
 
 
-int SolveFK(const real_T *joints, real_T *pose, const robot_T *ptr_robot) {
+int SolveFK(const real_T *joints, real_T pose[16], const robot_T *ptr_robot) {
     std::cout << "Using custom/default SolveFK" << std::endl;
     // return -1; // Return -1 to use RoboDK default, return 1 for success, return 0 for target out of reach
 
@@ -251,7 +254,7 @@ int SolveFK(const real_T *joints, real_T *pose, const robot_T *ptr_robot) {
     return 1; // Return -1 to use RoboDK default, return 0 for target out of reach, return 1 for success
 }
 
-int SolveFK_CAD(const real_T *joints, real_T *pose, real_T *joint_poses, int max_poses, const robot_T *ptr_robot) {
+int SolveFK_CAD(const real_T *joints, real_T pose[16], real_T *joint_poses, int max_poses, const robot_T *ptr_robot) {
     std::cout << "Using custom SolveFK_CAD" << std::endl;
     // return -1; // Return -1 to use RoboDK default, return 0 for success
 
@@ -314,7 +317,7 @@ int SolveFK_CAD(const real_T *joints, real_T *pose, real_T *joint_poses, int max
     // return -1; // return -1 to use RoboDK default
 }
 
-int SolveIK(const real_T *pose, real_T *joints, real_T *joints_all, int max_solutions, const real_T *joints_approx, const robot_T *ptr_robot) {
+int SolveIK(const real_T pose[16], real_T *joints, real_T *joints_all, int max_solutions, const real_T *joints_approx, const robot_T *ptr_robot) {
     std::cout << "Using custom SolveIK..." << std::endl;
     
     // Retrieve the number of axes (degrees of freedom)

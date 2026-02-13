@@ -3,7 +3,10 @@
 # To load your custom DLL: Double click on your robot, select Parameters, click on Options under Robot Kinematics, click on Select Library.
 # This is supported since RoboDK v6
 #--------------------------------
-# CONFIG -= qt
+
+CONFIG -= qt
+QT -= core
+QT -= gui
 
 TEMPLATE = lib
 CONFIG += c++17
@@ -45,12 +48,4 @@ SOURCES += \
 
 HEADERS += \
     samplekinematics.h
-
-
-
-
-
-
-
-
 

@@ -1,13 +1,17 @@
+/*
+ * Copyright (c) 2026 RoboDK Global. All rights reserved.
+ */
+
 #ifndef SAMPLEKINEMATICS_H
 #define SAMPLEKINEMATICS_H
 
 
-#if defined(_MSC_VER) || defined(WIN64) || defined(_WIN64) || defined(__WIN64__) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#if defined(_WIN32)
 #define MYLIB_EXPORT __declspec(dllexport)
 #define MYLIB_IMPORT __declspec(dllimport)
 #else
-#define MYLIB_EXPORT __attribute__((visibility("default")))
-#define MYLIB_IMPORT __attribute__((visibility("default")))
+#define MYLIB_EXPORT
+#define MYLIB_IMPORT
 #endif
 
 
@@ -29,7 +33,7 @@ extern "C" {
  * pointer to the robot parameters, if any
  * \return returns 1 if the solution is valid, returns 0 if there is no solution (such as joints out of limits), return -1 if we want to use the default/generic forward kinematics of RoboDK
  */
-MYLIB_EXPORT int SolveFK(const real_T *joints, real_T *pose, const robot_T *ptr_robot);
+MYLIB_EXPORT int SolveFK(const real_T *joints, real_T pose[16], const robot_T *ptr_robot);
 
 
 /*!
@@ -47,7 +51,7 @@ MYLIB_EXPORT int SolveFK(const real_T *joints, real_T *pose, const robot_T *ptr_
  * pointer to the robot parameters, if any.
  * \return Returns 1 if the solution is valid, returns 0 if there is no solution (such as joints out of limits), return -1 if we want to use the default/generic forward kinematics of RoboDK
  */
-MYLIB_EXPORT int SolveFK_CAD(const real_T *joints, real_T *pose, real_T *joint_poses, int max_poses, const robot_T *ptr_robot);
+MYLIB_EXPORT int SolveFK_CAD(const real_T *joints, real_T pose[16], real_T *joint_poses, int max_poses, const robot_T *ptr_robot);
 
 
 
@@ -67,7 +71,7 @@ MYLIB_EXPORT int SolveFK_CAD(const real_T *joints, real_T *pose, real_T *joint_p
  * pointer to the robot parameters, if any.
  * \return returns the number of valid solutions (equal or less than max_solutions), if any. Returns 0 if there is no solution (for example: target out of reach), return -1 if we want to use the default iterative solution provided by RoboDK
  */
-MYLIB_EXPORT int SolveIK(const real_T *pose, real_T *joints, real_T *joints_all, int max_solutions, const real_T *joints_approx, const robot_T *ptr_robot);
+MYLIB_EXPORT int SolveIK(const real_T pose[16], real_T *joints, real_T *joints_all, int max_solutions, const real_T *joints_approx, const robot_T *ptr_robot);
 
 }
 
