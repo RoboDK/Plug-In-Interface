@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (c) 2015-2025 RoboDK Inc.
+** Copyright (c) 2015-2026 RoboDK Global.
 ** Contact: https://robodk.com/
 **
 ** This file is part of the RoboDK API.
@@ -23,7 +23,7 @@
 ** OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ** SOFTWARE.
 **
-** RoboDK is a registered trademark of RoboDK Inc.
+** RoboDK is a registered trademark of RoboDK Global.
 **
 ****************************************************************************/
 
