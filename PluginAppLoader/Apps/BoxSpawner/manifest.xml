@@ -37,5 +37,7 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/SpawnBox.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/SpawnBox.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/__init__.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/docs/icons.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/docs/interface.png</asset>
   </assets>
 </packageManifest>

@@ -29,5 +29,7 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/CycleTime.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/LICENSE.md</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/README.md</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/docs/interface.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CycleTime/docs/results.png</asset>
   </assets>
 </packageManifest>
