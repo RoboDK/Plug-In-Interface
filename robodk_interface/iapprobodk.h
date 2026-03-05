@@ -7,7 +7,7 @@
 * Therefore, when the RoboDK API is used inside the Plugin Interface (using IItem and IRoboDK) the speed is faster than using the default API \ref LinkTiming and it allows you to better filter and synchronize events using the PluginEvent callback.
 * However, contrary to the standard RoboDK API, all RoboDK Plug-In applications must exist within RoboDK's environment.
 *
-* Some RoboDK Example plugins are available here:
+* You can find RoboDK Example Plug-ins here:
 * - https://github.com/RoboDK/Plug-In-Interface
 *
 * Each example includes the *robodk_interface* folder. This folder is required by every plug-in and defines the interface to RoboDK.
@@ -18,6 +18,8 @@
 * Make sure to follow the installation requirements section (\ref LinkInstall) to install Qt as a C++ development environment.
 *
 * Important: The plugin inteface can change with different major versions of RoboDK. Make sure to use the right plugin inteface header and source files for your RoboDK version.
+*
+* This document about the RoboDK plug-in interface is published in the RoboDK documentation: https://robodk.com/doc/en/PlugIns/index.html. For general information about RoboDK visit the Help and Resources section: https://robodk.com/help.
 *
 *
 * \section LinkPlugin RoboDK Plug-In Structure
@@ -63,7 +65,6 @@
 * - \ref tMatrix2D data structure to represent a variable size 2D matrix (mostly used for internal purposes)
 *
 *
-*
 * \subsubsection LinkPluginAPI Plug-In Interface vs. RoboDK API
 * The RoboDK API is a generic set of commands that allows you to interact with RoboDK and automate tasks. The RoboDK API is used by default when macros are used in RoboDK.
 * The RoboDK Plug-In interface includes an interface to the RoboDK API.
@@ -78,6 +79,24 @@
 * - Plug-Ins can only be deployed as C++ code using Qt libraries.
 *
 *
+* \section LinkKinematics Custom robot kinematics interface
+* You can customize the robot kinematics algorithms in RoboDK by creating a custom library (DLL) in the folder C:/RoboDK/bin/robotextensions. By customizing your kinematics you can implement your custom or proprietary algorithms to calculate forward and inverse kinematics. For example, a custom inverse kinematics for 7-axis robots that calculates the result exactly the same as your controller.
+* 
+* The custom kinematics feature is available since RoboDK v6 and it is available on Windows, Mac and Linux. It is not a requirement to use Qt Creator and Qt libraries to create custom kinematics.
+*
+* The custom robot kinematics interface allows you to implement the following functions:
+* - SolveFK: Calculate the forward kinematics solution. This function calculates the pose of the end effector with repect to the robot base given a set of robot joints in mm or deg.
+* - SolveFK_CAD: Calculate the forward kinematics solution including the poses for all joints. This function is similar to SolveFK but it is used to display the 3D model in the 3D view.
+* - SolveIK: Calculate the inverse kinematics solution: calculates the robot joints given the pose of the robot flange with respect to the robot base.
+*
+* The robot kinematics interface is different from the Plug-in Interface and you can use one without using the other one.
+*
+* Follow these steps to load your custom robot kinematics library: Double click on your robot, select Parameters, click on Options under Robot Kinematics, click on Select Library.
+* 
+* You can find an example to create your custom kinematics in the following link: https://github.com/RoboDK/Plug-In-Interface/tree/master/robotextensions/samplekinematics.
+* 
+* \image html custom-kinematics.png width=600
+* 
 *
 * \section LinkTiming Timing tests
 * The \ref PluginExample application shows how to implement a basic plugin. Among other things it performs some timing tests to calculate the speed of RoboDK on a specific computer.
