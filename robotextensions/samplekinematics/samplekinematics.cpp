@@ -110,6 +110,31 @@ int iRobot_nDOFs(const robot_T *ptr_robot){
     return ((const real_T*) ptr_robot)[1*20+1];
 }
 
+/*!
+ * \brief iRobot_Name returns the name of the robot
+ * \param robotData
+ * \return
+ */
+static std::string iRobot_Name(const real_T* ptr_robot)
+{
+    constexpr size_t begin = 90 * 20;
+    constexpr size_t size = 59;
+    constexpr size_t end = begin + size;
+
+    std::string name;
+    name.reserve(size);
+
+    for (size_t i = begin; i < end; ++i)
+    {
+        if (ptr_robot[i] == 0.0)
+            break;
+
+        name.push_back(static_cast<char>(ptr_robot[i]));
+    }
+
+    return name;
+}
+
 
 ///
 /// \brief Convert the 4 values of a DHM transformation to a pose

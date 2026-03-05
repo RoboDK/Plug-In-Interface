@@ -1,7 +1,11 @@
 #--------------------------------
-# This is a sample project that shows how to customize the robot kinematics in RoboDK by creating a custom DLL
-# To load your custom DLL: Double click on your robot, select Parameters, click on Options under Robot Kinematics, click on Select Library.
-# This is supported since RoboDK v6
+# This is a sample project that shows how to customize the robot kinematics in RoboDK by creating a custom library.
+# To load your custom library (DLL): Double click on your robot, select Parameters, click on Options under Robot Kinematics, click on Select Library.
+# This is supported since RoboDK 6.0.
+#
+# More information here:
+# https://robodk.com/doc/en/PlugIns/index.html#LinkKinematics
+# https://github.com/RoboDK/Plug-In-Interface/tree/master/robotextensions/samplekinematics
 #--------------------------------
 
 CONFIG -= qt
