@@ -76,13 +76,29 @@ Installation Requirements
 
 Requirements to make RoboDK Plug-Ins work:
  * Install RoboDK (v3.5.4 or later): https://robodk.com/download
- * Make sure you compile your plugin using the correct compiler and version of Qt:
+ * Make sure you compile your plugin using the correct compiler and version of Qt for the corresponding version of RoboDK:
   - Qt version 5.15 on Windows (MSVC2019).
-  - Qt version 5.15 on Mac (clang 64 bit).
-  - Qt version 5.12 on Linux.
- * It is possible to run in debug mode on Windows. Contact us for more information.
+  - Qt version 6.10 on Mac (clang 64 bit). Before RoboDK 6.0: Qt 5.15.
+  - Qt version 6.10 on Linux. Before RoboDK 6.0: Qt 5.12.
+ * You can run in debug mode on Windows. Contact us for more information.
 
-![](qtrun.png)
+![RoboDK Plugin and Qt setup-example](qtrun.png)
+
+
+Deployment
+----------
+
+Refer to the Add-in Manager documentation to deploy your Plug-in as an Add-in package (RDKP file):
+https://robodk.com/doc/en/Add-ins.html#AddinManager
+
+You can contact us to submit your Add-in in the RoboDK Marketplace. 
+
+You can find more information here:
+ * How to use the Add-in Manager to create or pack an Add-in: https://robodk.com/doc/en/Add-ins.html#AddinCreator
+ * How to submit your Add-in for publishing: https://robodk.com/doc/en/Add-ins.html#AddinSubmit
+ * Add-in Marketplace: https://robodk.com/addins
+
+
 
 Qt Tips
 -------------
