@@ -148,10 +148,7 @@ void FormRobotPilot::IncrementalMove(int id, double sense){
         }
 
         // apply to XYZWPR
-        tXYZWPR xyzwpr;
-        for (int i=0; i<6; i++){
-            xyzwpr[i] = 0;
-        }
+        tXYZWPR xyzwpr = {};
         xyzwpr[id] = step;
 
         Mat pose_increment;
