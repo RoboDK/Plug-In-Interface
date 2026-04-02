@@ -44,6 +44,6 @@ The default mapping was created for an Xbox One controller.
 
 ### Settings
 
-You can edit the settings to suit your needs, such as robot speeds, step size, step range, initial settings, etc.
+You can edit the settings to suit your needs, such as robot speeds, step size, step range, initial settings, etc. Find the settings in Connect-Game Controller-Settings.
 
 ![Settings](./docs/settings.png)
