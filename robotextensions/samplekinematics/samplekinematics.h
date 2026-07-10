@@ -79,7 +79,6 @@ MYLIB_EXPORT int SolveFK(const real_T *joints, real_T pose[16], const robot_T *p
 MYLIB_EXPORT int SolveFK_CAD(const real_T *joints, real_T pose[16], real_T *joint_poses, int max_poses, const robot_T *ptr_robot);
 
 
-
 /*!
  * \brief Calculate the inverse kinematics solution: calculates the robot joints given the pose of the robot flange with respect to the robot base
  * \param pose
@@ -97,6 +96,20 @@ MYLIB_EXPORT int SolveFK_CAD(const real_T *joints, real_T pose[16], real_T *join
  * \return returns the number of valid solutions (equal or less than max_solutions), if any. Returns 0 if there is no solution (for example: target out of reach), return -1 if we want to use the default iterative solution provided by RoboDK
  */
 MYLIB_EXPORT int SolveIK(const real_T pose[16], real_T *joints, real_T *joints_all, int max_solutions, const real_T *joints_approx, const robot_T *ptr_robot);
+
+
+/*!
+ * \brief Returns the RLF flags for a set of joint values(rear/front, Lower/upper, Flip/non-flip)
+ * \param joints
+ * robot joints in deg or mm
+ * \param config
+ * robot configuration flags (0 or 1). For example, for Front, Upper arm and Flip (J5<0) we should return [0,0,1]
+ * \param ptr_robot
+ * pointer to the robot parameters, if any.
+ * \return
+ */
+MYLIB_EXPORT int Joints2Config(const real_T *joints, real_T config[3], const robot_T *ptr_robot);
+
 
 }
 
