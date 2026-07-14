@@ -9,6 +9,7 @@
 #include <QToolBar>
 #include <QDebug>
 #include <QAction>
+#include <QKeySequence>
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QTextEdit>
@@ -41,6 +42,7 @@ QString PluginExample::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar
 
     // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
     action_information = new QAction(QIcon(":/resources/information.png"), tr("Plugin Speed Information"));
+    action_information->setShortcut(QKeySequence("Ctrl+I"));
     action_robotpilot = new QAction(QIcon(":/resources/code.png"), tr("Robot Pilot Form"));
     action_help = new QAction(QIcon(":/resources/help.png"), tr("RoboDK Plugins - Help"));
     // Make sure to connect the action to your callback (slot)
@@ -321,11 +323,21 @@ void PluginExample::PluginEvent(TypeEvent event_type) {
 //----------------------------------------------------------------------------------
 // Define your own button callbacks here
 
+// Formats one row of the benchmark table (metric name + measured value)
+static QString BenchmarkRowHtml(const QString &metric, const QString &value){
+    return QString("<tr><td style=\"padding:4px 12px 4px 4px;\">%1</td>"
+                    "<td style=\"padding:4px;font-family:monospace;text-align:right;\">%2</td></tr>")
+            .arg(metric.toHtmlEscaped(), value.toHtmlEscaped());
+}
+
 void PluginExample::callback_information(){
 
     // Perform some timing tests using the RoboDK API
     RDK->ShowMessage("Starting timing tests", false);
-    QString text_message_html("<strong>Plugin Timing Tests Summary on " + QDateTime::currentDateTime().toString() + ":</strong><br>");
+
+    QString text_message_html;
+    text_message_html += "<h2 style=\"margin-bottom:2px;\">Plugin Timing Tests Summary</h2>";
+    text_message_html += QString("<p style=\"margin-top:0;font-weight:bold;\">%1</p>").arg(QDateTime::currentDateTime().toString());
 
     int ntests=10000;
     Item robot = RDK->ItemUserPick("Select a robot arm", IItem::ITEM_TYPE_ROBOT_ARM);
@@ -333,54 +345,65 @@ void PluginExample::callback_information(){
         Mat pose_fk;
         tJoints joints_ik;
         QList<tJoints> joints_ik_all;
-        qint64 tstart;
-        qint64 tend;
+        QElapsedTimer timer;
 
-        text_message_html += "<br>" + QString("Using robot %1").arg(robot->Name());
+        QString benchmark_rows;
+        benchmark_rows += BenchmarkRowHtml("Robot", robot->Name());
 
-        // Test Forward Kinematics
-        tstart = QDateTime::currentMSecsSinceEpoch();
+        // Test Forward Kinematics (QElapsedTimer gives nanosecond resolution, unlike QDateTime's millisecond ticks)
+        timer.start();
         for (int i=0; i<ntests; i++){
             pose_fk = robot->SolveFK(robot->Joints());
         }
-        tend = QDateTime::currentMSecsSinceEpoch();
-        text_message_html += "<br>" + QString("Forward Kinematics: %1 micro seconds").arg(((double)(tend-tstart)*1000)/ntests, 0, 'f', 2);
+        benchmark_rows += BenchmarkRowHtml("Forward Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed())/ntests, 0, 'f', 2));
 
         // Test Inverse Kinematics
-        tstart = QDateTime::currentMSecsSinceEpoch();
+        timer.start();
         for (int i=0; i<ntests; i++){
             joints_ik = robot->SolveIK(pose_fk);
         }
-        tend = QDateTime::currentMSecsSinceEpoch();
-        text_message_html += "<br>" + QString("Inverse Kinematics: %1 micro seconds").arg(((double)(tend-tstart)*1000)/ntests, 0, 'f', 2);
+        benchmark_rows += BenchmarkRowHtml("Inverse Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed())/ntests, 0, 'f', 2));
 
         // Test Forward Kinematics
-        tstart = QDateTime::currentMSecsSinceEpoch();
+        timer.start();
         for (int i=0; i<ntests; i++){
             joints_ik_all = robot->SolveIK_All(pose_fk);
         }
-        tend = QDateTime::currentMSecsSinceEpoch();
-        text_message_html += "<br>" + QString("Inverse Kinematics: %1 micro seconds (all solutions)").arg(((double)(tend-tstart)*1000)/ntests, 0, 'f', 2);
+        benchmark_rows += BenchmarkRowHtml("Inverse Kinematics (all solutions)", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed())/ntests, 0, 'f', 2));
 
         // Test Collisions for each inverse kinematics solution, less samples but more accurate timer (nano second accuracy)
-        QElapsedTimer timer;
         timer.start();
         int nJoints = joints_ik_all.length();
+        int nWithCollisions = 0;
+        int nWithoutCollisions = 0;
         for (int i=0; i<nJoints; i++){
             robot->setJoints(joints_ik_all.at(i));
             RDK->Render(IRoboDK::RenderUpdateOnly);
-            RDK->Collisions();
+            int nCollisions = RDK->Collisions();
+            if (nCollisions > 0){
+                nWithCollisions++;
+            } else {
+                nWithoutCollisions++;
+            }
         }
         double ms_collisions = (1e-6 * timer.nsecsElapsed())/nJoints;
         double samples_x_sec = 1000.0/ms_collisions;
         qDebug() << "ms per collision: " << ms_collisions;
         qDebug() << "Collision samples per second: " << samples_x_sec;
 
-        text_message_html += "<br>" + QString("Collision check: %1 milliseconds/sample (samples: %2)").arg(ms_collisions, 0, 'f', 2).arg(nJoints);
-        text_message_html += "<br>" + QString("Collision check: %1 samples/sec").arg(samples_x_sec, 0, 'f', 2);
+        benchmark_rows += BenchmarkRowHtml(QString("Collision check (%1 samples)").arg(nJoints), QString("%1 ms/sample").arg(ms_collisions, 0, 'f', 2));
+        benchmark_rows += BenchmarkRowHtml("Collision check throughput", QString("%1 samples/sec").arg(samples_x_sec, 0, 'f', 2));
+        benchmark_rows += BenchmarkRowHtml("Points with collisions", QString::number(nWithCollisions));
+        benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nWithoutCollisions));
+
+        text_message_html += "<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
+                              "<tr style=\"background-color:#dde5f0;\">"
+                              "<th style=\"padding:4px;text-align:left;\">Metric</th>"
+                              "<th style=\"padding:4px;text-align:right;\">Value</th></tr>"
+                              + benchmark_rows + "</table>";
 
     } else {
-        text_message_html += "<br>No robot available to run Kinematic tests";
+        text_message_html += "<p><i>No robot available to run Kinematic tests</i></p>";
     }
 
     // output through debug console
@@ -394,20 +417,23 @@ void PluginExample::callback_information(){
     QList<Item> item_list = RDK->getItemList();
 
     RDK->ShowMessage("Displaying list of station items", false);
-    text_message_html += QString("<br>Open station <strong>%1</strong> items:").arg(RDK->getActiveStation()->Name());
+    text_message_html += QString("<h3 style=\"margin-bottom:2px;\">Open station: %1</h3>").arg(RDK->getActiveStation()->Name().toHtmlEscaped());
+    text_message_html += "<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
+                          "<tr style=\"background-color:#dde5f0;\">"
+                          "<th style=\"padding:4px;text-align:left;\">Item</th>"
+                          "<th style=\"padding:4px;text-align:left;\">Parent</th></tr>";
     foreach (Item itm, item_list){
         Item item_parent = itm->Parent();
-        if (!ItemValid(item_parent)){
-            // station items do not have a parent
-            text_message_html += QString("<br>%1 (station)").arg(itm->Name());
-        } else {
-            text_message_html += QString("<br>%1 -> <i>parent: %2</i>").arg(itm->Name()).arg(item_parent->Name());
-        }
-
+        QString parent_text = ItemValid(item_parent) ? item_parent->Name() : tr("(station)");
+        text_message_html += QString("<tr><td style=\"padding:2px 12px 2px 4px;\">%1</td>"
+                                      "<td style=\"padding:2px;font-weight:bold;\"><i>%2</i></td></tr>")
+                .arg(itm->Name().toHtmlEscaped(), parent_text.toHtmlEscaped());
     }
+    text_message_html += "</table>";
 
 
-    QTextEdit *text_editor = new QTextEdit("Plugin timing summary");
+    QTextEdit *text_editor = new QTextEdit();
+    text_editor->setReadOnly(true);
     text_editor->setHtml(text_message_html);
 
     static QDockWidget *dockedInfo = nullptr;
