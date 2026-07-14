@@ -15,6 +15,7 @@
 #include <QDateTime>
 #include <QIcon>
 #include <QDesktopServices>
+#include <QElapsedTimer>
 
 //------------------------------- RoboDK Plug-in commands ------------------------------
 
@@ -319,8 +320,7 @@ void PluginExample::callback_information(){
     QString text_message_html("<strong>Plugin Timing Tests Summary on " + QDateTime::currentDateTime().toString() + ":</strong><br>");
 
     int ntests=10000;
-    //Item robot = RDK->getItem("", IItem::ITEM_TYPE_ROBOT);
-    Item robot = RDK->ItemUserPick("Pick a robot", IItem::ITEM_TYPE_ROBOT);
+    Item robot = RDK->ItemUserPick("Select a robot arm", IItem::ITEM_TYPE_ROBOT_ARM);
     if (ItemValid(robot)){
         Mat pose_fk;
         tJoints joints_ik;
@@ -353,10 +353,27 @@ void PluginExample::callback_information(){
         }
         tend = QDateTime::currentMSecsSinceEpoch();
         text_message_html += "<br>" + QString("Inverse Kinematics: %1 micro seconds (all solutions)").arg(((double)(tend-tstart)*1000)/ntests, 0, 'f', 2);
+
+        // Test Collisions for each inverse kinematics solution, less samples but more accurate timer (nano second accuracy)
+        QElapsedTimer timer;
+        timer.start();
+        int nJoints = joints_ik_all.length();
+        for (int i=0; i<nJoints; i++){
+            robot->setJoints(joints_ik_all.at(i));
+            RDK->Render(IRoboDK::RenderUpdateOnly);
+            RDK->Collisions();
+        }
+        double ms_collisions = (1e-6 * timer.nsecsElapsed())/nJoints;
+        double samples_x_sec = 1000.0/ms_collisions;
+        qDebug() << "ms per collision: " << ms_collisions;
+        qDebug() << "Collision samples per second: " << samples_x_sec;
+
+        text_message_html += "<br>" + QString("Collision check: %1 milliseconds/sample (samples: %2)").arg(ms_collisions, 0, 'f', 2).arg(nJoints);
+        text_message_html += "<br>" + QString("Collision check: %1 samples/sec").arg(samples_x_sec, 0, 'f', 2);
+
     } else {
         text_message_html += + "<br>No robot available to run Kinematic tests";
     }
-
 
     // output through debug console
     qDebug() << text_message_html;
@@ -385,7 +402,11 @@ void PluginExample::callback_information(){
     QTextEdit *text_editor = new QTextEdit("Plugin timing summary");
     text_editor->setHtml(text_message_html);
 
-    AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
+    static QDockWidget *dockedInfo = nullptr;
+    if (dockedInfo != nullptr){
+        dockedInfo->deleteLater();
+    }
+    dockedInfo = AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
 }
 
 void PluginExample::callback_robotpilot(){
