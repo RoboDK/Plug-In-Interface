@@ -29,10 +29,15 @@ FormRobotPilot::~FormRobotPilot(){
 }
 
 void FormRobotPilot::on_btnSelectRobot_clicked(){
-    SelectRobot();
+    SelectRobot(true);
 }
 
-bool FormRobotPilot::SelectRobot(){
+bool FormRobotPilot::SelectRobot(bool force_selection){
+    if (!force_selection && RDK->Valid(Robot)){
+        // a valid robot is already selected: avoid prompting on every jog move
+        return true;
+    }
+
     QList<Item> all_robots = RDK->getItemList(IItem::ITEM_TYPE_ROBOT);
     if (all_robots.length() == 0){
         ui->lblRobot->setText("Load a robot");

@@ -75,6 +75,14 @@ void PluginExample::PluginUnload(){
     toolbar1->deleteLater();
     toolbar1 = nullptr;
 
+    // remove the actions (not owned by the menu/toolbar, so they are not deleted automatically)
+    action_information->deleteLater();
+    action_information = nullptr;
+    action_robotpilot->deleteLater();
+    action_robotpilot = nullptr;
+    action_help->deleteLater();
+    action_help = nullptr;
+
     if (dock_robotpilot != nullptr){
         dock_robotpilot->close();
         dock_robotpilot = nullptr;
@@ -328,7 +336,7 @@ void PluginExample::callback_information(){
         qint64 tstart;
         qint64 tend;
 
-        text_message_html += + "<br>" + QString("Using robot %1").arg(robot->Name());
+        text_message_html += "<br>" + QString("Using robot %1").arg(robot->Name());
 
         // Test Forward Kinematics
         tstart = QDateTime::currentMSecsSinceEpoch();
@@ -336,7 +344,7 @@ void PluginExample::callback_information(){
             pose_fk = robot->SolveFK(robot->Joints());
         }
         tend = QDateTime::currentMSecsSinceEpoch();
-        text_message_html += + "<br>" + QString("Forward Kinematics: %1 micro seconds").arg(((double)(tend-tstart)*1000)/ntests, 0, 'f', 2);
+        text_message_html += "<br>" + QString("Forward Kinematics: %1 micro seconds").arg(((double)(tend-tstart)*1000)/ntests, 0, 'f', 2);
 
         // Test Inverse Kinematics
         tstart = QDateTime::currentMSecsSinceEpoch();
@@ -372,7 +380,7 @@ void PluginExample::callback_information(){
         text_message_html += "<br>" + QString("Collision check: %1 samples/sec").arg(samples_x_sec, 0, 'f', 2);
 
     } else {
-        text_message_html += + "<br>No robot available to run Kinematic tests";
+        text_message_html += "<br>No robot available to run Kinematic tests";
     }
 
     // output through debug console
