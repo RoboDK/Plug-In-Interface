@@ -403,6 +403,24 @@ void PluginExample::callback_information(){
                               "<th style=\"padding:4px;text-align:right;font-weight:bold;\">Value</th></tr>"
                               + benchmark_rows + "</table>";
 
+
+        // TODO: Test collisions for the joint lists of a program and perform similar metrics as done in the previous step
+        Item program = RDK->ItemUserPick("Select a program to run a check for collisions", IItem::ITEM_TYPE_PROGRAM);
+        QString err_msg;
+        tMatrix2D *list_joints; // TODO: create object
+        program->InstructionListJoints(&err_msg, list_joints, 1, 1, IRoboDK::COLLISION_OFF, 0, -1);
+        // For each joint in list_joints calculate collisions and calculate if a collision was found
+        for (){
+            robot->setJoints(list_joints.at(i));
+            RDK->Render(IRoboDK::RenderUpdateOnly);
+            int nCollisions = RDK->Collisions();
+            if (nCollisions > 0){
+                nWithCollisions++;
+            } else {
+                nWithoutCollisions++;
+            }
+        }
+
     } else {
         text_message_html += "<p><i>No robot available to run Kinematic tests</i></p>";
     }
@@ -423,6 +441,8 @@ void PluginExample::callback_information(){
                           "<tr>"
                           "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Item</th>"
                           "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Parent</th></tr>";
+
+
     foreach (Item itm, item_list){
         Item item_parent = itm->Parent();
         QString parent_text = ItemValid(item_parent) ? item_parent->Name() : tr("(station)");
