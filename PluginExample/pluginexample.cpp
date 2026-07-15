@@ -46,7 +46,7 @@ QString PluginExample::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar
     action_robotpilot = new QAction(QIcon(":/resources/code.png"), tr("Robot Pilot Form"));
     action_help = new QAction(QIcon(":/resources/help.png"), tr("RoboDK Plugins - Help"));
     // Make sure to connect the action to your callback (slot)
-    connect(action_information, SIGNAL(triggered()), this, SLOT(callback_information()), Qt::QueuedConnection);
+    connect(action_information, SIGNAL(triggered()), this, SLOT(callback_benchmarkInfo()), Qt::QueuedConnection);
     connect(action_robotpilot, SIGNAL(triggered()), this, SLOT(callback_robotpilot()), Qt::QueuedConnection);
     connect(action_help, SIGNAL(triggered()), this, SLOT(callback_help()), Qt::QueuedConnection);
 
@@ -130,7 +130,7 @@ bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
 QString PluginExample::PluginCommand(const QString &command, const QString &value){
     qDebug() << "Sent command: " << command << "    With value: " << value;
     if (command.compare("Information", Qt::CaseInsensitive) == 0){
-        callback_information();
+        callback_benchmarkInfo();
         return "Done";
     } else if (command.compare("RobotPilot", Qt::CaseInsensitive) == 0){
         callback_robotpilot();
@@ -330,7 +330,7 @@ static QString BenchmarkRowHtml(const QString &metric, const QString &value){
             .arg(metric.toHtmlEscaped(), value.toHtmlEscaped());
 }
 
-void PluginExample::callback_information(){
+void PluginExample::callback_benchmarkInfo(){
 
     // Perform some timing tests using the RoboDK API
     RDK->ShowMessage("Starting timing tests", false);
@@ -429,6 +429,8 @@ void PluginExample::callback_information(){
     qDebug() << text_message_html;
 
 
+    // Example to retrieve station items ans show their dependency:
+    /*
     RDK->ShowMessage("Retrieving all station items", false);
     QStringList item_list_names = RDK->getItemListNames();
     qDebug() << "Available items in the current station: " << item_list_names;
@@ -451,6 +453,7 @@ void PluginExample::callback_information(){
                 .arg(itm->Name().toHtmlEscaped(), parent_text.toHtmlEscaped());
     }
     text_message_html += "</table>";
+*/
 
 
     QTextEdit *text_editor = new QTextEdit();

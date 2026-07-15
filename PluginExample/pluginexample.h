@@ -57,7 +57,7 @@ public slots:
     // define button callbacks (or slots) here. They are triggered automatically when the button is selected.
 
     /// Called when the information button/action is selected
-    void callback_information();
+    void callback_benchmarkInfo();
 
     /// Called when the robot pilot button/action is selected
     void callback_robotpilot();
@@ -76,7 +76,7 @@ private:
     /// Pointer to the customized menu
     QMenu *menu1;
 
-    /// Information action. callback_information is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
+    /// Information action. callback_benchmarkInfo is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
     QAction *action_information;
 
     /// Open robot pilot form action. callback_robotpilot is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
