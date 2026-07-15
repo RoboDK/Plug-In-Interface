@@ -372,6 +372,7 @@ void PluginExample::callback_information(){
         benchmark_rows += BenchmarkRowHtml("Inverse Kinematics (all solutions)", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed())/ntests, 0, 'f', 2));
 
         // Test Collisions for each inverse kinematics solution, less samples but more accurate timer (nano second accuracy)
+        RDK->Collisions(); // Run one time first, the first time it needs to run additional calculations for all loaded objects if collision check was not on already
         timer.start();
         int nJoints = joints_ik_all.length();
         int nWithCollisions = 0;
@@ -392,14 +393,14 @@ void PluginExample::callback_information(){
         qDebug() << "Collision samples per second: " << samples_x_sec;
 
         benchmark_rows += BenchmarkRowHtml(QString("Collision check (%1 samples)").arg(nJoints), QString("%1 ms/sample").arg(ms_collisions, 0, 'f', 2));
-        benchmark_rows += BenchmarkRowHtml("Collision check throughput", QString("%1 samples/sec").arg(samples_x_sec, 0, 'f', 2));
+        benchmark_rows += BenchmarkRowHtml("Collision check rate", QString("%1 samples/sec").arg(samples_x_sec, 0, 'f', 2));
         benchmark_rows += BenchmarkRowHtml("Points with collisions", QString::number(nWithCollisions));
         benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nWithoutCollisions));
 
         text_message_html += "<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
-                              "<tr style=\"background-color:#dde5f0;\">"
-                              "<th style=\"padding:4px;text-align:left;\">Metric</th>"
-                              "<th style=\"padding:4px;text-align:right;\">Value</th></tr>"
+                              "<tr>"
+                              "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Metric</th>"
+                              "<th style=\"padding:4px;text-align:right;font-weight:bold;\">Value</th></tr>"
                               + benchmark_rows + "</table>";
 
     } else {
@@ -419,9 +420,9 @@ void PluginExample::callback_information(){
     RDK->ShowMessage("Displaying list of station items", false);
     text_message_html += QString("<h3 style=\"margin-bottom:2px;\">Open station: %1</h3>").arg(RDK->getActiveStation()->Name().toHtmlEscaped());
     text_message_html += "<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
-                          "<tr style=\"background-color:#dde5f0;\">"
-                          "<th style=\"padding:4px;text-align:left;\">Item</th>"
-                          "<th style=\"padding:4px;text-align:left;\">Parent</th></tr>";
+                          "<tr>"
+                          "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Item</th>"
+                          "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Parent</th></tr>";
     foreach (Item itm, item_list){
         Item item_parent = itm->Parent();
         QString parent_text = ItemValid(item_parent) ? item_parent->Name() : tr("(station)");
