@@ -397,9 +397,19 @@ void PluginExample::callback_benchmarkInfo() {
         benchmark_rows += BenchmarkRowHtml("Points with collisions", QString::number(nWithCollisions));
         benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nWithoutCollisions));
 
+
+
         // Test collisions along the joint list of a full program, using the same metrics as above (optional: the user can cancel this step)
-        Item program = RDK->ItemUserPick("Select a program to check for collisions (optional)", IItem::ITEM_TYPE_PROGRAM);
+        Item program = RDK->getItem("Main", IItem::ITEM_TYPE_PROGRAM);
+        if (!ItemValid(program)){
+            program = RDK->ItemUserPick("Select a program to check for collisions (optional)", IItem::ITEM_TYPE_PROGRAM);
+        }
         if (ItemValid(program)) {
+            // TODO: Show the table at this point and update again after following calculations
+
+            // TODO: Add a header if the program is valid
+
+            RDK->ShowMessage("Calculating collisions for program: " + program->Name() + " ...", false);
             tMatrix2D *list_joints = Matrix2D_Create();
             QString err_msg;
             int result = program->InstructionListJoints(err_msg, list_joints, 1, 1, IRoboDK::COLLISION_OFF);
@@ -427,6 +437,7 @@ void PluginExample::callback_benchmarkInfo() {
 
                 benchmark_rows += BenchmarkRowHtml("Program", program->Name());
                 benchmark_rows += BenchmarkRowHtml(QString("Program collision check (%1 steps)").arg(nSteps), QString("%1 ms/step").arg(ms_prog_collisions, 0, 'f', 2));
+                // TODO: Add the collision check rate in samples/second based on ms_prog_collisions
                 benchmark_rows += BenchmarkRowHtml("Program points with collisions", QString::number(nProgWithCollisions));
                 benchmark_rows += BenchmarkRowHtml("Program points without collisions", QString::number(nProgWithoutCollisions));
             } else {
@@ -434,7 +445,7 @@ void PluginExample::callback_benchmarkInfo() {
                 benchmark_rows += BenchmarkRowHtml("Program collision check", tr("Failed: %1").arg(err_msg));
             }
 
-            Matrix2D_Delete(&list_joints);
+            ::Matrix2D_Delete(&list_joints);
         }
 
         text_message_html += "<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
@@ -446,6 +457,8 @@ void PluginExample::callback_benchmarkInfo() {
     } else {
         text_message_html += "<p><i>No robot available to run Kinematic tests</i></p>";
     }
+
+    RDK->ShowMessage("Done with benchmark calculation", false);
 
     // output through debug console
     qDebug() << text_message_html;
