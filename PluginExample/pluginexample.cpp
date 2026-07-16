@@ -18,6 +18,20 @@
 #include <QDesktopServices>
 #include <QElapsedTimer>
 #include <QApplication>
+#include <QSysInfo>
+#include <QThread>
+
+// Platform-specific headers used only to read the CPU model/frequency and total RAM
+// (Qt does not expose this information through a cross-platform API)
+#if defined(Q_OS_WIN)
+#include <QSettings>
+#include <windows.h>
+#elif defined(Q_OS_MACOS)
+#include <sys/sysctl.h>
+#elif defined(Q_OS_LINUX)
+#include <QFile>
+#include <unistd.h>
+#endif
 
 //------------------------------- RoboDK Plug-in commands ------------------------------
 
@@ -331,6 +345,85 @@ static QString BenchmarkRowHtml(const QString &metric, const QString &value) {
             .arg(metric.toHtmlEscaped(), value.toHtmlEscaped());
 }
 
+// Returns 1-2 benchmark rows describing the OS, CPU and RAM of this computer.
+// The CPU model/frequency and total RAM require a few OS-specific calls since Qt does not
+// expose them directly; any piece that is not available on this platform (e.g. CPU frequency
+// on Apple Silicon Macs) is simply left out instead of failing.
+static QString HardwareInfoRowsHtml() {
+    QString cpu_model;
+    QString cpu_freq;
+    QString ram_total;
+
+#if defined(Q_OS_WIN)
+    QSettings cpu_key(R"(HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0)", QSettings::NativeFormat);
+    cpu_model = cpu_key.value("ProcessorNameString").toString().trimmed();
+    int mhz = cpu_key.value("~MHz").toInt();
+    if (mhz > 0) {
+        cpu_freq = QString("%1 GHz").arg(mhz / 1000.0, 0, 'f', 2);
+    }
+
+    MEMORYSTATUSEX mem_status;
+    mem_status.dwLength = sizeof(mem_status);
+    if (GlobalMemoryStatusEx(&mem_status)) {
+        ram_total = QString("%1 GB").arg(mem_status.ullTotalPhys / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1);
+    }
+
+#elif defined(Q_OS_MACOS)
+    char cpu_brand[256] = {};
+    size_t cpu_brand_size = sizeof(cpu_brand);
+    if (sysctlbyname("machdep.cpu.brand_string", cpu_brand, &cpu_brand_size, nullptr, 0) == 0) {
+        cpu_model = QString::fromLocal8Bit(cpu_brand);
+    }
+
+    qint64 freq_hz = 0;
+    size_t freq_size = sizeof(freq_hz);
+    // Not available on Apple Silicon Macs: sysctlbyname() fails here and cpu_freq stays empty
+    if (sysctlbyname("hw.cpufrequency", &freq_hz, &freq_size, nullptr, 0) == 0 && freq_hz > 0) {
+        cpu_freq = QString("%1 GHz").arg(freq_hz / 1.0e9, 0, 'f', 2);
+    }
+
+    qint64 ram_bytes = 0;
+    size_t ram_size = sizeof(ram_bytes);
+    if (sysctlbyname("hw.memsize", &ram_bytes, &ram_size, nullptr, 0) == 0) {
+        ram_total = QString("%1 GB").arg(ram_bytes / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1);
+    }
+
+#elif defined(Q_OS_LINUX)
+    QFile cpuinfo("/proc/cpuinfo");
+    if (cpuinfo.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        const QStringList lines = QString::fromLocal8Bit(cpuinfo.readAll()).split('\n');
+        for (const QString &line : lines) {
+            if (cpu_model.isEmpty() && line.startsWith("model name")) {
+                cpu_model = line.section(':', 1).trimmed();
+            } else if (cpu_freq.isEmpty() && line.startsWith("cpu MHz")) {
+                cpu_freq = QString("%1 GHz").arg(line.section(':', 1).trimmed().toDouble() / 1000.0, 0, 'f', 2);
+            }
+        }
+    }
+
+    long n_pages = sysconf(_SC_PHYS_PAGES);
+    long page_size = sysconf(_SC_PAGE_SIZE);
+    if (n_pages > 0 && page_size > 0) {
+        ram_total = QString("%1 GB").arg((double(n_pages) * page_size) / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1);
+    }
+#endif
+
+    if (cpu_model.isEmpty()) {
+        cpu_model = QSysInfo::currentCpuArchitecture();
+    }
+
+    QString system_value = QString("%1, %2, %3 cores").arg(QSysInfo::prettyProductName(), cpu_model, QString::number(QThread::idealThreadCount()));
+    if (!cpu_freq.isEmpty()) {
+        system_value += QString(" @ %1").arg(cpu_freq);
+    }
+
+    QString rows = BenchmarkRowHtml("System", system_value);
+    if (!ram_total.isEmpty()) {
+        rows += BenchmarkRowHtml("RAM", ram_total);
+    }
+    return rows;
+}
+
 // Wraps a set of BenchmarkRowHtml() rows into a complete Metric/Value table
 static QString BenchmarkTableHtml(const QString &rows) {
     return QString("<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
@@ -371,8 +464,7 @@ void PluginExample::callback_benchmarkInfo() {
 
         QString benchmark_rows;
         benchmark_rows += BenchmarkRowHtml("Robot", robot->Name());
-
-        // TODO: Add cpu information, frequency, RAM and OS info in 1 or 2 lines
+        benchmark_rows += HardwareInfoRowsHtml();
 
         // Test Forward Kinematics (QElapsedTimer gives nanosecond resolution, unlike QDateTime's millisecond ticks)
         timer.start();
