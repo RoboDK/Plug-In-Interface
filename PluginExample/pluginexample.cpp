@@ -21,12 +21,12 @@
 //------------------------------- RoboDK Plug-in commands ------------------------------
 
 
-QString PluginExample::PluginName(){
+QString PluginExample::PluginName() {
     return "Example Plugin";
 }
 
 
-QString PluginExample::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings){
+QString PluginExample::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings) {
     RDK = rdk;
     MainWindow = mw;
     StatusBar = statusbar;
@@ -61,12 +61,12 @@ QString PluginExample::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar
     dock_robotpilot = nullptr;
     form_robotpilot = nullptr;
 
-    // return string is reserverd for future compatibility
+    // return string is reserved for future compatibility
     return "";
-};
+}
 
 
-void PluginExample::PluginUnload(){
+void PluginExample::PluginUnload() {
     // Cleanup the plugin
     qDebug() << "Unloading plugin " << PluginName();
 
@@ -85,7 +85,7 @@ void PluginExample::PluginUnload(){
     action_help->deleteLater();
     action_help = nullptr;
 
-    if (dock_robotpilot != nullptr){
+    if (dock_robotpilot != nullptr) {
         dock_robotpilot->close();
         dock_robotpilot = nullptr;
         form_robotpilot = nullptr;
@@ -95,7 +95,7 @@ void PluginExample::PluginUnload(){
     Q_CLEANUP_RESOURCE(resources1);
 }
 
-void PluginExample::PluginLoadToolbar(QMainWindow *mw, int icon_size){
+void PluginExample::PluginLoadToolbar(QMainWindow *mw, int icon_size) {
     // Create a new toolbar:
     toolbar1 = mw->addToolBar("Plugin Example Toolbar");
     toolbar1->setIconSize(QSize(icon_size, icon_size));
@@ -110,15 +110,15 @@ void PluginExample::PluginLoadToolbar(QMainWindow *mw, int icon_size){
 }
 
 
-bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type){
+bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type) {
     qDebug() << "Selected item: " << item->Name() << " of type " << item->Type() << " click type: " << click_type;
 
-    if (item->Type() == IItem::ITEM_TYPE_OBJECT){
+    if (item->Type() == IItem::ITEM_TYPE_OBJECT) {
         //menu->actions().insert(0, action_btn1); // add action at the beginning
         menu->addAction(action_information); // add action at the end
         qDebug() << "Done";
         return false;
-    } else if (item->Type() == IItem::ITEM_TYPE_ROBOT){
+    } else if (item->Type() == IItem::ITEM_TYPE_ROBOT) {
         //menu->actions().insert(0, action_robotpilot); // add action at the beginning
         menu->addAction(action_robotpilot); // add action at the end
         qDebug() << "Done";
@@ -127,12 +127,12 @@ bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
     return false;
 }
 
-QString PluginExample::PluginCommand(const QString &command, const QString &value){
+QString PluginExample::PluginCommand(const QString &command, const QString &value) {
     qDebug() << "Sent command: " << command << "    With value: " << value;
-    if (command.compare("Information", Qt::CaseInsensitive) == 0){
+    if (command.compare("Information", Qt::CaseInsensitive) == 0) {
         callback_benchmarkInfo();
         return "Done";
-    } else if (command.compare("RobotPilot", Qt::CaseInsensitive) == 0){
+    } else if (command.compare("RobotPilot", Qt::CaseInsensitive) == 0) {
         callback_robotpilot();
         return "Done";
     }
@@ -324,13 +324,13 @@ void PluginExample::PluginEvent(TypeEvent event_type) {
 // Define your own button callbacks here
 
 // Formats one row of the benchmark table (metric name + measured value)
-static QString BenchmarkRowHtml(const QString &metric, const QString &value){
+static QString BenchmarkRowHtml(const QString &metric, const QString &value) {
     return QString("<tr><td style=\"padding:4px 12px 4px 4px;\">%1</td>"
                     "<td style=\"padding:4px;font-family:monospace;text-align:right;\">%2</td></tr>")
             .arg(metric.toHtmlEscaped(), value.toHtmlEscaped());
 }
 
-void PluginExample::callback_benchmarkInfo(){
+void PluginExample::callback_benchmarkInfo() {
 
     // Perform some timing tests using the RoboDK API
     RDK->ShowMessage("Starting timing tests", false);
@@ -339,9 +339,9 @@ void PluginExample::callback_benchmarkInfo(){
     text_message_html += "<h2 style=\"margin-bottom:2px;\">Plugin Timing Tests Summary</h2>";
     text_message_html += QString("<p style=\"margin-top:0;font-weight:bold;\">%1</p>").arg(QDateTime::currentDateTime().toString());
 
-    int ntests=10000;
+    const int ntests = 10000;
     Item robot = RDK->ItemUserPick("Select a robot arm", IItem::ITEM_TYPE_ROBOT_ARM);
-    if (ItemValid(robot)){
+    if (ItemValid(robot)) {
         Mat pose_fk;
         tJoints joints_ik;
         QList<tJoints> joints_ik_all;
@@ -352,43 +352,43 @@ void PluginExample::callback_benchmarkInfo(){
 
         // Test Forward Kinematics (QElapsedTimer gives nanosecond resolution, unlike QDateTime's millisecond ticks)
         timer.start();
-        for (int i=0; i<ntests; i++){
+        for (int i = 0; i < ntests; i++) {
             pose_fk = robot->SolveFK(robot->Joints());
         }
-        benchmark_rows += BenchmarkRowHtml("Forward Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed())/ntests, 0, 'f', 2));
+        benchmark_rows += BenchmarkRowHtml("Forward Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2));
 
         // Test Inverse Kinematics
         timer.start();
-        for (int i=0; i<ntests; i++){
+        for (int i = 0; i < ntests; i++) {
             joints_ik = robot->SolveIK(pose_fk);
         }
-        benchmark_rows += BenchmarkRowHtml("Inverse Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed())/ntests, 0, 'f', 2));
+        benchmark_rows += BenchmarkRowHtml("Inverse Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2));
 
-        // Test Forward Kinematics
+        // Test Inverse Kinematics (all solutions)
         timer.start();
-        for (int i=0; i<ntests; i++){
+        for (int i = 0; i < ntests; i++) {
             joints_ik_all = robot->SolveIK_All(pose_fk);
         }
-        benchmark_rows += BenchmarkRowHtml("Inverse Kinematics (all solutions)", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed())/ntests, 0, 'f', 2));
+        benchmark_rows += BenchmarkRowHtml("Inverse Kinematics (all solutions)", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2));
 
-        // Test Collisions for each inverse kinematics solution, less samples but more accurate timer (nano second accuracy)
-        RDK->Collisions(); // Run one time first, the first time it needs to run additional calculations for all loaded objects if collision check was not on already
+        // Test collisions for each inverse kinematics solution: fewer samples, but a more accurate timer (nanosecond accuracy)
+        RDK->Collisions(); // Run once first: the first call needs extra bookkeeping for all loaded objects if collision checking was not already on
         timer.start();
         int nJoints = joints_ik_all.length();
         int nWithCollisions = 0;
         int nWithoutCollisions = 0;
-        for (int i=0; i<nJoints; i++){
+        for (int i = 0; i < nJoints; i++) {
             robot->setJoints(joints_ik_all.at(i));
             RDK->Render(IRoboDK::RenderUpdateOnly);
             int nCollisions = RDK->Collisions();
-            if (nCollisions > 0){
+            if (nCollisions > 0) {
                 nWithCollisions++;
             } else {
                 nWithoutCollisions++;
             }
         }
-        double ms_collisions = (1e-6 * timer.nsecsElapsed())/nJoints;
-        double samples_x_sec = 1000.0/ms_collisions;
+        double ms_collisions = (1e-6 * timer.nsecsElapsed()) / nJoints;
+        double samples_x_sec = 1000.0 / ms_collisions;
         qDebug() << "ms per collision: " << ms_collisions;
         qDebug() << "Collision samples per second: " << samples_x_sec;
 
@@ -397,29 +397,51 @@ void PluginExample::callback_benchmarkInfo(){
         benchmark_rows += BenchmarkRowHtml("Points with collisions", QString::number(nWithCollisions));
         benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nWithoutCollisions));
 
+        // Test collisions along the joint list of a full program, using the same metrics as above (optional: the user can cancel this step)
+        Item program = RDK->ItemUserPick("Select a program to check for collisions (optional)", IItem::ITEM_TYPE_PROGRAM);
+        if (ItemValid(program)) {
+            tMatrix2D *list_joints = Matrix2D_Create();
+            QString err_msg;
+            int result = program->InstructionListJoints(err_msg, list_joints, 1, 1, IRoboDK::COLLISION_OFF);
+
+            if (result >= 0) {
+                int nDOFs = robot->Joints().Length();
+                int nSteps = Matrix2D_Get_ncols(list_joints);
+                int nProgWithCollisions = 0;
+                int nProgWithoutCollisions = 0;
+
+                timer.start();
+                for (int col = 0; col < nSteps; col++) {
+                    // Each column of the matrix holds one step: [J1..Jn, ERROR, MM_STEP, DEG_STEP, MOVE_ID]
+                    tJoints step_joints(list_joints, col, nDOFs);
+                    robot->setJoints(step_joints);
+                    RDK->Render(IRoboDK::RenderUpdateOnly);
+                    int nCollisions = RDK->Collisions();
+                    if (nCollisions > 0) {
+                        nProgWithCollisions++;
+                    } else {
+                        nProgWithoutCollisions++;
+                    }
+                }
+                double ms_prog_collisions = (1e-6 * timer.nsecsElapsed()) / nSteps;
+
+                benchmark_rows += BenchmarkRowHtml("Program", program->Name());
+                benchmark_rows += BenchmarkRowHtml(QString("Program collision check (%1 steps)").arg(nSteps), QString("%1 ms/step").arg(ms_prog_collisions, 0, 'f', 2));
+                benchmark_rows += BenchmarkRowHtml("Program points with collisions", QString::number(nProgWithCollisions));
+                benchmark_rows += BenchmarkRowHtml("Program points without collisions", QString::number(nProgWithoutCollisions));
+            } else {
+                qDebug() << "InstructionListJoints failed: " << err_msg;
+                benchmark_rows += BenchmarkRowHtml("Program collision check", tr("Failed: %1").arg(err_msg));
+            }
+
+            Matrix2D_Delete(&list_joints);
+        }
+
         text_message_html += "<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
                               "<tr>"
                               "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Metric</th>"
                               "<th style=\"padding:4px;text-align:right;font-weight:bold;\">Value</th></tr>"
                               + benchmark_rows + "</table>";
-
-
-        // TODO: Test collisions for the joint lists of a program and perform similar metrics as done in the previous step
-        Item program = RDK->ItemUserPick("Select a program to run a check for collisions", IItem::ITEM_TYPE_PROGRAM);
-        QString err_msg;
-        tMatrix2D *list_joints; // TODO: create object
-        program->InstructionListJoints(&err_msg, list_joints, 1, 1, IRoboDK::COLLISION_OFF, 0, -1);
-        // For each joint in list_joints calculate collisions and calculate if a collision was found
-        for (){
-            robot->setJoints(list_joints.at(i));
-            RDK->Render(IRoboDK::RenderUpdateOnly);
-            int nCollisions = RDK->Collisions();
-            if (nCollisions > 0){
-                nWithCollisions++;
-            } else {
-                nWithoutCollisions++;
-            }
-        }
 
     } else {
         text_message_html += "<p><i>No robot available to run Kinematic tests</i></p>";
@@ -428,47 +450,19 @@ void PluginExample::callback_benchmarkInfo(){
     // output through debug console
     qDebug() << text_message_html;
 
-
-    // Example to retrieve station items ans show their dependency:
-    /*
-    RDK->ShowMessage("Retrieving all station items", false);
-    QStringList item_list_names = RDK->getItemListNames();
-    qDebug() << "Available items in the current station: " << item_list_names;
-
-    QList<Item> item_list = RDK->getItemList();
-
-    RDK->ShowMessage("Displaying list of station items", false);
-    text_message_html += QString("<h3 style=\"margin-bottom:2px;\">Open station: %1</h3>").arg(RDK->getActiveStation()->Name().toHtmlEscaped());
-    text_message_html += "<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
-                          "<tr>"
-                          "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Item</th>"
-                          "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Parent</th></tr>";
-
-
-    foreach (Item itm, item_list){
-        Item item_parent = itm->Parent();
-        QString parent_text = ItemValid(item_parent) ? item_parent->Name() : tr("(station)");
-        text_message_html += QString("<tr><td style=\"padding:2px 12px 2px 4px;\">%1</td>"
-                                      "<td style=\"padding:2px;font-weight:bold;\"><i>%2</i></td></tr>")
-                .arg(itm->Name().toHtmlEscaped(), parent_text.toHtmlEscaped());
-    }
-    text_message_html += "</table>";
-*/
-
-
     QTextEdit *text_editor = new QTextEdit();
     text_editor->setReadOnly(true);
     text_editor->setHtml(text_message_html);
 
     static QDockWidget *dockedInfo = nullptr;
-    if (dockedInfo != nullptr){
+    if (dockedInfo != nullptr) {
         dockedInfo->deleteLater();
     }
     dockedInfo = AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
 }
 
-void PluginExample::callback_robotpilot(){
-    if (dock_robotpilot != nullptr){
+void PluginExample::callback_robotpilot() {
+    if (dock_robotpilot != nullptr) {
         // prevent opening more than 1 form
         RDK->ShowMessage("Robot pilot form is already open", false);
         return;
@@ -478,14 +472,14 @@ void PluginExample::callback_robotpilot(){
     dock_robotpilot = AddDockWidget(MainWindow, form_robotpilot, "Robot Pilot");
     connect(form_robotpilot, SIGNAL(destroyed()), this, SLOT(callback_robotpilot_closed()));
 }
-void PluginExample::callback_robotpilot_closed(){
+
+void PluginExample::callback_robotpilot_closed() {
     // it is important to reset pointers when the form is closed (deleted)
     dock_robotpilot = nullptr;
     form_robotpilot = nullptr;
     RDK->ShowMessage("Closed robot pilot", false);
 }
-void PluginExample::callback_help(){
+
+void PluginExample::callback_help() {
     QDesktopServices::openUrl(QUrl("https://robodk.com/CreatePlugin"));
 }
-
-
