@@ -444,7 +444,7 @@ static QString BenchmarkSectionRowHtml(const QString &title) {
 void PluginExample::callback_benchmarkInfo() {
     static QDockWidget *dockedInfo = nullptr;
     if (dockedInfo != nullptr) {
-        dockedInfo->deleteLater();
+        dockedInfo->close();
         QApplication::processEvents(); // force the dock widget to be removed
     }
 
