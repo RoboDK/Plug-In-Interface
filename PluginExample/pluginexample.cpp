@@ -17,6 +17,7 @@
 #include <QIcon>
 #include <QDesktopServices>
 #include <QElapsedTimer>
+#include <QApplication>
 
 //------------------------------- RoboDK Plug-in commands ------------------------------
 
@@ -330,7 +331,21 @@ static QString BenchmarkRowHtml(const QString &metric, const QString &value) {
             .arg(metric.toHtmlEscaped(), value.toHtmlEscaped());
 }
 
+// Wraps a set of BenchmarkRowHtml() rows into a complete Metric/Value table
+static QString BenchmarkTableHtml(const QString &rows) {
+    return QString("<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
+                    "<tr>"
+                    "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Metric</th>"
+                    "<th style=\"padding:4px;text-align:right;font-weight:bold;\">Value</th></tr>")
+            + rows + "</table>";
+}
+
 void PluginExample::callback_benchmarkInfo() {
+    static QDockWidget *dockedInfo = nullptr;
+    if (dockedInfo != nullptr) {
+        dockedInfo->deleteLater();
+        QApplication::processEvents(); // force the dock widget to be removed
+    }
 
     // Perform some timing tests using the RoboDK API
     RDK->ShowMessage("Starting timing tests", false);
@@ -338,6 +353,13 @@ void PluginExample::callback_benchmarkInfo() {
     QString text_message_html;
     text_message_html += "<h2 style=\"margin-bottom:2px;\">Plugin Timing Tests Summary</h2>";
     text_message_html += QString("<p style=\"margin-top:0;font-weight:bold;\">%1</p>").arg(QDateTime::currentDateTime().toString());
+
+    // Create the report widget now: this lets us show partial results while the (potentially slow) collision checks run below
+    QTextEdit *text_editor = new QTextEdit();
+    text_editor->setReadOnly(true);
+    text_editor->setHtml(text_message_html);
+
+    dockedInfo = AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
 
     const int ntests = 10000;
     Item robot = RDK->ItemUserPick("Select a robot arm", IItem::ITEM_TYPE_ROBOT_ARM);
@@ -349,6 +371,8 @@ void PluginExample::callback_benchmarkInfo() {
 
         QString benchmark_rows;
         benchmark_rows += BenchmarkRowHtml("Robot", robot->Name());
+
+        // TODO: Add cpu information, frequency, RAM and OS info in 1 or 2 lines
 
         // Test Forward Kinematics (QElapsedTimer gives nanosecond resolution, unlike QDateTime's millisecond ticks)
         timer.start();
@@ -397,23 +421,27 @@ void PluginExample::callback_benchmarkInfo() {
         benchmark_rows += BenchmarkRowHtml("Points with collisions", QString::number(nWithCollisions));
         benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nWithoutCollisions));
 
-
+        // Show the table now: the program collision check below can take a while for long programs
+        text_message_html += BenchmarkTableHtml(benchmark_rows);
+        text_editor->setHtml(text_message_html);
+        QApplication::processEvents(); // force the dock widget to repaint now, before the (possibly slow) program collision check below
 
         // Test collisions along the joint list of a full program, using the same metrics as above (optional: the user can cancel this step)
         Item program = RDK->getItem("Main", IItem::ITEM_TYPE_PROGRAM);
-        if (!ItemValid(program)){
+        if (!ItemValid(program)) {
             program = RDK->ItemUserPick("Select a program to check for collisions (optional)", IItem::ITEM_TYPE_PROGRAM);
+            QApplication::processEvents(); // hides the popup right away as we are doing heavy processing afterwards
         }
         if (ItemValid(program)) {
-            // TODO: Show the table at this point and update again after following calculations
-
-            // TODO: Add a header if the program is valid
+            // Header for this section, only added if the program is valid
+            text_message_html += QString("<h3 style=\"margin-bottom:2px;\">Program Collision Check: %1</h3>").arg(program->Name().toHtmlEscaped());
 
             RDK->ShowMessage("Calculating collisions for program: " + program->Name() + " ...", false);
             tMatrix2D *list_joints = Matrix2D_Create();
             QString err_msg;
             int result = program->InstructionListJoints(err_msg, list_joints, 1, 1, IRoboDK::COLLISION_OFF);
 
+            QString program_rows;
             if (result >= 0) {
                 int nDOFs = robot->Joints().Length();
                 int nSteps = Matrix2D_Get_ncols(list_joints);
@@ -432,46 +460,38 @@ void PluginExample::callback_benchmarkInfo() {
                     } else {
                         nProgWithoutCollisions++;
                     }
+                    // Update the progress from time to time:
+                    if (col % 100 == 0){
+                        RDK->Command("ProgressBar", QString("%1").arg(100.0*col/nSteps));
+                    }
                 }
+                RDK->Command("ProgressBar", "-1");
                 double ms_prog_collisions = (1e-6 * timer.nsecsElapsed()) / nSteps;
+                double prog_samples_x_sec = 1000.0 / ms_prog_collisions;
 
-                benchmark_rows += BenchmarkRowHtml("Program", program->Name());
-                benchmark_rows += BenchmarkRowHtml(QString("Program collision check (%1 steps)").arg(nSteps), QString("%1 ms/step").arg(ms_prog_collisions, 0, 'f', 2));
-                // TODO: Add the collision check rate in samples/second based on ms_prog_collisions
-                benchmark_rows += BenchmarkRowHtml("Program points with collisions", QString::number(nProgWithCollisions));
-                benchmark_rows += BenchmarkRowHtml("Program points without collisions", QString::number(nProgWithoutCollisions));
+                program_rows += BenchmarkRowHtml(QString("Collision check (%1 steps)").arg(nSteps), QString("%1 ms/step").arg(ms_prog_collisions, 0, 'f', 2));
+                program_rows += BenchmarkRowHtml("Collision check rate", QString("%1 samples/sec").arg(prog_samples_x_sec, 0, 'f', 2));
+                program_rows += BenchmarkRowHtml("Points with collisions", QString::number(nProgWithCollisions));
+                program_rows += BenchmarkRowHtml("Points without collisions", QString::number(nProgWithoutCollisions));
             } else {
                 qDebug() << "InstructionListJoints failed: " << err_msg;
-                benchmark_rows += BenchmarkRowHtml("Program collision check", tr("Failed: %1").arg(err_msg));
+                program_rows += BenchmarkRowHtml("Collision check", tr("Failed: %1").arg(err_msg));
             }
 
             ::Matrix2D_Delete(&list_joints);
-        }
 
-        text_message_html += "<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
-                              "<tr>"
-                              "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Metric</th>"
-                              "<th style=\"padding:4px;text-align:right;font-weight:bold;\">Value</th></tr>"
-                              + benchmark_rows + "</table>";
+            text_message_html += BenchmarkTableHtml(program_rows);
+
+            // Update the report now that the program collision check is done
+            text_editor->setHtml(text_message_html);
+        }
 
     } else {
         text_message_html += "<p><i>No robot available to run Kinematic tests</i></p>";
+        text_editor->setHtml(text_message_html);
     }
 
     RDK->ShowMessage("Done with benchmark calculation", false);
-
-    // output through debug console
-    qDebug() << text_message_html;
-
-    QTextEdit *text_editor = new QTextEdit();
-    text_editor->setReadOnly(true);
-    text_editor->setHtml(text_message_html);
-
-    static QDockWidget *dockedInfo = nullptr;
-    if (dockedInfo != nullptr) {
-        dockedInfo->deleteLater();
-    }
-    dockedInfo = AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
 }
 
 void PluginExample::callback_robotpilot() {
