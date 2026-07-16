@@ -434,6 +434,13 @@ static QString BenchmarkTableHtml(const QString &rows) {
             + rows + "</table>";
 }
 
+// Formats a full-width section header row inside the benchmark table (keeps everything in one
+// table so both columns stay the same width instead of each table sizing itself independently)
+static QString BenchmarkSectionRowHtml(const QString &title) {
+    return QString("<tr><td colspan=\"2\" style=\"padding:10px 4px 4px 4px;font-weight:bold;border-top:1px solid #999;\">%1</td></tr>")
+            .arg(title.toHtmlEscaped());
+}
+
 void PluginExample::callback_benchmarkInfo() {
     static QDockWidget *dockedInfo = nullptr;
     if (dockedInfo != nullptr) {
@@ -444,9 +451,11 @@ void PluginExample::callback_benchmarkInfo() {
     // Perform some timing tests using the RoboDK API
     RDK->ShowMessage("Starting timing tests", false);
 
-    QString text_message_html;
-    text_message_html += "<h2 style=\"margin-bottom:2px;\">Plugin Timing Tests Summary</h2>";
-    text_message_html += QString("<p style=\"margin-top:0;font-weight:bold;\">%1</p>").arg(QDateTime::currentDateTime().toString());
+    QString header_html;
+    header_html += "<h2 style=\"margin-bottom:2px;\">Plugin Timing Tests Summary</h2>";
+    header_html += QString("<p style=\"margin-top:0;font-weight:bold;\">%1</p>").arg(QDateTime::currentDateTime().toString());
+
+    QString text_message_html = header_html;
 
     // Create the report widget now: this lets us show partial results while the (potentially slow) collision checks run below
     QTextEdit *text_editor = new QTextEdit();
@@ -515,7 +524,7 @@ void PluginExample::callback_benchmarkInfo() {
         benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nWithoutCollisions));
 
         // Show the table now: the program collision check below can take a while for long programs
-        text_message_html += BenchmarkTableHtml(benchmark_rows);
+        text_message_html = header_html + BenchmarkTableHtml(benchmark_rows);
         text_editor->setHtml(text_message_html);
         QApplication::processEvents(); // force the dock widget to repaint now, before the (possibly slow) program collision check below
 
@@ -526,15 +535,14 @@ void PluginExample::callback_benchmarkInfo() {
             QApplication::processEvents(); // hides the popup right away as we are doing heavy processing afterwards
         }
         if (ItemValid(program)) {
-            // Header for this section, only added if the program is valid
-            text_message_html += QString("<h3 style=\"margin-bottom:2px;\">Program Collision Check: %1</h3>").arg(program->Name().toHtmlEscaped());
+            // Section header row for the program results, added to the same table so both columns stay the same width
+            benchmark_rows += BenchmarkSectionRowHtml(QString("Program Collision Check: %1").arg(program->Name().toHtmlEscaped()));
 
             RDK->ShowMessage("Calculating collisions for program: " + program->Name() + " ...", false);
             tMatrix2D *list_joints = Matrix2D_Create();
             QString err_msg;
             int result = program->InstructionListJoints(err_msg, list_joints, 1, 1, IRoboDK::COLLISION_OFF);
 
-            QString program_rows;
             if (result >= 0) {
                 int nDOFs = robot->Joints().Length();
                 int nSteps = Matrix2D_Get_ncols(list_joints);
@@ -562,25 +570,24 @@ void PluginExample::callback_benchmarkInfo() {
                 double ms_prog_collisions = (1e-6 * timer.nsecsElapsed()) / nSteps;
                 double prog_samples_x_sec = 1000.0 / ms_prog_collisions;
 
-                program_rows += BenchmarkRowHtml(QString("Collision check (%1 steps)").arg(nSteps), QString("%1 ms/step").arg(ms_prog_collisions, 0, 'f', 2));
-                program_rows += BenchmarkRowHtml("Collision check rate", QString("%1 samples/sec").arg(prog_samples_x_sec, 0, 'f', 2));
-                program_rows += BenchmarkRowHtml("Points with collisions", QString::number(nProgWithCollisions));
-                program_rows += BenchmarkRowHtml("Points without collisions", QString::number(nProgWithoutCollisions));
+                benchmark_rows += BenchmarkRowHtml(QString("Collision check (%1 steps)").arg(nSteps), QString("%1 ms/step").arg(ms_prog_collisions, 0, 'f', 2));
+                benchmark_rows += BenchmarkRowHtml("Collision check rate", QString("%1 samples/sec").arg(prog_samples_x_sec, 0, 'f', 2));
+                benchmark_rows += BenchmarkRowHtml("Points with collisions", QString::number(nProgWithCollisions));
+                benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nProgWithoutCollisions));
             } else {
                 qDebug() << "InstructionListJoints failed: " << err_msg;
-                program_rows += BenchmarkRowHtml("Collision check", tr("Failed: %1").arg(err_msg));
+                benchmark_rows += BenchmarkRowHtml("Collision check", tr("Failed: %1").arg(err_msg));
             }
 
             ::Matrix2D_Delete(&list_joints);
 
-            text_message_html += BenchmarkTableHtml(program_rows);
-
-            // Update the report now that the program collision check is done
+            // Update the report now that the program collision check is done (same table, so columns stay aligned)
+            text_message_html = header_html + BenchmarkTableHtml(benchmark_rows);
             text_editor->setHtml(text_message_html);
         }
 
     } else {
-        text_message_html += "<p><i>No robot available to run Kinematic tests</i></p>";
+        text_message_html = header_html + "<p><i>No robot available to run Kinematic tests</i></p>";
         text_editor->setHtml(text_message_html);
     }
 
