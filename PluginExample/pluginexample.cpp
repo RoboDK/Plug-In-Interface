@@ -345,7 +345,7 @@ static QString BenchmarkRowHtml(const QString &metric, const QString &value) {
             .arg(metric.toHtmlEscaped(), value.toHtmlEscaped());
 }
 
-// Returns 1-2 benchmark rows describing the OS, CPU and RAM of this computer.
+// Returns 2-3 benchmark rows describing the System (OS), CPU (model, cores, frequency) and RAM of this computer.
 // The CPU model/frequency and total RAM require a few OS-specific calls since Qt does not
 // expose them directly; any piece that is not available on this platform (e.g. CPU frequency
 // on Apple Silicon Macs) is simply left out instead of failing.
@@ -412,12 +412,13 @@ static QString HardwareInfoRowsHtml() {
         cpu_model = QSysInfo::currentCpuArchitecture();
     }
 
-    QString system_value = QString("%1, %2, %3 cores").arg(QSysInfo::prettyProductName(), cpu_model, QString::number(QThread::idealThreadCount()));
+    QString cpu_value = QString("%1, %2 cores").arg(cpu_model, QString::number(QThread::idealThreadCount()));
     if (!cpu_freq.isEmpty()) {
-        system_value += QString(" @ %1").arg(cpu_freq);
+        cpu_value += QString(" @ %1").arg(cpu_freq);
     }
 
-    QString rows = BenchmarkRowHtml("System", system_value);
+    QString rows = BenchmarkRowHtml("System", QSysInfo::prettyProductName());
+    rows += BenchmarkRowHtml("CPU", cpu_value);
     if (!ram_total.isEmpty()) {
         rows += BenchmarkRowHtml("RAM", ram_total);
     }
