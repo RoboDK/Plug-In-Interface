@@ -196,6 +196,7 @@ void XYZWPR_2_Pose(const real_T xyzwpr[6], real_T pose[16]){
 /// \param out The output matrix should not be any of the input matrices for the calculation to work
 ///
 void Pose_Mult(const real_T inA[16], const real_T inB[16], real_T out[16]){
+    // Important: inA, inB and out should all be different pointers
     (out)[0] = (inA)[0]*(inB)[0] + (inA)[4]*(inB)[1] + (inA)[8]*(inB)[2] + (inA)[12]*(inB)[3];
     (out)[1] = (inA)[1]*(inB)[0] + (inA)[5]*(inB)[1] + (inA)[9]*(inB)[2] + (inA)[13]*(inB)[3];
     (out)[2] = (inA)[2]*(inB)[0] + (inA)[6]*(inB)[1] + (inA)[10]*(inB)[2] + (inA)[14]*(inB)[3];
@@ -244,8 +245,9 @@ void Pose_Inv(const real_T in[16], real_T out[16]){
 
 
 int SolveFK(const real_T *joints, real_T pose[16], const robot_T *ptr_robot) {
-    std::cout << "Using custom/default SolveFK" << std::endl;
     // return -1; // Return -1 to use RoboDK default, return 1 for success, return 0 for target out of reach
+
+    std::cout << "Using custom SolveFK" << std::endl;
 
     // Below is RoboDK's default calculation:
 
@@ -295,18 +297,33 @@ int SolveFK(const real_T *joints, real_T pose[16], const robot_T *ptr_robot) {
         // Apply the pose of the joint i to the accumulated  final pose
         real_T pose_ji[16];
         DHM_2_Pose(rx_tx_rz_tz, pose_ji);
-        Pose_Mult(last_pose, pose_ji, next_pose);
+
+        // Important: if these pointers last_pose_copy == next_pose are the same, the Pose_Mult math does not work properly
+        real_T last_pose_copy[16];
+        for (int i=0; i<16; i++){
+            last_pose_copy[i] = last_pose[i];
+        }
+        Pose_Mult(last_pose_copy, pose_ji, next_pose);
         last_pose = next_pose;
     }
 
     Pose_Mult(last_pose, pose_tool, pose);
 
+    /*
+    // Debug pose values
+    std::cout << "FK pose:" << std::endl;
+    for (int id=0; id<16; id++){
+        std::cout << pose[id] << std::endl;
+    }
+    */
+
     return 1; // Return -1 to use RoboDK default, return 0 for target out of reach, return 1 for success
 }
 
 int SolveFK_CAD(const real_T *joints, real_T pose[16], real_T *joint_poses, int max_poses, const robot_T *ptr_robot) {
+    //return -1; // Return -1 to use RoboDK default, return 0 for success
+
     std::cout << "Using custom SolveFK_CAD" << std::endl;
-    // return -1; // Return -1 to use RoboDK default, return 0 for success
 
     // Below is RoboDK's default calculation:
 
@@ -369,6 +386,7 @@ int SolveFK_CAD(const real_T *joints, real_T pose[16], real_T *joint_poses, int 
 
 int SolveIK(const real_T pose[16], real_T *joints, real_T *joints_all, int max_solutions, const real_T *joints_approx, const robot_T *ptr_robot) {
     std::cout << "Using custom SolveIK..." << std::endl;
+    // return -1; // Use RoboDK's default inverse kinematics for generic mechanisms (iterative solution)
     
     // Retrieve the number of axes (degrees of freedom)
     int nDOFs = iRobot_nDOFs(ptr_robot);
@@ -400,4 +418,17 @@ int SolveIK(const real_T pose[16], real_T *joints, real_T *joints_all, int max_s
     // Logic: Calculate inverse kinematics
     // Fill joints_all with up to max_solutions
     //return -1; returns the number of valid solutions (equal or less than max_solutions), if any. Returns 0 if there is no solution (for example: target out of reach), return -1 if we want to use the default iterative solution provided by RoboDK
+}
+
+int Joints2Config(const real_T *joints, real_T config[3], const robot_T *ptr_robot){
+    std::cout << "Using custom Joints2Config..." << std::endl;
+    //return -1; // use default values
+
+    config[0] = 0.0; // 0=front, 1=rear
+    config[1] = 0.0; // 0=upper arm, 1=lower arm
+    //config[2] = 0; // 0=non flip (j5>=0), 1=flip (j5<0)
+    config[2] = joints[4] < 0 ? 1.0 : 0.0; // 0=non flip (j5>=0), 1=flip (j5<0)
+
+    return 1; // Return 1 to use provided values. Return -1 to use the default values
+    //return -1; // use default values
 }
