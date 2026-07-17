@@ -146,8 +146,8 @@ bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
 
 QString PluginExample::PluginCommand(const QString &command, const QString &value) {
     qDebug() << "Sent command: " << command << "    With value: " << value;
-    if (command.compare("Information", Qt::CaseInsensitive) == 0) {
-        callback_benchmarkInfo();
+    if (command.compare("BenchmarkInfo", Qt::CaseInsensitive) == 0) {
+        callback_benchmarkInfo(value);
         return "Done";
     } else if (command.compare("RobotPilot", Qt::CaseInsensitive) == 0) {
         callback_robotpilot();
@@ -472,7 +472,7 @@ static QString BenchmarkTableText(const QVector<BenchmarkRow> &rows) {
     return text;
 }
 
-void PluginExample::callback_benchmarkInfo() {
+void PluginExample::callback_benchmarkInfo(const QString &progname) {
     static QDockWidget *dockedInfo = nullptr;
     if (dockedInfo != nullptr) {
         dockedInfo->close();
@@ -563,7 +563,7 @@ void PluginExample::callback_benchmarkInfo() {
         QApplication::processEvents(); // force the dock widget to repaint now, before the (possibly slow) program collision check below
 
         // Test collisions along the joint list of a full program, using the same metrics as above (optional: the user can cancel this step)
-        Item program = RDK->getItem("Main", IItem::ITEM_TYPE_PROGRAM);
+        Item program = RDK->getItem(progname.isEmpty() ? "Main" : progname, IItem::ITEM_TYPE_PROGRAM);
         if (!ItemValid(program)) {
             program = RDK->ItemUserPick("Select a program to check for collisions (optional)", IItem::ITEM_TYPE_PROGRAM);
             QApplication::processEvents(); // hides the popup right away as we are doing heavy processing afterwards
