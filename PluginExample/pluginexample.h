@@ -73,8 +73,8 @@ private:
     /// Pointer to the customized menu
     QMenu *menu1;
 
-    /// Information action. callback_benchmarkInfo is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
-    QAction *action_information;
+    /// Benchmark info action. callback_benchmarkInfo is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
+    QAction *action_benchmarkInfo;
 
     /// Open robot pilot form action. callback_robotpilot is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
     QAction *action_robotpilot;

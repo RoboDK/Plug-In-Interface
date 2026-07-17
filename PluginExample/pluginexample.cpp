@@ -56,19 +56,20 @@ QString PluginExample::PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar
     Q_INIT_RESOURCE(resources1);
 
     // Here you can add all the "Actions": these actions are callbacks from buttons selected from the menu or the toolbar
-    action_information = new QAction(QIcon(":/resources/information.png"), tr("Plugin Speed Information"));
-    action_information->setShortcut(QKeySequence("Ctrl+I"));
+    action_benchmarkInfo = new QAction(QIcon(":/resources/information.png"), tr("Plugin Speed Information"));
+    action_benchmarkInfo->setShortcut(QKeySequence("Ctrl+I"));
+    action_benchmarkInfo->setObjectName("actionBenchmarkInfo");
     action_robotpilot = new QAction(QIcon(":/resources/code.png"), tr("Robot Pilot Form"));
     action_help = new QAction(QIcon(":/resources/help.png"), tr("RoboDK Plugins - Help"));
     // Make sure to connect the action to your callback (slot)
-    connect(action_information, SIGNAL(triggered()), this, SLOT(callback_benchmarkInfo()), Qt::QueuedConnection);
+    connect(action_benchmarkInfo, SIGNAL(triggered()), this, SLOT(callback_benchmarkInfo()), Qt::QueuedConnection);
     connect(action_robotpilot, SIGNAL(triggered()), this, SLOT(callback_robotpilot()), Qt::QueuedConnection);
     connect(action_help, SIGNAL(triggered()), this, SLOT(callback_help()), Qt::QueuedConnection);
 
     // Here you can add one or more actions in the menu
     menu1 = menubar->addMenu("Plugin Example Menu");
     qDebug() << "Setting up the menu bar";
-    menu1->addAction(action_information);
+    menu1->addAction(action_benchmarkInfo);
     menu1->addAction(action_robotpilot);
     menu1->addAction(action_help);
 
@@ -93,8 +94,8 @@ void PluginExample::PluginUnload() {
     toolbar1 = nullptr;
 
     // remove the actions (not owned by the menu/toolbar, so they are not deleted automatically)
-    action_information->deleteLater();
-    action_information = nullptr;
+    action_benchmarkInfo->deleteLater();
+    action_benchmarkInfo = nullptr;
     action_robotpilot->deleteLater();
     action_robotpilot = nullptr;
     action_help->deleteLater();
@@ -119,7 +120,7 @@ void PluginExample::PluginLoadToolbar(QMainWindow *mw, int icon_size) {
     toolbar1->setObjectName(PluginName() + "-Toolbar1");
 
     // Add a new button to the toolbar
-    toolbar1->addAction(action_information);
+    toolbar1->addAction(action_benchmarkInfo);
     toolbar1->addAction(action_robotpilot);
     toolbar1->addAction(action_help);
 }
@@ -130,7 +131,7 @@ bool PluginExample::PluginItemClick(Item item, QMenu *menu, TypeClick click_type
 
     if (item->Type() == IItem::ITEM_TYPE_OBJECT) {
         //menu->actions().insert(0, action_btn1); // add action at the beginning
-        menu->addAction(action_information); // add action at the end
+        menu->addAction(action_benchmarkInfo); // add action at the end
         qDebug() << "Done";
         return false;
     } else if (item->Type() == IItem::ITEM_TYPE_ROBOT) {
@@ -590,6 +591,8 @@ void PluginExample::callback_benchmarkInfo() {
         text_message_html = header_html + "<p><i>No robot available to run Kinematic tests</i></p>";
         text_editor->setHtml(text_message_html);
     }
+
+    // todo: print the results in text mode for console
 
     RDK->ShowMessage("Done with benchmark calculation", false);
 }
