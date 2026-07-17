@@ -53,8 +53,9 @@ public:
 public slots:
     // define button callbacks (or slots) here. They are triggered automatically when the button is selected.
 
-    /// Called when the information button/action is selected
-    void callback_benchmarkInfo();
+    /// Called when the information button/action is selected, or via PluginCommand("BenchmarkInfo", progname)
+    /// \param progname Name of the program to check for collisions. Defaults to "Main" when left empty.
+    void callback_benchmarkInfo(const QString &progname = QString());
 
     /// Called when the robot pilot button/action is selected
     void callback_robotpilot();
