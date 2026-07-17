@@ -47,7 +47,7 @@ calls `PluginCommand("BenchmarkInfo", progname)`. This is useful to collect perf
 example as part of an automated test or CI run:
 
 ```bash
-./RoboDK -NEWINSTANCE -NOUI -SKIPINI -PLUGINLOAD=PluginExample "./RoboDK.app/Contents/Library/01-Robot painting/Painting-with-UR10.rdk" -PluginCommand=BenchmarkInfo=MainProg
+./RoboDK -NEWINSTANCE -NOUI -SKIPINI -PLUGINLOAD=PluginExample "./RoboDK.app/Contents/Library/Welding-with-Comau-Smart5-NJ-130-2-6.rdk" -PluginCommand=BenchmarkInfo=MainProg
 ```
 
 - `-NEWINSTANCE`: starts a new RoboDK instance instead of reusing one that is already running.
@@ -62,6 +62,8 @@ example as part of an automated test or CI run:
 ## Sample results
 
 The previous command was run from the command line for the [Spot welding station with Comau](https://robodk.com/example/Welding-with-Comau-Smart5-NJ-130-2-6) and the following results can be obtained for different systems.
+
+Note: RoboDK v6 was used which includes important performance improvements for collision checking.
 
 ### Results for Apple M5 Pro
 
