@@ -20,6 +20,7 @@
 #include <QApplication>
 #include <QSysInfo>
 #include <QThread>
+#include <QVector>
 
 // Platform-specific headers used only to read the CPU model/frequency and total RAM
 // (Qt does not expose this information through a cross-platform API)
@@ -339,6 +340,15 @@ void PluginExample::PluginEvent(TypeEvent event_type) {
 //----------------------------------------------------------------------------------
 // Define your own button callbacks here
 
+// One row of the benchmark report: either a plain metric/value pair, or (if is_section is set)
+// a full-width section title. Kept as data so the same rows can be rendered both as an HTML
+// table (for the dock widget) and as an aligned plain-text table (for the console).
+struct BenchmarkRow {
+    QString metric;
+    QString value;
+    bool is_section = false;
+};
+
 // Formats one row of the benchmark table (metric name + measured value)
 static QString BenchmarkRowHtml(const QString &metric, const QString &value) {
     return QString("<tr><td style=\"padding:4px 12px 4px 4px;\">%1</td>"
@@ -350,7 +360,7 @@ static QString BenchmarkRowHtml(const QString &metric, const QString &value) {
 // The CPU model/frequency and total RAM require a few OS-specific calls since Qt does not
 // expose them directly; any piece that is not available on this platform (e.g. CPU frequency
 // on Apple Silicon Macs) is simply left out instead of failing.
-static QString HardwareInfoRowsHtml() {
+static QVector<BenchmarkRow> HardwareInfoRows() {
     QString cpu_model;
     QString cpu_freq;
     QString ram_total;
@@ -418,21 +428,13 @@ static QString HardwareInfoRowsHtml() {
         cpu_value += QString(" @ %1").arg(cpu_freq);
     }
 
-    QString rows = BenchmarkRowHtml("System", QSysInfo::prettyProductName());
-    rows += BenchmarkRowHtml("CPU", cpu_value);
+    QVector<BenchmarkRow> rows;
+    rows.append({"System", QSysInfo::prettyProductName()});
+    rows.append({"CPU", cpu_value});
     if (!ram_total.isEmpty()) {
-        rows += BenchmarkRowHtml("RAM", ram_total);
+        rows.append({"RAM", ram_total});
     }
     return rows;
-}
-
-// Wraps a set of BenchmarkRowHtml() rows into a complete Metric/Value table
-static QString BenchmarkTableHtml(const QString &rows) {
-    return QString("<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
-                    "<tr>"
-                    "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Metric</th>"
-                    "<th style=\"padding:4px;text-align:right;font-weight:bold;\">Value</th></tr>")
-            + rows + "</table>";
 }
 
 // Formats a full-width section header row inside the benchmark table (keeps everything in one
@@ -440,6 +442,34 @@ static QString BenchmarkTableHtml(const QString &rows) {
 static QString BenchmarkSectionRowHtml(const QString &title) {
     return QString("<tr><td colspan=\"2\" style=\"padding:10px 4px 4px 4px;font-weight:bold;border-top:1px solid #999;\">%1</td></tr>")
             .arg(title.toHtmlEscaped());
+}
+
+// Wraps the accumulated rows into a complete Metric/Value HTML table (for the dock widget)
+static QString BenchmarkTableHtml(const QVector<BenchmarkRow> &rows) {
+    QString html_rows;
+    for (const BenchmarkRow &row : rows) {
+        html_rows += row.is_section ? BenchmarkSectionRowHtml(row.metric) : BenchmarkRowHtml(row.metric, row.value);
+    }
+    return QString("<table cellspacing=\"0\" style=\"border-collapse:collapse;\">"
+                    "<tr>"
+                    "<th style=\"padding:4px;text-align:left;font-weight:bold;\">Metric</th>"
+                    "<th style=\"padding:4px;text-align:right;font-weight:bold;\">Value</th></tr>")
+            + html_rows + "</table>";
+}
+
+// Formats the accumulated rows as an aligned, human-readable plain-text table (for console output)
+static QString BenchmarkTableText(const QVector<BenchmarkRow> &rows) {
+    const int metric_width = 40;
+    QString text = QString("%1  Value\n").arg(QString("Metric").leftJustified(metric_width));
+    text += QString(metric_width + 10, QChar('-')) + "\n";
+    for (const BenchmarkRow &row : rows) {
+        if (row.is_section) {
+            text += QString("\n-- %1 --\n").arg(row.metric);
+        } else {
+            text += QString("%1  %2\n").arg(row.metric.leftJustified(metric_width), row.value);
+        }
+    }
+    return text;
 }
 
 void PluginExample::callback_benchmarkInfo() {
@@ -465,6 +495,10 @@ void PluginExample::callback_benchmarkInfo() {
 
     dockedInfo = AddDockWidget(MainWindow, text_editor, "Dock Plugin timing summary");
 
+    // Declared here (rather than inside the if-block below) so the rows collected so far are still
+    // available afterwards to print the plain-text console report
+    QVector<BenchmarkRow> benchmark_rows;
+
     const int ntests = 10000;
     Item robot = RDK->ItemUserPick("Select a robot arm", IItem::ITEM_TYPE_ROBOT_ARM);
     if (ItemValid(robot)) {
@@ -473,30 +507,29 @@ void PluginExample::callback_benchmarkInfo() {
         QList<tJoints> joints_ik_all;
         QElapsedTimer timer;
 
-        QString benchmark_rows;
-        benchmark_rows += BenchmarkRowHtml("Robot", robot->Name());
-        benchmark_rows += HardwareInfoRowsHtml();
+        benchmark_rows.append({"Robot", robot->Name()});
+        benchmark_rows += HardwareInfoRows();
 
         // Test Forward Kinematics (QElapsedTimer gives nanosecond resolution, unlike QDateTime's millisecond ticks)
         timer.start();
         for (int i = 0; i < ntests; i++) {
             pose_fk = robot->SolveFK(robot->Joints());
         }
-        benchmark_rows += BenchmarkRowHtml("Forward Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2));
+        benchmark_rows.append({"Forward Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2)});
 
         // Test Inverse Kinematics
         timer.start();
         for (int i = 0; i < ntests; i++) {
             joints_ik = robot->SolveIK(pose_fk);
         }
-        benchmark_rows += BenchmarkRowHtml("Inverse Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2));
+        benchmark_rows.append({"Inverse Kinematics", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2)});
 
         // Test Inverse Kinematics (all solutions)
         timer.start();
         for (int i = 0; i < ntests; i++) {
             joints_ik_all = robot->SolveIK_All(pose_fk);
         }
-        benchmark_rows += BenchmarkRowHtml("Inverse Kinematics (all solutions)", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2));
+        benchmark_rows.append({"Inverse Kinematics (all solutions)", QString("%1 microseconds").arg((1e-3 * timer.nsecsElapsed()) / ntests, 0, 'f', 2)});
 
         // Test collisions for each inverse kinematics solution: fewer samples, but a more accurate timer (nanosecond accuracy)
         RDK->Collisions(); // Run once first: the first call needs extra bookkeeping for all loaded objects if collision checking was not already on
@@ -519,10 +552,10 @@ void PluginExample::callback_benchmarkInfo() {
         qDebug() << "ms per collision: " << ms_collisions;
         qDebug() << "Collision samples per second: " << samples_x_sec;
 
-        benchmark_rows += BenchmarkRowHtml(QString("Collision check (%1 samples)").arg(nJoints), QString("%1 ms/sample").arg(ms_collisions, 0, 'f', 2));
-        benchmark_rows += BenchmarkRowHtml("Collision check rate", QString("%1 samples/sec").arg(samples_x_sec, 0, 'f', 2));
-        benchmark_rows += BenchmarkRowHtml("Points with collisions", QString::number(nWithCollisions));
-        benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nWithoutCollisions));
+        benchmark_rows.append({QString("Collision check (%1 samples)").arg(nJoints), QString("%1 ms/sample").arg(ms_collisions, 0, 'f', 2)});
+        benchmark_rows.append({"Collision check rate", QString("%1 samples/sec").arg(samples_x_sec, 0, 'f', 2)});
+        benchmark_rows.append({"Points with collisions", QString::number(nWithCollisions)});
+        benchmark_rows.append({"Points without collisions", QString::number(nWithoutCollisions)});
 
         // Show the table now: the program collision check below can take a while for long programs
         text_message_html = header_html + BenchmarkTableHtml(benchmark_rows);
@@ -537,7 +570,7 @@ void PluginExample::callback_benchmarkInfo() {
         }
         if (ItemValid(program)) {
             // Section header row for the program results, added to the same table so both columns stay the same width
-            benchmark_rows += BenchmarkSectionRowHtml(QString("Program Collision Check: %1").arg(program->Name().toHtmlEscaped()));
+            benchmark_rows.append({QString("Program Collision Check: %1").arg(program->Name()), QString(), true});
 
             RDK->ShowMessage("Calculating collisions for program: " + program->Name() + " ...", false);
             tMatrix2D *list_joints = Matrix2D_Create();
@@ -571,13 +604,13 @@ void PluginExample::callback_benchmarkInfo() {
                 double ms_prog_collisions = (1e-6 * timer.nsecsElapsed()) / nSteps;
                 double prog_samples_x_sec = 1000.0 / ms_prog_collisions;
 
-                benchmark_rows += BenchmarkRowHtml(QString("Collision check (%1 steps)").arg(nSteps), QString("%1 ms/step").arg(ms_prog_collisions, 0, 'f', 2));
-                benchmark_rows += BenchmarkRowHtml("Collision check rate", QString("%1 samples/sec").arg(prog_samples_x_sec, 0, 'f', 2));
-                benchmark_rows += BenchmarkRowHtml("Points with collisions", QString::number(nProgWithCollisions));
-                benchmark_rows += BenchmarkRowHtml("Points without collisions", QString::number(nProgWithoutCollisions));
+                benchmark_rows.append({QString("Collision check (%1 steps)").arg(nSteps), QString("%1 ms/step").arg(ms_prog_collisions, 0, 'f', 2)});
+                benchmark_rows.append({"Collision check rate", QString("%1 samples/sec").arg(prog_samples_x_sec, 0, 'f', 2)});
+                benchmark_rows.append({"Points with collisions", QString::number(nProgWithCollisions)});
+                benchmark_rows.append({"Points without collisions", QString::number(nProgWithoutCollisions)});
             } else {
                 qDebug() << "InstructionListJoints failed: " << err_msg;
-                benchmark_rows += BenchmarkRowHtml("Collision check", tr("Failed: %1").arg(err_msg));
+                benchmark_rows.append({"Collision check", tr("Failed: %1").arg(err_msg)});
             }
 
             ::Matrix2D_Delete(&list_joints);
@@ -592,7 +625,12 @@ void PluginExample::callback_benchmarkInfo() {
         text_editor->setHtml(text_message_html);
     }
 
-    // todo: print the results in text mode for console
+    // Print the same results as an aligned, human-readable plain-text table in the console
+    if (!benchmark_rows.isEmpty()) {
+        qDebug().noquote() << "\n" + BenchmarkTableText(benchmark_rows);
+    } else {
+        qDebug() << "No robot available to run Kinematic tests";
+    }
 
     RDK->ShowMessage("Done with benchmark calculation", false);
 }
