@@ -25,7 +25,7 @@ from robodk import robolink
 STATION_URL = "https://cdn.robodk.com/downloads-library/library-stations/Welding-with-Comau-Smart5-NJ-130-2-6.rdk"
 PLUGIN_NAME = "PluginExample"  # Matches PluginExample.pro's TARGET, used to load the plugin
 PLUGIN_ID = "Example Plugin"  # Matches PluginExample::PluginName(), used to target PluginCommand
-PROGRAM_NAME = "MainProg"  # Program to run the collision check against
+PROGRAM_NAME = "main"  # Program to run the collision check against
 
 
 def download_station(url: str) -> str:
@@ -52,38 +52,46 @@ def download_station(url: str) -> str:
     print("Saved to: %s" % filepath)
     return filepath
 
+def print_custom(txt):
+    global do_print_stdout
+    if do_print_stdout:
+        print(txt)
 
 def main():
+    global do_print_stdout
+    do_print_stdout = False
+
     station_path = download_station(STATION_URL)
 
     # Start a new, headless RoboDK instance.
     # -DEBUG is required for qDebug()-based plugin console output (such as the benchmark
     # report) to actually be printed; Robolink relays RoboDK's stdout to ours automatically.
     print("Starting a new headless RoboDK instance...")
-    RDK = robolink.Robolink(args=["-NEWINSTANCE", "-NOUI", "-EXIT_LAST_COM", "-SKIPINI", "-Settings=LicenseLoad"])
+    RDK = robolink.Robolink(args=["-NEWINSTANCE", "-NOUI", "-EXIT_LAST_COM", "-SKIPINI", "-Settings=LicenseLoad"], close_std_out=print_custom)
+
+    if RDK.Command("LHasMaint") != "1":
+        msg = "You need a license to run collision checking benchmarks"
+        sys.exit(msg)
 
     print("Loading plugin: %s" % PLUGIN_NAME)
-    if False:#not RDK.PluginLoad(PLUGIN_NAME):
+    if not RDK.PluginLoad(PLUGIN_NAME):
         msg = "Failed to load plugin: %s. Are you using the latest version? Is the plugin properly installed?" % PLUGIN_NAME
-        print(msg)
         sys.exit(msg)
 
     print("Opening station: %s" % station_path)
     station = RDK.AddFile(station_path)
     if not station.Valid():
         msg = "Failed to open station: %s" % station_path
-        print(msg)
         sys.exit(msg)
 
     print("=" * 70)
     print("Running BenchmarkInfo=%s (output below is streamed live from RoboDK)" % PROGRAM_NAME)
     print("=" * 70)
+    do_print_stdout = True
     result = RDK.PluginCommand(PLUGIN_ID, "BenchmarkInfo", PROGRAM_NAME)
-
-    # Give RoboDK's console output a moment to reach us before we close the connection
-    time.sleep(9)
+    do_print_stdout = False
     print("=" * 70)
-    print("PluginCommand result: %s" % result)
+    print("Plugin Command result: %s" % result)
 
     print("Closing RoboDK...")
     RDK.CloseRoboDK()
