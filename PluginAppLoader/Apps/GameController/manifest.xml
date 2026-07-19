@@ -32,5 +32,7 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/GameController/README.md</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/GameController/Settings.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/GameController/Settings.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/docs/settings.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/GameController/docs/start.png</asset>
   </assets>
 </packageManifest>
