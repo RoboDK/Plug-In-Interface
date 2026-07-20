@@ -93,9 +93,9 @@ Points with collisions                    66
 Points without collisions                 3523
 ```
 
-### Results for Apple
+### Results on Apple
 
-### M5 Pro and Silicon build
+### M5 Pro and Apple Silicon build
 
 ```
 Metric                                    Value
@@ -119,7 +119,7 @@ Points with collisions                    66
 Points without collisions                 3523
 ```
 
-### M1 and an Intel build
+### M1 and Intel build
 
 ```
 
