@@ -95,7 +95,7 @@ Points without collisions                 3523
 
 ### Results on Apple
 
-### M5 Pro and Apple Silicon build
+### Apple M5 Pro and Apple Silicon build
 
 ```
 Metric                                    Value
@@ -119,8 +119,51 @@ Points with collisions                    66
 Points without collisions                 3523
 ```
 
-### M1 and Intel build
+### Apple M1 and Apple Silicon build
 
 ```
+Metric                                    Value
+--------------------------------------------------
+Robot                                     Comau Smart5 NJ 130-2.6
+System                                    macOS Tahoe (26.5)
+CPU                                       Apple M1, 8 cores
+RAM                                       16.0 GB
+Forward Kinematics                        0.99 microseconds
+Inverse Kinematics                        3.59 microseconds
+Inverse Kinematics (all solutions)        2.65 microseconds
+Collision check (5 samples)               0.24 ms/sample
+Collision check rate                      4196.39 samples/sec
+Points with collisions                    0
+Points without collisions                 5
 
+-- Program Collision Check: main --
+Collision check (3589 steps)              1.38 ms/step
+Collision check rate                      724.92 samples/sec
+Points with collisions                    66
+Points without collisions                 3523
+```
+
+
+### Apple M1 and Intel build
+
+```
+Metric                                    Value
+--------------------------------------------------
+Robot                                     Comau Smart5 NJ 130-2.6
+System                                    macOS Tahoe (26.5)
+CPU                                       Apple M1, 8 cores @ 2.40 GHz
+RAM                                       16.0 GB
+Forward Kinematics                        2.09 microseconds
+Inverse Kinematics                        6.16 microseconds
+Inverse Kinematics (all solutions)        5.24 microseconds
+Collision check (5 samples)               0.31 ms/sample
+Collision check rate                      3219.49 samples/sec
+Points with collisions                    0
+Points without collisions                 5
+
+-- Program Collision Check: main --
+Collision check (3589 steps)              1.41 ms/step
+Collision check rate                      707.07 samples/sec
+Points with collisions                    66
+Points without collisions                 3523
 ```
