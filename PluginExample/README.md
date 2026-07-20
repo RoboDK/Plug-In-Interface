@@ -59,13 +59,43 @@ example as part of an automated test or CI run:
   the results as text to the console — since `-NOUI` means the docked report is never shown, this text output
   is the only way to read the stats in this scenario.
 
-## Sample results
+## Performance results
 
-The previous command was run from the command line for the [Spot welding station with Comau](https://robodk.com/example/Welding-with-Comau-Smart5-NJ-130-2-6) and the following results can be obtained for different systems.
+The command from the previous section was run from the command line for the [Spot welding station with Comau](https://robodk.com/example/Welding-with-Comau-Smart5-NJ-130-2-6) using RoboDK v6.0.6.
+
+The following results can be obtained for different systems.
 
 Note: RoboDK v6 was used which includes important performance improvements for collision checking.
 
-### Results for Apple M5 Pro
+### Results on Windows/PC
+
+Using Intel Core i9-14900KF @3.19 GHz
+
+```
+Metric                                    Value
+--------------------------------------------------
+Robot                                     Comau Smart5 NJ 130-2.6
+System                                    Windows 11 Version 2009
+CPU                                       Intel(R) Core(TM) i9-14900KF, 32 cores @ 3.19 GHz
+RAM                                       31.8 GB
+Forward Kinematics                        0.61 microseconds
+Inverse Kinematics                        2.00 microseconds
+Inverse Kinematics (all solutions)        2.23 microseconds
+Collision check (5 samples)               1.34 ms/sample
+Collision check rate                      743.55 samples/sec
+Points with collisions                    0
+Points without collisions                 5
+
+-- Program Collision Check: main --
+Collision check (3589 steps)              4.57 ms/step
+Collision check rate                      218.99 samples/sec
+Points with collisions                    66
+Points without collisions                 3523
+```
+
+### Results for Apple
+
+### M5 Pro and Silicon build
 
 ```
 Metric                                    Value
@@ -87,4 +117,10 @@ Collision check (3589 steps)              0.83 ms/step
 Collision check rate                      1203.55 samples/sec
 Points with collisions                    66
 Points without collisions                 3523
+```
+
+### M1 and an Intel build
+
+```
+
 ```
