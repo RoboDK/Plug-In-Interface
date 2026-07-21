@@ -1,4 +1,5 @@
 # Run some performance tests of RoboDK using the RoboDK API for Python
+# Note: for best performance you should use the API through the plug-in interface. Check the README.md file to learn more.
 
 # You can also use the new version of the API:
 from robodk import robolink    # RoboDK API
