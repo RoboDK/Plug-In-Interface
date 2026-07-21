@@ -69,7 +69,7 @@ Note: RoboDK v6 was used which includes important performance improvements for c
 
 ### Results on Windows/PC
 
-Using Intel Core i9-14900KF @3.19 GHz
+Using Intel Core i9-14900KF @3.19 GHz (Desktop PC)
 
 ```
 Metric                                    Value
@@ -89,6 +89,30 @@ Points without collisions                 5
 -- Program Collision Check: main --
 Collision check (3589 steps)              4.57 ms/step
 Collision check rate                      218.99 samples/sec
+Points with collisions                    66
+Points without collisions                 3523
+```
+
+Using Using Intel Core i7-1165G7 @2.8 GHz (Laptop PC)
+
+```
+Metric                                    Value
+--------------------------------------------------
+Robot                                     Comau Smart5 NJ 130-2.6
+System                                    Windows 11 Version 2009
+CPU                                       11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, 8 cores @ 2.80 GHz
+RAM                                       15.6 GB
+Forward Kinematics                        1.57 microseconds
+Inverse Kinematics                        11.36 microseconds
+Inverse Kinematics (all solutions)        11.88 microseconds
+Collision check (5 samples)               1.91 ms/sample
+Collision check rate                      523.58 samples/sec
+Points with collisions                    0
+Points without collisions                 5
+
+-- Program Collision Check: main --
+Collision check (3589 steps)              12.07 ms/step
+Collision check rate                      82.88 samples/sec
 Points with collisions                    66
 Points without collisions                 3523
 ```
