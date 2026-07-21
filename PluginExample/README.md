@@ -1,6 +1,6 @@
 # Plugin Example
 
-The Plugin Example is the reference RoboDK Plug-in used as a starting point for new plugins. It showcases the
+Plugin Example is the reference RoboDK Plug-in used as a starting point for developing new plug-ins. It demonstrates the
 Plug-in Interface: registering menu/toolbar actions, adding a docked window, listening to RoboDK events, and
 calling the RoboDK API (`IRoboDK`/`IItem`) directly from C++ for maximum performance.
 
@@ -21,13 +21,13 @@ calling the RoboDK API (`IRoboDK`/`IItem`) directly from C++ for maximum perform
 
 ## Usage
 
-1. Select **Tools-Plug-Ins** in RoboDK and load **PluginExample** if it is not already loaded.
+1. Select **Tools-Plug-Ins** in RoboDK and double click on **PluginExample** if it is not already loaded.
 2. Use the **Plugin Example** menu or toolbar:
    - **Plugin Speed Information** (or `Ctrl+I`): pick a robot to benchmark. You can then optionally pick a
      program to run a collision check against; if a program named `Main` exists, it is used automatically.
-   - **Robot Pilot Form**: opens the jog panel described above.
-   - **RoboDK Plugins - Help**: opens the RoboDK Plug-in documentation in your browser.
-3. Results are shown in a docked report (HTML table) and are also printed as an aligned plain-text table in
+   - **Robot Pilot Form**: Opens the jog panel described above.
+   - **RoboDK Plugins - Help**: Opens the RoboDK Plug-in documentation in your browser.
+3. Results are displayed as a table in a docked windo and are also printed as an aligned plain-text table in
    the console/debug output, which is useful when there is no GUI available (see below).
 
 
@@ -44,10 +44,10 @@ calling the RoboDK API (`IRoboDK`/`IItem`) directly from C++ for maximum perform
 
 The benchmark can be triggered without any user interaction using RoboDK's `-PluginCommand` argument, which
 calls `PluginCommand("BenchmarkInfo", progname)`. This is useful to collect performance stats headlessly, for
-example as part of an automated test or CI run:
+example as part of an automated test or CI (Continuous Integration) workflow:
 
 ```bash
-./RoboDK -NEWINSTANCE -NOUI -SKIPINI -PLUGINLOAD=PluginExample "./RoboDK.app/Contents/Library/Welding-with-Comau-Smart5-NJ-130-2-6.rdk" -PluginCommand=BenchmarkInfo=MainProg
+./RoboDK -NEWINSTANCE -NOUI -SKIPINI -PLUGINLOAD=PluginExample "C:/RoboDK/Library/Welding-with-Comau-Smart5-NJ-130-2-6.rdk" -PluginCommand=BenchmarkInfo=MainProg
 ```
 
 - `-NEWINSTANCE`: starts a new RoboDK instance instead of reusing one that is already running.
@@ -57,15 +57,17 @@ example as part of an automated test or CI run:
 - The quoted path is the RoboDK station (`.rdk`) to open.
 - `-PluginCommand=BenchmarkInfo=MainProg`: runs the benchmark against the program named `MainProg` and prints
   the results as text to the console — since `-NOUI` means the docked report is never shown, this text output
-  is the only way to read the stats in this scenario.
+  is the only way to read the stats in this scenario. If you trigger this action manually you can run RoboDK using the -DEBUG command line option (C:/RoboDK/RoboDK-Debug.bat) to save the console output as a text file.
 
-## Performance results
+## Performance results (RoboDK v6)
 
 The command from the previous section was run from the command line for the [Spot welding station with Comau](https://robodk.com/example/Welding-with-Comau-Smart5-NJ-130-2-6) using RoboDK v6.0.6.
 
 The following results can be obtained for different systems.
 
-Note: RoboDK v6 was used which includes important performance improvements for collision checking.
+RoboDK v6 was used to generate these reports. RoboDK v6 includes important performance improvements for collision checking compared to previous versions.
+
+Note on benchmarking: These results illustrate RoboDK performance on the systems tested and should not be interpreted as a controlled comparison of the processors or operating systems. Performance may vary depending on the RoboDK build, station complexity, collision settings, system configuration, power settings, and background processes. 
 
 ### Results on Windows/PC
 
