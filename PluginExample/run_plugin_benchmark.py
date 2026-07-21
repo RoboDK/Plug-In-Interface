@@ -17,7 +17,6 @@ Usage:
 import os
 import sys
 import tempfile
-import time
 import urllib.request
 
 from robodk import robolink
@@ -26,6 +25,28 @@ STATION_URL = "https://cdn.robodk.com/downloads-library/library-stations/Welding
 PLUGIN_NAME = "PluginExample"  # Matches PluginExample.pro's TARGET, used to load the plugin
 PLUGIN_ID = "Example Plugin"  # Matches PluginExample::PluginName(), used to target PluginCommand
 PROGRAM_NAME = "main"  # Program to run the collision check against
+
+from importlib.metadata import version, PackageNotFoundError
+
+MIN_ROBODK_VERSION = "6.0.0"
+
+
+def check_robodk_version(min_version=MIN_ROBODK_VERSION):
+    """Make sure the installed robodk package meets the minimum required version."""
+    try:
+        installed_version = version("robodk")
+    except PackageNotFoundError:
+        sys.exit("Could not find the 'robodk' package version. Run: pip install --upgrade robodk")
+
+    installed_tuple = tuple(int(part) for part in installed_version.split(".")[:3])
+    min_tuple = tuple(int(part) for part in min_version.split(".")[:3])
+    if installed_tuple < min_tuple:
+        sys.exit("This script requires robodk >= %s (found %s). This is needed to show the results in the console. Run: pip install --upgrade robodk" % (min_version, installed_version))
+
+    print("robodk package version: %s (OK, >= %s)" % (installed_version, min_version))
+
+
+check_robodk_version()
 
 
 def download_station(url: str) -> str:
