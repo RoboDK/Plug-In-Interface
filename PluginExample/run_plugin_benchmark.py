@@ -16,6 +16,7 @@ Usage:
 
 import os
 import sys
+import time
 import tempfile
 import urllib.request
 
@@ -110,9 +111,11 @@ def main():
     print("=" * 70)
     do_print_stdout = True
     result = RDK.PluginCommand(PLUGIN_ID, "BenchmarkInfo", PROGRAM_NAME)
-    do_print_stdout = False
     print("=" * 70)
     print("Plugin Command result: %s" % result)
+    # Flushing the stdout channel is done on a separate thread in robolink and it may take some time. If we turn it off, let's wait some time
+    time.sleep(1)
+    do_print_stdout = False
 
     print("Closing RoboDK...")
     RDK.CloseRoboDK()
