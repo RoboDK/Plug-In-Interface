@@ -22,8 +22,9 @@ public:
     ~FormRobotPilot();
 
     /// \brief Select a robot in the Robot variable
+    /// \param force_selection Set to true to always prompt the selection dialog, even if a valid robot is already selected
     /// \return True if a robot was properly retrieved
-    bool SelectRobot();
+    bool SelectRobot(bool force_selection = false);
 
     /// \brief IncrementalMove
     /// \param id Joint id or cartesian move id [x,y,z,r,p,w]

@@ -1,14 +1,11 @@
 #ifndef PLUGINEXAMPLE_H
 #define PLUGINEXAMPLE_H
 
-
 #include <QObject>
 #include <QtPlugin>
 #include <QDockWidget>
 #include "iapprobodk.h"
 #include "robodktypes.h"
-
-
 
 class QToolBar;
 class QMenu;
@@ -26,19 +23,19 @@ class FormRobotPilot;
 class PluginExample : public QObject, IAppRoboDK
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "RoboDK.IAppRoboDK")// FILE "metadatalugin.json")
+    Q_PLUGIN_METADATA(IID "RoboDK.IAppRoboDK")
     Q_INTERFACES(IAppRoboDK)
 
 public:
     //------------------------------- RoboDK Plug-in Interface commands ------------------------------
 
-    QString PluginName(void) override;    
-    virtual QString PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings="") override;
-    virtual void PluginUnload() override;
-    virtual void PluginLoadToolbar(QMainWindow *mw, int icon_size) override;
-    virtual bool PluginItemClick(Item item, QMenu *menu, TypeClick click_type) override;
-    virtual QString PluginCommand(const QString &command, const QString &value) override;
-    virtual void PluginEvent(TypeEvent event_type) override;
+    QString PluginName() override;
+    QString PluginLoad(QMainWindow *mw, QMenuBar *menubar, QStatusBar *statusbar, RoboDK *rdk, const QString &settings="") override;
+    void PluginUnload() override;
+    void PluginLoadToolbar(QMainWindow *mw, int icon_size) override;
+    bool PluginItemClick(Item item, QMenu *menu, TypeClick click_type) override;
+    QString PluginCommand(const QString &command, const QString &value) override;
+    void PluginEvent(TypeEvent event_type) override;
 
     //----------------------------------------------------------------------------------
 
@@ -56,8 +53,9 @@ public:
 public slots:
     // define button callbacks (or slots) here. They are triggered automatically when the button is selected.
 
-    /// Called when the information button/action is selected
-    void callback_information();
+    /// Called when the information button/action is selected, or via PluginCommand("BenchmarkInfo", progname)
+    /// \param progname Name of the program to check for collisions. Defaults to "Main" when left empty.
+    void callback_benchmarkInfo(const QString &progname = QString());
 
     /// Called when the robot pilot button/action is selected
     void callback_robotpilot();
@@ -65,7 +63,7 @@ public slots:
     /// Called when the robot pilot window is closed (event triggered by the dock window)
     void callback_robotpilot_closed();
 
-    /// Called when the user select the button/action for help
+    /// Called when the user selects the button/action for help
     void callback_help();
 
 // define your actions: usually, one action per button
@@ -76,8 +74,8 @@ private:
     /// Pointer to the customized menu
     QMenu *menu1;
 
-    /// Information action. callback_information is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
-    QAction *action_information;
+    /// Benchmark info action. callback_benchmarkInfo is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
+    QAction *action_benchmarkInfo;
 
     /// Open robot pilot form action. callback_robotpilot is triggered with this action. Actions are required to populate toolbars and menus and allows getting callbacks.
     QAction *action_robotpilot;

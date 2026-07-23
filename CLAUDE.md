@@ -24,7 +24,11 @@ make
 
 To build a single plugin, run qmake/make inside its subdirectory (e.g., `PluginExample/PluginExample.pro`).
 
-There are no automated tests — plugins are tested manually by loading them in RoboDK via **Tools → Plug-Ins**.
+There are no automated tests — plugins are tested manually by loading them in RoboDK via **Tools → Plug-Ins**, or faster, by launching RoboDK with a command-line flag:
+```bash
+RoboDK.exe -PLUGINSLOAD                                      # start with all available plugins loaded
+RoboDK.exe -PLUGINLOAD=C:/RoboDK/bin/plugins/pluginexample.dll   # load one plugin on the fly
+```
 
 ## Qt Version Requirements
 
@@ -79,7 +83,7 @@ PluginXxx/
 
 ### Add-in Apps (`PluginAppLoader/Apps/`)
 
-Python-based apps loaded via the `PluginAppLoader` C++ plugin. Each app in its own subdirectory follows the same `IAppRoboDK` interface conventions but runs as Python scripts rather than compiled DLLs.
+Python-based apps loaded via the `PluginAppLoader` C++ plugin (built in separately, always enabled in RoboDK but disabled by default). Each app is a subfolder; every `.py` script inside becomes a menu item/toolbar button, and an `AppConfig.ini` (auto-generated on first load) controls menu placement, icons, and shortcuts. Package an app folder into a distributable `.rdkp` with `PluginAppLoader/Apps/PackageCreate.py` (or `PackageCreateOne.py` for a single app).
 
 ### Robot Extensions (`robotextensions/samplekinematics/`)
 

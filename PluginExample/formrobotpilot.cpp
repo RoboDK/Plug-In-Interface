@@ -2,11 +2,9 @@
 #include "ui_formrobotpilot.h"
 
 FormRobotPilot::FormRobotPilot(RoboDK *rdk, QWidget *parent) : QWidget(parent),
-    ui(new Ui::FormRobotPilot)
-{
-    // keep the pointer to RoboDK
-    RDK = rdk;
-    Robot = nullptr;
+    ui(new Ui::FormRobotPilot),
+    RDK(rdk),
+    Robot(nullptr) {
 
     // Create the window
     ui->setupUi(this);
@@ -24,17 +22,22 @@ FormRobotPilot::FormRobotPilot(RoboDK *rdk, QWidget *parent) : QWidget(parent),
     SelectRobot();
 }
 
-FormRobotPilot::~FormRobotPilot(){
+FormRobotPilot::~FormRobotPilot() {
     delete ui;
 }
 
-void FormRobotPilot::on_btnSelectRobot_clicked(){
-    SelectRobot();
+void FormRobotPilot::on_btnSelectRobot_clicked() {
+    SelectRobot(true);
 }
 
-bool FormRobotPilot::SelectRobot(){
+bool FormRobotPilot::SelectRobot(bool force_selection) {
+    if (!force_selection && RDK->Valid(Robot)) {
+        // a valid robot is already selected: avoid prompting on every jog move
+        return true;
+    }
+
     QList<Item> all_robots = RDK->getItemList(IItem::ITEM_TYPE_ROBOT);
-    if (all_robots.length() == 0){
+    if (all_robots.length() == 0) {
         ui->lblRobot->setText("Load a robot");
         RDK->ShowMessage("Select File-Open to load a robot or a RoboDK station", false);
         //QString file = QFileDialog::getOpenFilename()
@@ -52,9 +55,7 @@ bool FormRobotPilot::SelectRobot(){
     return robot_is_selected;
 }
 
-
-
-void FormRobotPilot::setup_btn_joints(){
+void FormRobotPilot::setup_btn_joints() {
     ui->btnTXn->setText("J1-");
     ui->btnTXp->setText("J1+");
     ui->btnTYn->setText("J2-");
@@ -68,7 +69,8 @@ void FormRobotPilot::setup_btn_joints(){
     ui->btnRZn->setText("J6-");
     ui->btnRZp->setText("J6+");
 }
-void FormRobotPilot::setup_btn_cartesian(){
+
+void FormRobotPilot::setup_btn_cartesian() {
     ui->btnTXn->setText("Tx-");
     ui->btnTXp->setText("Tx+");
     ui->btnTYn->setText("Ty-");
@@ -82,58 +84,58 @@ void FormRobotPilot::setup_btn_cartesian(){
     ui->btnRZn->setText("Rz-");
     ui->btnRZp->setText("Rz+");
 }
-void FormRobotPilot::on_radCartesianReference_clicked(){
+
+void FormRobotPilot::on_radCartesianReference_clicked() {
     setup_btn_cartesian();
 }
 
-void FormRobotPilot::on_radCartesianTool_clicked()
-{
+void FormRobotPilot::on_radCartesianTool_clicked() {
     setup_btn_cartesian();
 }
 
-void FormRobotPilot::on_radJoints_clicked()
-{
+void FormRobotPilot::on_radJoints_clicked() {
     setup_btn_joints();
 }
 
-void FormRobotPilot::on_btnTXn_clicked(){ IncrementalMove(0, -1); }
-void FormRobotPilot::on_btnTYn_clicked(){ IncrementalMove(1, -1); }
-void FormRobotPilot::on_btnTZn_clicked(){ IncrementalMove(2, -1); }
-void FormRobotPilot::on_btnRXn_clicked(){ IncrementalMove(3, -1); }
-void FormRobotPilot::on_btnRYn_clicked(){ IncrementalMove(4, -1); }
-void FormRobotPilot::on_btnRZn_clicked(){ IncrementalMove(5, -1); }
+void FormRobotPilot::on_btnTXn_clicked() { IncrementalMove(0, -1); }
+void FormRobotPilot::on_btnTYn_clicked() { IncrementalMove(1, -1); }
+void FormRobotPilot::on_btnTZn_clicked() { IncrementalMove(2, -1); }
+void FormRobotPilot::on_btnRXn_clicked() { IncrementalMove(3, -1); }
+void FormRobotPilot::on_btnRYn_clicked() { IncrementalMove(4, -1); }
+void FormRobotPilot::on_btnRZn_clicked() { IncrementalMove(5, -1); }
 
-void FormRobotPilot::on_btnTXp_clicked(){ IncrementalMove(0, +1); }
-void FormRobotPilot::on_btnTYp_clicked(){ IncrementalMove(1, +1); }
-void FormRobotPilot::on_btnTZp_clicked(){ IncrementalMove(2, +1); }
-void FormRobotPilot::on_btnRXp_clicked(){ IncrementalMove(3, +1); }
-void FormRobotPilot::on_btnRYp_clicked(){ IncrementalMove(4, +1); }
-void FormRobotPilot::on_btnRZp_clicked(){ IncrementalMove(5, +1); }
+void FormRobotPilot::on_btnTXp_clicked() { IncrementalMove(0, +1); }
+void FormRobotPilot::on_btnTYp_clicked() { IncrementalMove(1, +1); }
+void FormRobotPilot::on_btnTZp_clicked() { IncrementalMove(2, +1); }
+void FormRobotPilot::on_btnRXp_clicked() { IncrementalMove(3, +1); }
+void FormRobotPilot::on_btnRYp_clicked() { IncrementalMove(4, +1); }
+void FormRobotPilot::on_btnRZp_clicked() { IncrementalMove(5, +1); }
 
-
-void FormRobotPilot::IncrementalMove(int id, double sense){
-    if (!SelectRobot()) { return; }
+void FormRobotPilot::IncrementalMove(int id, double sense) {
+    if (!SelectRobot()) {
+        return;
+    }
 
     // Calculate the relative movement
     double step = sense * ui->spnStep->value();
 
     // check if it is a joint movement or a Cartesian movement
     bool is_joint_move = ui->radJoints->isChecked();
-    if (is_joint_move){
+    if (is_joint_move) {
         tJoints joints = Robot->Joints();
-        if (id >= joints.Length()){
+        if (id >= joints.Length()) {
             qDebug() << "Internal problem: Invalid joint ID";
             return;
         }
         joints.Data()[id] = joints.Data()[id] + step;
         bool can_move = Robot->MoveJ(joints);
-        if (!can_move){
+        if (!can_move) {
             RDK->ShowMessage(tr("The robot can't move to this location"), false);
         }
     } else {
-        // check the index so that is is within 0-5
-        if (id < 0 || id >= 6){
-            qDebug()<< "Internal problem: Invalid id provided for an incremental move";
+        // check the index so that it is within 0-5
+        if (id < 0 || id >= 6) {
+            qDebug() << "Internal problem: Invalid id provided for an incremental move";
             return;
         }
 
@@ -150,7 +152,7 @@ void FormRobotPilot::IncrementalMove(int id, double sense){
         Mat pose_robot_new;
 
         bool is_tcp_relative_move = ui->radCartesianTool->isChecked();
-        if (is_tcp_relative_move){
+        if (is_tcp_relative_move) {
             // apply relative to the TCP:
             // if the movement is relative to the TCP we must POST MULTIPLY the movement
             pose_robot_new = pose_robot * pose_increment;
@@ -167,7 +169,7 @@ void FormRobotPilot::IncrementalMove(int id, double sense){
         }
 
         bool canmove = Robot->MoveJ(pose_robot_new);
-        if (!canmove){
+        if (!canmove) {
             RDK->ShowMessage(tr("The robot can't move to this location"), false);
         }
         /*if (!Robot->setPose(pose_robot_new)){
@@ -179,10 +181,7 @@ void FormRobotPilot::IncrementalMove(int id, double sense){
     RDK->Render();
 }
 
-
-
-
-void FormRobotPilot::on_chkRunOnRobot_clicked(bool checked){
+void FormRobotPilot::on_chkRunOnRobot_clicked(bool checked) {
     if (checked) {
         if (!SelectRobot()) {
             RDK->ShowMessage(tr("Select a robot first"), false);
