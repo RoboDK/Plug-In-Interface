@@ -7,6 +7,9 @@ The OPC UA (Open Platform Communications Unified Architecture) is a cross-platfo
 
 OPC UA provides a platform independent service-oriented architecture that integrates all the functionality of the classic OPC into one extensible framework.
 
+Documentation about how to use the OPC-UA Add-in to integrate with a PLC:
+https://robodk.com/doc/en/OPC-UA.html
+
 ## Features
 
 - Add RoboDK as a OPC UA server and/or an OPC UA client
