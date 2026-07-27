@@ -24,6 +24,8 @@ make
 
 To build a single plugin, run qmake/make inside its subdirectory (e.g., `PluginExample/PluginExample.pro`).
 
+The top-level `Plug-In-Interface.pro` builds all plugins as `SUBDIRS`. Note that `Plugin-OPC-UA`, `PluginOpenGL`, `PluginOpenGL-Shaders`, and `PluginRoboUI` are gated behind `win32 { }` and only build on Windows.
+
 There are no automated tests — plugins are tested manually by loading them in RoboDK via **Tools → Plug-Ins**, or faster, by launching RoboDK with a command-line flag:
 ```bash
 RoboDK.exe -PLUGINSLOAD                                      # start with all available plugins loaded
@@ -99,4 +101,4 @@ Copy `PluginExample/` as a template. It demonstrates:
 
 ## Deployment
 
-Plugins are packaged as `.rdkp` Add-in files using the RoboDK Add-in Manager. See the [Add-ins documentation](https://robodk.com/doc/en/Add-ins.html#AddinManager).
+Plugins are packaged as `.rdkp` Add-in files using the RoboDK Add-in Manager. See the [Add-ins documentation](https://robodk.com/doc/en/Add-ins.html#AddinManager). Each plugin includes a `manifest.xml` (title, version, description, asset list) consumed by the Add-in Manager when packaging.
