@@ -1,6 +1,9 @@
 # Item Utilities
 
-The Item Utilities App for RoboDK adds utility functions to manipulate Items, such as objects and robots.
+The Item Utilities App for RoboDK adds utility functions to manipulate items such as objects and robots directly in your RoboDK station.
+You can access its features directly from the menu bar by navigating to **Utilities - Item Utilities**, or by right-clicking any item in the station or station tree and selecting **Item Utilities**.
+
+![Utilities](./docs/utilities.png)
 
 - For more information about RoboDK Apps, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
@@ -9,8 +12,8 @@ The Item Utilities App for RoboDK adds utility functions to manipulate Items, su
 
 ## Features
 
-- Replace an object in-place
-- Replace a robot, taking account the robot base offset and the program/target links
-- Attach an object to a robot link (permanently)
-- Scale an object
-- Simplify meshes
+- **Replace Object:** Swap an existing station object with a new 3D model while preserving its exact physical location.
+- **Replace Robot:** Change robot models while maintaining existing program/target links, base offsets, and attached tools.
+- **Attach Object To Robot Link:** Permanently lock objects (e.g., dress packs, harnesses, custom fixtures) onto specific robot joints/links.
+- **Scale Object:** Uniformly or non-uniformly resize objects and curves along the X, Y, and Z axes.
+- **Simplify Object:** Clean up dense meshes by removing redundant triangles and small geometry to enhance simulation performance.
