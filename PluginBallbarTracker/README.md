@@ -1,7 +1,9 @@
 # Ballbar Tracker
 
 The Ballbar Tracker Plug-in for RoboDK allows you to attach a ballbar to a robot.
-A ballbar is fixed on it's origin and can rotate and extend to follow a TCP.
+
+A ballbar is fixed on its origin and can rotate and extend to follow a TCP.
+
 This plug-in can be extended to simulate actuators.
 
 ## Features
@@ -13,10 +15,10 @@ This plug-in can be extended to simulate actuators.
 
 ### Ballbar mechanism
 
-A ballbar assume the following structure:
+A ballbar assumes the following structure:
 
 - A parent frame corresponding to the origin of the ballbar, the rotation point.
-- A two-axis mechanism for rotating the ballbar in 3D. The first joint will be use to rotate around (+/- 180 degrees), and the second up and down (+/- 90 degrees).
+- A two-axis mechanism for rotating the ballbar in 3D. The first joint will be used to rotate around (+/- 180 degrees), and the second up and down (+/- 90 degrees).
 - A linear axis mechanism for extending and retracting the ballbar. You can set the range to 0 mm if your ballbar does not support this feature.
 - A child frame corresponding to the attachment point of the ballbar.
 
@@ -24,7 +26,7 @@ A ballbar assume the following structure:
 
 ### Attaching the ballbar
 
-This plugin adds a "Attach ballbar" checkable menu item when right-clicking on a robot or a tool. When checked, the ballbar will be attached. If more than one ballbar is available, a prompt will appear to select the attachment frame of the ballbar.
+This plugin adds an "Attach ballbar" checkable menu item when right-clicking on a robot or a tool. When checked, the ballbar will be attached. If more than one ballbar is available, a prompt will appear to select the attachment frame of the ballbar.
 
 <p align="center"><img src="./doc/menu.PNG" /></p>
 

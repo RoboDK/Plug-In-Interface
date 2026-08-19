@@ -4,33 +4,31 @@ This example shows the possibility of integrating a third-party library (ImGUI) 
 
 ![RoboUI](./doc/rdk-imgui.png)
 
-
 ## Features
+
 - Drawing a graphical user interface on top of a RoboDK 3D scene
 - Determination of mouse position and the ability to switch between elements of the customized interface and the original application interface
 
-
 ## Prerequisites
-- [RoboDK](https://robodk.com/download)
 
+- [RoboDK](https://robodk.com/download)
 
 ## Installation
 
 Plug-ins are usually packaged as RoboDK Packages (.rdkp), which are automatically installed when opened with RoboDK.
 To manually install this Plug-in, copy the content of this folder to your RoboDK Plug-ins folder (typically `C:/RoboDK/bin/plugins`).
 
-
 ## Configuration
 
 1. Enable the Plug-in (Tools->Add-ins or Shift+I)
-
 
 ## About RoboDK Plug-ins
 
 The RoboDK Plug-In Interface allows you to extend or customize RoboDK software with Plug-ins linked natively into the core of RoboDK.
 
 You can integrate your Plug-in as part of the RoboDK user interface and easily customize RoboDK for offline programming and simulation purposes.
-For instance, by adding buttons in the menu and the toolbar, processing events, synchronizing with render, accept API command calls, and more.
+
+For instance, by adding buttons in the menu and the toolbar, processing events, synchronizing with render, accepting API command calls, and more.
 
 Once you complete developing your Plug-in, you can easily distribute your Plug-in as a self-contained package file (.rdkp).
 

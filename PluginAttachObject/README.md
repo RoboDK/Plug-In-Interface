@@ -17,6 +17,7 @@ The Attach Object Plug-in for RoboDK can dynamically attach multiple objects to 
 ### Attaching and detaching objects from RoboDK
 
 Attach or detach an object or multiple objects to the same robot link by right-clicking them (either in the tree or in the cell). Attach and detach menus will be present according to the state of the selected objects.
+
 If more than one robot is present in the station, a selection prompt will appear.
 
 Attached objects will conserve their relative position to the robot when the object is attached. Place them correctly before attaching them.
@@ -24,11 +25,12 @@ Attached objects will conserve their relative position to the robot when the obj
 ![Objects menu](./doc/object-menus.png)
 
 Attach or detach an object or multiple objects to the same robot link by right-clicking a robot (either in the tree or in the cell). Attach and detach menus will be present according to the state of the selected robot.
+
 If more than one object is present in the station, a selection prompt will appear.
 
 ![Attaching objects](./doc/robot-menus.png)
 
-Once the objects an the robot are selected, a prompt will appear to select the link ID to attach. For instance, to attach an object on the last link of a six axis robot, enter 6.
+Once the objects and the robot are selected, a prompt will appear to select the link ID to attach. For instance, to attach an object on the last link of a six axis robot, enter 6.
 
 ![Attaching objects](./doc/joint-entry.png)
 
