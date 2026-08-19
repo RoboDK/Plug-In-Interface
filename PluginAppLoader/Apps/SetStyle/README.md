@@ -1,8 +1,8 @@
 # Set Style
 
-The Set Style App for RoboDK adds quick appearance presets to edit curves, points and objects.
+The Set Style Add-in for RoboDK adds quick appearance presets to edit curves, points and objects.
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).

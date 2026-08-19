@@ -1,13 +1,13 @@
 # Object Deleter
 
-The Object Deleter App for RoboDK adds customizable zones to delete objects.
+The Object Deleter Add-in for RoboDK adds customizable zones to delete objects.
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
 
-## Feature
+## Features
 
 - Use the Editor to set the Object Deleter settings.
   - Radius: radius of the delete zone, in mm.

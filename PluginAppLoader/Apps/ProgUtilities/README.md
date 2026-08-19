@@ -1,8 +1,8 @@
 # Program Utilities
 
-The Program utilities App for RoboDK adds tools to edit programs and program instructions.
+The Program Utilities Add-in for RoboDK adds tools to edit programs and program instructions.
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
@@ -11,19 +11,24 @@ The Program utilities App for RoboDK adds tools to edit programs and program ins
 
 ### Convert MoveC to MoveL
 
-Right-click one or more programs to convert any MoveC command in a series of linear movements (MoveL).
-The default step size is 1 mm, or 1 degree. You can edit this settings in the ConvertMoveC.py.
+Right-click one or more programs to convert any MoveC command into a series of linear movements (MoveL).
+
+The default step size is 1 mm, or 1 degree. You can edit these settings in the ConvertMoveC.py.
+
 A new program will be created after the conversion.
 
 ### Expand sub-program calls
 
 Right-click one or more programs to expand (inline) any sub-program calls.
-By default, this process is recursive (sub-programs in sub-programs are also inline). You can edit this settings in the ExpandSubPrograms.py.
+
+By default, this process is recursive (sub-programs in sub-programs are also inline). You can edit these settings in the ExpandSubPrograms.py.
+
 A new program will be created.
 
 ### Merge programs
 
 Right-click two or more programs to merge them.
+
 A new program will be created.
 
 ### Visibility utilities

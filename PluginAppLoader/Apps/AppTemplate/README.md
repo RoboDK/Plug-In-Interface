@@ -1,9 +1,10 @@
-# RoboDK App Template
+# RoboDK Add-in Template
 
-The App Template for RoboDK provides the necessary examples to build a RoboDK Add-in.
-It can be used as a template to build your own RoboDK Apps.
+The Add-in Template for RoboDK provides the necessary examples to build a RoboDK Add-in.
 
-For more information about RoboDK Add-ins and Apps visit the documentation:
+It can be used as a template to build your own RoboDK Add-ins.
+
+For more information about RoboDK Add-ins, visit the documentation:
 
 - RoboDK documentation: <https://robodk.com/doc/en/Add-ins.html>.
 - RoboDK API for Add-ins or Apps: <https://robodk.com/doc/en/PythonAPI/app.html>.

@@ -1,8 +1,8 @@
 # Curve Utilities
 
-The Curve Utilities App for RoboDK adds tools to generate and edit curve objects.
+The Curve Utilities Add-in for RoboDK adds tools to generate and edit curve objects.
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).

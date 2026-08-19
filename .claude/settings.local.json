@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(grep -n ' $' PluginAppLoader/Apps/SettingsImportExport/README.md2)",
+      "Bash(grep *)"
     ]
   }
 }

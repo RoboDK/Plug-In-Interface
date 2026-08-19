@@ -1,9 +1,10 @@
 # Snapshot
 
-The Snapshot App for RoboDK adds high resolution snapshot (print screen) capabilities to RoboDK.
+The Snapshot Add-in for RoboDK adds high resolution snapshot (print screen) capabilities to RoboDK.
+
 Take a snapshot or high resolution snapshot of the 3D view and save it on disk.
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
