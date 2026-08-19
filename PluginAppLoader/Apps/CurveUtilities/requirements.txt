@@ -1,0 +1,3 @@
+ezdxf>=1.4.1
+svgpathtools>=1.6.1
+scipy
