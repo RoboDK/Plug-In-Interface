@@ -44,4 +44,5 @@ Use the Editor to set the spawner settings.
 ### Add Python Script
 
 Add a python script in your station (by going to Utilities - Box Spawner - Add Script) that will spawn a box when called. Useful for spawning boxes when a RoboDK program is running.
+
 For example, the program call `Call SpawnBox(1)` will use the Spawner ID #1 and spawn the box according to **Box Spawner Settings (1)**.

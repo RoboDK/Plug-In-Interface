@@ -1,7 +1,9 @@
 # Record
 
 The Record Add-in for RoboDK adds cinematic recording capabilities to RoboDK.
+
 Attach a camera to any object, and record to video file from its perspective.
+
 You can access all its features directly from the **Record** menu in the top menu bar or via the dedicated **Record toolbar**.
 
 ![Menu](./docs/menu.png)

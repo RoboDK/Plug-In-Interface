@@ -1,8 +1,8 @@
 # Game Controller
 
-The Game Controller App for RoboDK allows you to control your robot arm using a game controller.
+The Game Controller Add-in for RoboDK allows you to control your robot arm using a game controller.
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
@@ -14,15 +14,15 @@ The Game Controller App for RoboDK allows you to control your robot arm using a 
 
 ## Usage
 
-Press the Controller icon in the toolbar to start the app, and click again to stop it. You can also navigate to Connect-Game Controller-Launch Game Controller to start the app.
+Press the Controller icon in the toolbar to start the Add-in, and click again to stop it. You can also navigate to Connect - Game Controller - Launch Game Controller to start the Add-in.
 
 ![Start](./docs/start.png)
 
 Status updates will be available on the status bar of RoboDK (bottom of the screen).
 
-By default, this app moves the simulated robot. You can also move the real robot if you are connected using the RoboDK driver for your robot controller:
+By default, this Add-in moves the simulated robot. You can also move the real robot if you are connected using the RoboDK driver for your robot controller:
 
-- Select Connect-Connect Robot
+- Select Connect - Connect Robot
 - Enter the IP of the robot
 - Select Connect
 
@@ -44,6 +44,6 @@ The default mapping was created for an Xbox One controller.
 
 ### Settings
 
-You can edit the settings to suit your needs, such as robot speeds, step size, step range, initial settings, etc. Find the settings in Connect-Game Controller-Settings.
+You can edit the settings to suit your needs, such as robot speeds, step size, step range, initial settings, etc. Find the settings in Connect - Game Controller - Settings.
 
 ![Settings](./docs/settings.png)
