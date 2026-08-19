@@ -4,7 +4,7 @@ The Box Spawner Add-in for RoboDK allows you to programmatically add box objects
 
 It automates the creation, scaling, placement, and conveyor attachment of box components, making it ideal for simulating pick-and-place, palletizing, or conveyor-fed applications.
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
@@ -21,6 +21,8 @@ It automates the creation, scaling, placement, and conveyor attachment of box co
 
 ## Usage
 
+### Spawner
+
 Click the **Spawn** icon in the toolbar to spawn a box instantly using the active profile (defaults to Spawner ID #0).
 
 You can also navigate to **Utilities - Box Spawner - Spawn** to generate a box.
@@ -33,7 +35,7 @@ Use the Editor to set the spawner settings.
 
 - Units: In millimeters or inches.
 - Box Size: L/W/H (or X/Y/Z) in the above units.
-- Spawn Location: RoboDK item (frame or station) where the box will be spawn.
+- Spawn Location: RoboDK item (frame or station) where the box will be spawned.
 - Conveyor Relocation: Automatically transfer the box to the closest conveyor.
 - Randomization: Randomize the position, orientation, and scale of the box.
 

@@ -1,11 +1,11 @@
 # Item Utilities
 
-The Item Utilities App for RoboDK adds utility functions to manipulate items such as objects and robots directly in your RoboDK station.
+The Item Utilities Add-in for RoboDK adds utility functions to manipulate items such as objects and robots directly in your RoboDK station.
 You can access its features directly from the menu bar by navigating to **Utilities - Item Utilities**, or by right-clicking any item in the station or station tree and selecting **Item Utilities**.
 
 ![Utilities](./docs/utilities.png)
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).

@@ -1,12 +1,12 @@
 # Record
 
-The Record App for RoboDK adds cinematic recording capabilities to RoboDK.
+The Record Add-in for RoboDK adds cinematic recording capabilities to RoboDK.
 Attach a camera to any object, and record to video file from its perspective.
 You can access all its features directly from the **Record** menu in the top menu bar or via the dedicated **Record toolbar**.
 
 ![Menu](./docs/menu.png)
 
-- For more information about RoboDK Apps, visit the
+- For more information about RoboDK Add-ins, visit the
 [documentation](https://robodk.com/doc/en/PythonAPI/app.html).
 - Submit bug reports and feature suggestions on our
 [GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
