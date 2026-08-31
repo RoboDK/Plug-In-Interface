@@ -52,7 +52,7 @@ def ReplaceObjects(objects=None):
 
     # Replace objects
     for object_item in objects:
-        object_links = object_item.getLinks(None)
+        object_links = object_item.getLinks(-1)
         _object_item = object_item.Parent().Paste()
         _object_item.setPose(object_item.Pose())
         object_item.Delete()
