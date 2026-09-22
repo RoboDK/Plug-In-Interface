@@ -1,178 +1,75 @@
-AppLoader plug-in for RoboDK
-===========================
-
-Note: The AppLoader plugin is obsolete and has been replaced by the Add-in Manager. You should use the new Add-in Manager to load, create or edit existing Add-ins. You can still use the AppLoader plug-in to load classic/legacy Add-ins: https://robodk.com/doc/en/Add-ins.html#Addins. You can still refer to this plugin as an example plug-in.
-
-The App loader plug-in allows you to easily load scripts and executable files as if they were plug-ins in RoboDK software.
+# App Loader Plug-In for RoboDK
 
 This plugin allows integrating scripts as part of the RoboDK user interface and easily customize RoboDK for customized offline programming and simulation purposes.
 
-Adding scripts to an Add-in will add buttons in the menu and the toolbar automatically. A settings file allows you to easily customize the appearance of a specific set of buttons/actions.
+The App Loader plugin was created to load classic Add-ins, and is the open source version of the Add-in Manager included with RoboDK. This plugin provides an alternative lightweight option for development compared to the Add-in Manager.
 
-Once you complete developing your Add-in you can easily distribute your Add-in or set of Add-ins as a package file.
+Use the Add-in Manager to load, create or edit Add-ins: <https://robodk.com/doc/en/Add-ins.html#Addins>. App Loader is kept in this repository as a real-world **example RoboDK Plug-In** — it is a good reference if you want to see a C++ plugin that builds its own dialogs, installs packages, and drives Python/executable scripts from the RoboDK UI.
 
-The AppLoader plugin is available in RoboDK by default. However, the plugin is disabled by default.
+If you are looking for documentation on how to *write or package a script-based Add-in* (the `.py`/`AppConfig.ini` side of things), see [Apps/README.md](./Apps/README.md) instead — that folder also contains ready-to-load example Add-ins.
 
-Follow these steps to load the AppLoader plugin:
-* Select Tools->Plug-Ins
-* Select Load Plug-Ins
-* Select AppLoader
+## Loading the plugin
+
+The App Loader plugin is included with RoboDK by default but is disabled:
+
+- Select Tools -> Plug-Ins
+- Select Load Plug-Ins
+- Select AppLoader
 
 ![Sample Apps Loaded](./doc/Apps-Loaded.png)
 
-Each Add-in is a subfolder inside the /RoboDK/Apps/ folder. You can add or remove Add-ins by adding or deleting folders. You can also add or remove scripts (Python files) inside each subfolder to add or remove actions/buttons. Scripts that start with an underscore (_) are ignored and can be used as shared modules.
+Once loaded, it scans the `/RoboDK/Apps/` folder and turns every subfolder into a menu + toolbar. See [Apps/README.md](./Apps/README.md) for how those subfolders are structured.
 
-Each Add-in will have its own entry in the main menu and its own toolbar. Each script inside an Add-in will create a new button in the menu and a new button in the toolbar.
+## About RoboDK Plug-Ins (C++ development)
 
-You can also use Executable files (EXE files) instead of PY files.
+This section summarizes the RoboDK Plug-In Interface for C++/Qt developers. Full reference: <https://robodk.com/doc/en/PlugIns/index.html>
 
-You can optionally provide INI files to customize integration (order of appearance, context menu option, toolbar, etc.).
+RoboDK Plug-Ins are Qt-based C++ libraries (DLL/SO/DYLIB) that are linked natively into RoboDK's core, rather than driven through an external API connection. This makes calls to the RoboDK API (`IRoboDK`/`IItem`) much faster than the standard Python/C#/Matlab API, and it lets a plugin customize RoboDK's UI directly (menus, toolbars, docked windows, and even the 3D OpenGL view).
 
-If the INI file does not exist it will be automatically generated the first time a new folder inside Apps is found.
+Key interfaces every plugin implements or consumes (see [`robodk_interface/`](../robodk_interface/)):
 
-This plugin is provided with RoboDK by default. You don't need to change it or rebuild it to create and distribute your Add-ins in RoboDK. This document provides general information about how Add-ins work in RoboDK and how you can easily customize RoboDK for your specific simulation and offline programming needs using this plugin.
+- **`IAppRoboDK`** — the base class every plugin implements; it is the entry point RoboDK uses to load the plugin, add menu/toolbar actions, and forward UI events.
+- **`IRoboDK`** — the native RoboDK API surface (station tree, simulation, file I/O).
+- **`IItem`** — represents any object in the station tree (robot, frame, tool, program, etc). Items are pointers, not values, so always check for `nullptr`.
 
-More information about the RoboDK API for Python here:
-* https://github.com/RoboDK/RoboDK-API/tree/master/Python
-* https://pypi.org/project/robodk/
-* https://robodk.com/doc/en/RoboDK-API.html#PythonAPI
-* https://robodk.com/doc/en/PythonAPI/index.html
+Things to keep in mind when writing a plugin:
 
-Example
-=======
+- Screen updates are manual — trigger a render event explicitly after changing a robot/item's position.
+- Qt signals/slots (thread-safe) are used for UI callbacks.
+- Plug-Ins can only be deployed as compiled C++ libraries, and the Qt version/compiler used to build them **must match exactly** what RoboDK itself was built with:
 
-For a detailed example / template of a RoboDK Add-in, see the [Add-in Template](./Apps/AppTemplate/README.md).
+| Platform | Qt Version | Compiler |
+|----------|-----------|----------|
+| Windows  | 5.15      | MSVC2019 |
+| macOS    | 6.10 (>= RoboDK 6.0), 5.15 (older) | clang 64-bit |
+| Linux    | 6.10 (>= RoboDK 6.0), 5.12 (older) | GCC |
 
-The following tree shows the sample tree structure inside the Apps folder. The sample Add-ins provided are:
-* Recorder: Tools to record a video from your simulations.
-* Style: Tools to change the appearance of objects and tools (change the color and appearance of surfaces, points and curves). Among other things you can change the appearance of points if you use a large point cloud.
+Building and loading:
 
-``` bash
-C:/RoboDK/
-│
-├───Apps
-│   │
-│   ├───Record
-│   │       AppConfig.ini
-│   │       AttachCamera.py
-│   │       AttachCamera.svg
-│   │       AttachCameraChecked.svg
-│   │       Record.py
-│   │       Record.svg
-│   │       RecordChecked.svg
-│   │       SetSize.py
-│   │       SetSize.svg
-│   │
-│   ├───SetStyle
-│   │      AppConfig.ini
-│   │      Points_Default.py
-│   │      Points_PointCloud.py
-│   │      Points_PointCloud.svg
-│   │      Points_Cubes.py
-│   │      Points_Cubes.svg
-│   │      Points_Spheres.py
-│   │      Points_Spheres.svg
-│   │      Curves_Orange.py
-│   │      Curves_Orange.svg
-│   │      Curves_White.py
-│   │      Curves_White.svg
-│   │      Surfaces_Green.py
-│   │      Surfaces_Green.svg
-│   │      Surfaces_Orange.py
-│   │      Surfaces_Orange.svg
-│   │      Settings.py
-│   │      Settings.svg
-│   │
-├───bin
-...
+- Projects use **qmake**, not CMake. Double click a `.pro` file to open it in Qt Creator, or build from the command line (see the top-level [README.md](../README.md)).
+- Compiled plugins are placed in `C:/RoboDK/bin/plugins/` (release, Windows) — see the top-level README for the debug/macOS/Linux paths.
+- Start RoboDK with `-PLUGINSLOAD` to load all available plugins, or `-PLUGINLOAD=<path-to-plugin>` to load one on the fly, instead of using Tools -> Plug-Ins every time.
+- To get started with a new plugin from scratch, copy [`PluginExample/`](../PluginExample/) rather than App Loader — it is the minimal reference template.
 
-```
+## This plugin's project (AppLoader.pro)
 
-The sample tree structure will create 2 menus and 2 toolbars (one for each subfolder). Each script file in a subfolder will show as a button (action).
+App Loader is a standard RoboDK plugin project (`TEMPLATE = lib`, `CONFIG += plugin`, `TARGET = AppLoader`) that includes [`robodk_interface.pri`](../robodk_interface/robodk_interface.pri) like any other plugin in this repository, plus `QT += widgets network` (per `AppLoader.pro`, to allow using `QTcpSocket`).
 
-![Sample Apps Menu](./doc/Apps-Menu.png)
+| File | Purpose |
+|------|---------|
+| `apploader.h` / `.cpp` | `IAppRoboDK` implementation: plugin entry point, menu/toolbar registration, scans `Apps/` and turns each subfolder into actions |
+| `dialogapplist.h` / `.cpp` / `.ui` | Dialog window listing loaded Add-ins and their scripts |
+| `applistdelegate.h` / `.cpp` | Item delegate used to render rows in the Add-in list |
+| `tableheader.h` | Helper for the Add-in list's table header |
+| `installerdialog.h` / `.cpp` / `.ui` | UI shown when installing an `.rdkp` Add-in package |
+| `unzipper.h` / `.cpp` + `zip/` (miniz) | Unpacks `.rdkp` package files (zip archives) when installing an Add-in |
 
-Package
-=======
+## Example Add-ins
 
-RoboDK software treats rdkp files as RoboDK packaged Add-ins. These files consist of the Apps tree structure zipped in one folder using the RDKP extension.
+The [`Apps/`](./Apps/) folder contains example Add-ins (Record, SetStyle, AppTemplate, etc.) that this plugin loads, and is the canonical documentation for the Add-in format (`AppConfig.ini`, `AppLink.ini`, checkable actions, packaging as `.rdkp`, etc). See [Apps/README.md](./Apps/README.md).
 
-Double clicking an rdkp file provokes RoboDK to load the AppLoader plugin automatically (for example: Package.rdkp). Furthermore, the full path of the file is passed to the AppLoader plugin (or the corresponding plugin) as an "OpenFile" command (PluginCommand) if the plugin name is added before the extension.
+## Useful links
 
-The script PackageCreate.py will pack the contents in the Apps folder and save it as Package.apploader.rdkp automatically. This file is then ready to distribute.
-
-![Create a package](./doc/PackageCreate.png)
-
-Icons
-=====
-
-Having an image with the same name as the script will automatically load the image as the action. Supported image types include SVG, PNG, JPG and ICO (in this order of preference).
-
-AppConfig.ini
-============
-
-Once a new Add-in or script is loaded for the first time, an AppConfig.ini is created.
-
-The AppConfig.ini file allows you to customize the priority of the Add-in, the size of the toolbar and the size and look of each action.
-
-The top section (General) of the INI file allows you to customize the look. For example, the Recorder general Add-in settings look like this:
-
-```
-[General]
-MenuName=Recorder   # Name displayed in the main menu
-MenuParent=         # Name of the parent menu, if not using the main menu. For instance, menu-Utilities, menu-Program, menu-Tools, etc.
-MenuPriority=999    # Lower shows first compared to other apps
-MenuVisible=true    # Set to false to hide the menu from the parent menu
-Version=1.0.0       # Version of the application
-ToolbarArea=2       # Location in the toolbar, it can be: left (1), right (2), top (4), bottom (8) or default (-1)
-ToolbarSizeRatio=2  # Size of the toolbar as a ratio with respect to the default size (2 means twice the size of the default size)
-RunCommands=        # String with commands to execute when the toolbar is loaded
-```
-
-Each action will also have some settings to customize the appearance. For example, the Record action (script Record.py) looks like this:
-
-```
-[Record]
-DisplayName=Record                  # Name displayed in the app menu
-Description=Start/stop recording    # Description to display on hover
-Visible=true                        # Set to false to disable this action (not show it)
-DeveloperOnly=false                 # Set to true to make this action enabled in Developer Mode only
-Shortcut=                           # Set a keyboard shortcut to trigger this action, Ctrl+M for instance
-Checkable=true                      # Set to true if we want this to be checkable
-CheckableGroup=1                    # Set to a number greater than zero if you want to group this action with other actions having the same group index
-AddToMenu=true                      # Set to false to not show this action in the main menu
-AddToToolbar=true                   # Set to false to not show this action in the toolbar
-Priority=1                          # Set the priority within the same app (lower shows first)
-TypeOnContextMenu=                  # Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API). -1 means any type, and you can use commas to specify multiple items
-TypeOnDoubleClick=                  # Set to an item type to run this action when double clicking on the item (same index as the ITEM_TYPE_* in the API). -1 means any type, and you can use commas to specify multiple items
-```
-
-AppLink.ini
-============
-
-You can optionally create an AppLink.ini file to link the Add-in to another folder. You should set the path to the Add-in's folder in the Path variable. Note: single backslashes (\\) are treated as a special character. For example, the contents of an AppLink.ini file should look like this:
-
-``` bash
-[General]
-Path="D:/GitHub/Record"
-# or Path="D:\\GitHub\\Record"
-```
-
-The AppConfig.ini file (or Settings.ini in older versions) has priority over the AppLink.ini file, so the AppLink.ini file is ignored if one of the first 2 ini files are found.
-
-Checkable actions
-=================
-
-When an action is checkable, the corresponding script will be executed when the action is checked and also when it is unchecked.
-
-A checkable action also includes the additional behavior compared to non-checkable actions:
-* A station parameter with the corresponding script name (name of the script file) will be set to 1 or 0 if the action is checked or unchecked respectively.
-* The argument "Checked" or "Unchecked" will be passed as an argument through the process.
-* An icon can be provided for the checked state by adding the Checked keyword (as shown with the RecordChecked.svg example)
-
-Importing Apps
-=================
-
-RoboDK will automatically add your Add-in's directories to the environment variable `PYTHONPATH` when executing python scripts, allowing you to import and reuse Add-ins in your own scripts. Simply add a `__init__.py` file in your Add-in folder (this file can be left empty).
-
-If you are developing or debugging in your IDE, you might want to manually add your Add-in's directories to the system environment variable `PYTHONPATH`. The system environment variable will take precedence over RoboDK's.
+- RoboDK Plug-In interface documentation: <https://robodk.com/doc/en/PlugIns/index.html>
+- Add-in Manager / packaging Add-ins as `.rdkp`: <https://robodk.com/doc/en/Add-ins.html#AddinManager>
+- RoboDK API (Python): <https://robodk.com/doc/en/PythonAPI/index.html>

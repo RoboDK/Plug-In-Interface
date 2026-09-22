@@ -1,5 +1,4 @@
-RoboDK Plug-In Interface
-=========
+# RoboDK Plug-In Interface
 
 The RoboDK Plug-In Interface allows you to extend or customize RoboDK software for industrial robots and simulation of robot arms.
 
@@ -11,14 +10,13 @@ The RoboDK Plug-In interface is available in the [robodk_interface](./robodk_int
 
 ![](plugin-example.png)
 
-Introduction
--------------
+## Introduction
 
 RoboDK Plug-Ins allow extending RoboDK by using the RoboDK Interface and the RoboDK API.
 
 Contrary to the default RoboDK API (provided in Python, C#, C++, Matlab, etc), this RoboDK Plug-In interface is linked natively into the core of RoboDK.
 
-Therefore, when the RoboDK API is used inside the Plugin Interface (using IItem and IRoboDK) the speed is faster than using the default API.
+Therefore, when the RoboDK API is used inside the Plug-In Interface (using IItem and IRoboDK) the speed is faster than using the default API.
 
 However, all RoboDK Plug-In applications must exist within RoboDK's environment.
 
@@ -26,32 +24,30 @@ Double click the .pro file in any of the sample projects to open the project wit
 
 Make sure to follow the installation requirements section to install Qt as a C++ development environment.
 
-You can load one of the sample plug-ins by selecting:
- * Tools - Plug-Ins
+You can load one of the sample plugins by selecting:
+- Tools - Plug-Ins
 
 <p align="center"><img src="plugin-load.png" width="600"></p>
 
 The default location for RoboDK plugins is C:/RoboDK/bin/plugins.
 
-Plug-In Interface vs. RoboDK API
--------------
+## Plug-In Interface vs. RoboDK API
 
 The [RoboDK API](https://github.com/RoboDK/RoboDK-API) is a generic set of commands that allows you to interact with RoboDK and automate tasks. The RoboDK API is used by default when macros are used in RoboDK.
 
 The RoboDK Plug-In interface includes an interface to the RoboDK API.
 
 The main advantages of using the RoboDK API through a Plug-In Interface are the following:
- * The RoboDK API is much faster because it is loaded as a library (a RoboDK Plug-In is actually a library loaded by RoboDK).
- * You can customize the appearance of RoboDK's main window (including the menu, toolbar, and add docked windows).
- * You can customize the 3D view using OpenGL.
+- The RoboDK API is much faster because it is loaded as a library (a RoboDK Plug-In is actually a library loaded by RoboDK).
+- You can customize the appearance of RoboDK's main window (including the menu, toolbar, and add docked windows).
+- You can customize the 3D view using OpenGL.
 
 You should pay attention to the following when using the RoboDK API inside a Plug-In:
- * Items are pointers, not objects. You can check if an item is valid or not by checking if it is a null pointer (nullptr).
- * You must provoke a render event every time you want to update the screen (for example, if you change the position of a robot). Updating the screen is not done automatically.
- * Plug-Ins can only be deployed as C++ code using a DLL.
+- Items are pointers, not objects. You can check if an item is valid or not by checking if it is a null pointer (nullptr).
+- You must provoke a render event every time you want to update the screen (for example, if you change the position of a robot). Updating the screen is not done automatically.
+- Plug-Ins are compiled as native libraries (DLL on Windows, SO on Linux, DYLIB on macOS) and are loaded directly into RoboDK.
 
-Timing tests
--------------
+## Timing tests
 
 The PluginExample project shows how to implement a basic plugin. Among other things it performs some timing tests to calculate the speed of RoboDK on a specific computer.
 
@@ -61,12 +57,11 @@ By selecting the "Plugin Speed Information" button you'll obtain the timing stat
 
 For example, forward and inverse kinematics are usually under 2 microseconds and 10 microseconds respectively (1 microsecond = 0.000001 seconds).
 
-Requirements
--------------
+## Requirements
 
 Each RoboDK Plug-In must be developed using the Qt Creator and follow Qt's project guidelines.
 
-For convenience in connecting the Plugin Interface to third-party projects, the `robodk_interface` folder contains a file with all dependencies. This file can be included using the `include` directive in the qmake project:
+For convenience in connecting the Plug-In Interface to third-party projects, the `robodk_interface` folder contains a file with all dependencies. This file can be included using the `include` directive in the qmake project:
 ```
 include($$PWD/../robodk_interface/robodk_interface.pri)
 ```
@@ -75,21 +70,19 @@ It is recommended to use the [PluginExample](./PluginExample/) project to get st
 
 RoboDK must be installed to develop Plug-Ins. The free version of RoboDK is enough to develop a Plug-In as a proof of concept.
 
-Installation Requirements
--------------
+## Installation Requirements
 
 Requirements to make RoboDK Plug-Ins work:
- * Install RoboDK (v3.5.4 or later): https://robodk.com/download
- * Make sure you compile your plugin using the correct compiler and version of Qt for the corresponding version of RoboDK:
+- Install RoboDK: https://robodk.com/download
+- Make sure you compile your plugin using the correct compiler and version of Qt for the corresponding version of RoboDK:
   - Qt version 5.15 on Windows (MSVC2019).
   - Qt version 6.10 on Mac (clang 64 bit). Before RoboDK 6.0: Qt 5.15.
   - Qt version 6.10 on Linux. Before RoboDK 6.0: Qt 5.12.
- * You can run in debug mode on Windows. Contact us for more information.
+- You can run in debug mode on Windows. Contact us for more information.
 
 ![RoboDK Plugin and Qt setup-example](qtrun.png)
 
-Deployment
-----------
+## Deployment
 
 Refer to the Add-in Manager documentation to deploy your Plug-in as an Add-in package (RDKP file):
 https://robodk.com/doc/en/Add-ins.html#AddinManager
@@ -97,29 +90,27 @@ https://robodk.com/doc/en/Add-ins.html#AddinManager
 You can contact us to submit your Add-in in the RoboDK Marketplace.
 
 You can find more information here:
- * How to use the Add-in Manager to create or pack an Add-in: https://robodk.com/doc/en/Add-ins.html#AddinCreator
- * How to submit your Add-in for publishing: https://robodk.com/doc/en/Add-ins.html#AddinSubmit
- * Add-in Marketplace: https://robodk.com/addins
+- How to use the Add-in Manager to create or pack an Add-in: https://robodk.com/doc/en/Add-ins.html#AddinCreator
+- How to submit your Add-in for publishing: https://robodk.com/doc/en/Add-ins.html#AddinSubmit
+- Add-in Marketplace: https://robodk.com/addins
 
-Qt Tips
--------------
+## Qt Tips
 
 A RoboDK Plug-In must be created using the Qt Plugin Framework (C++).
 
 This list provides some useful links and tips for programming with Qt:
- * Double click the .pro file to open the example project using Qt Creator.
- * Use Qt signal/slots mechanism for action/button callbacks (https://doc.qt.io/qt-5/signalsandslots.html). Signals and slots are thread safe.
- * Wrap your strings using tr("your string") or QObject::tr("your string") to allow translation using Qt Linguist. For more information: https://doc.qt.io/qt-5/qtlinguist-index.html.
- * If you experience strange build issues it may be useful to delete the build folder that is automatically created to force a new build.
- * If you experience strange plugin load issues in RoboDK it is recommended to delete the libraries and create the plugin library with a new build.
- * More information about Qt: https://www.qt.io/.
+- Double click the .pro file to open the example project using Qt Creator.
+- Use Qt signal/slots mechanism for action/button callbacks (https://doc.qt.io/qt-5/signalsandslots.html). Signals and slots are thread safe.
+- Wrap your strings using tr("your string") or QObject::tr("your string") to allow translation using Qt Linguist. For more information: https://doc.qt.io/qt-5/qtlinguist-index.html.
+- If you experience strange build issues it may be useful to delete the build folder that is automatically created to force a new build.
+- If you experience strange plugin load issues in RoboDK it is recommended to delete the libraries and create the plugin library with a new build.
+- More information about Qt: https://www.qt.io/.
 
-Useful Links
--------------
+## Useful Links
 
 Useful links involving the RoboDK API:
- * RoboDK Plug-In interface documentation reference: https://robodk.com/doc/en/PlugIns/index.html.
- * Standard RoboDK API Introduction: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
- * Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/index.html.
- * Latest RoboDK API on GitHub: https://github.com/RoboDK/RoboDK-API.
- * RoboDK API Introductory video: https://www.youtube.com/watch?v=3I6OK1Kd2Eo.
+- RoboDK Plug-In interface documentation reference: https://robodk.com/doc/en/PlugIns/index.html.
+- Standard RoboDK API Introduction: https://robodk.com/doc/en/RoboDK-API.html#RoboDKAPI.
+- Standard RoboDK API Reference (based on Python): https://robodk.com/doc/en/PythonAPI/index.html.
+- Latest RoboDK API on GitHub: https://github.com/RoboDK/RoboDK-API.
+- RoboDK API Introductory video: https://www.youtube.com/watch?v=3I6OK1Kd2Eo.

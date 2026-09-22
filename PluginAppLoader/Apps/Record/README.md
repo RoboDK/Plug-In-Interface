@@ -8,11 +8,6 @@ You can access all its features directly from the **Record** menu in the top men
 
 ![Menu](./docs/menu.png)
 
-- For more information about RoboDK Add-ins, visit the
-[documentation](https://robodk.com/doc/en/PythonAPI/app.html).
-- Submit bug reports and feature suggestions on our
-[GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
-
 ## Features
 
 - **Direct 3D Video Capture:** Record simulation motion cleanly, outputting only the 3D environment and the station tree.

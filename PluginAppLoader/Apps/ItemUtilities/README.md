@@ -6,11 +6,6 @@ You can access its features directly from the menu bar by navigating to **Utilit
 
 ![Utilities](./docs/utilities.png)
 
-- For more information about RoboDK Add-ins, visit the
-[documentation](https://robodk.com/doc/en/PythonAPI/app.html).
-- Submit bug reports and feature suggestions on our
-[GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
-
 ## Features
 
 - **Replace Object:** Swap an existing station object with a new 3D model while preserving its exact physical location.

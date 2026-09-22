@@ -11,6 +11,6 @@ Perform a time study by comparing performance with different robot speeds.
 ## Features
 
 - Generate cycle time estimates for multiple programs
-- Save cycle time estimates to .CSV files
+- Save cycle time estimates to .csv files
 
 ![Interface](./docs/interface.png)

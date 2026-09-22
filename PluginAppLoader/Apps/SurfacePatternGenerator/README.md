@@ -10,11 +10,6 @@ You can access its features directly from the menu by navigating to **Utilities 
 
 ![Icon](./docs/icon.png)
 
-- For more information about RoboDK Add-ins, visit the
-[documentation](https://robodk.com/doc/en/PythonAPI/app.html).
-- Submit bug reports and feature suggestions on our
-[GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
-
 ## Features
 
 - **Geometric Path Projection:** Casts customizable 2D grid patterns directly onto complex 3D curved surfaces.

@@ -2,11 +2,6 @@
 
 The Point Utilities Add-in for RoboDK adds tools to generate and edit point objects.
 
-- For more information about RoboDK Add-ins, visit the
-[documentation](https://robodk.com/doc/en/PythonAPI/app.html).
-- Submit bug reports and feature suggestions on our
-[GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
-
 ![Interface](./docs/interface.png)
 
 ## Features
