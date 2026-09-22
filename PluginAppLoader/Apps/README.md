@@ -1,8 +1,8 @@
 # Example Add-ins
 
-This folder contains ready-to-load example RoboDK Add-ins. Each subfolder is a self-contained Add-in that the AppLoader plugin (or the Add-in Manager) turns into a menu and a toolbar — see the [AppLoader plugin README](../README.md) for how the plugin itself works and how to load it.
+This folder contains ready-to-load example RoboDK Add-ins. Each subfolder is a self-contained Add-in that the App Loader plugin (or the Add-in Manager) turns into a menu and a toolbar — see the [App Loader plugin README](../README.md) for how the plugin itself works and how to load it. These Add-ins work as classic apps (.ini files), or as regular Add-ins for the Add-in Manager.
 
-**Note:** The AppLoader plugin is an open source version of the Add-in Manager. You should use the new Add-in Manager to load, create or edit existing Add-ins. You can still use the AppLoader plug-in to load classic (legacy) Add-ins: <https://robodk.com/doc/en/Add-ins.html#Addins>.
+**Note:** The App Loader plugin is an open source version of the Add-in Manager. You should use the new Add-in Manager to load, create or edit existing Add-ins. You can still use the App Loader plug-in to load classic (legacy) Add-ins: <https://robodk.com/doc/en/Add-ins.html#Addins>.
 
 ## Available examples
 
@@ -75,6 +75,8 @@ C:/RoboDK/
 │   │      Settings.py
 │   │      Settings.svg
 │   │
+│   ...
+│
 ├───bin
 ...
 

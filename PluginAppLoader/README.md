@@ -1,8 +1,8 @@
-# AppLoader Plug-In for RoboDK
-
-The AppLoader plugin was created to load classic Add-ins, and is the open source version of the Add-in Manager.
+# App Loader Plug-In for RoboDK
 
 This plugin allows integrating scripts as part of the RoboDK user interface and easily customize RoboDK for customized offline programming and simulation purposes.
+
+The App Loader plugin was created to load classic Add-ins, and is the open source version of the Add-in Manager included with RoboDK. This plugin provides an alternative lightweight option for development compared to the Add-in manager.
 
 Use the Add-in Manager to load, create or edit Add-ins: <https://robodk.com/doc/en/Add-ins.html#Addins>. AppLoader is kept in this repository as a real-world **example RoboDK Plug-In** — it is a good reference if you want to see a C++ plugin that builds its own dialogs, installs packages, and drives Python/executable scripts from the RoboDK UI.
 
@@ -10,7 +10,7 @@ If you are looking for documentation on how to *write or package a script-based 
 
 ## Loading the plugin
 
-The AppLoader plugin ships with RoboDK by default but is disabled by default:
+The App Loader plugin is included with RoboDK by default but is disabled:
 
 - Select Tools -> Plug-Ins
 - Select Load Plug-Ins
@@ -18,7 +18,7 @@ The AppLoader plugin ships with RoboDK by default but is disabled by default:
 
 ![Sample Apps Loaded](./doc/Apps-Loaded.png)
 
-Once loaded, it scans the `/RoboDK/Apps/` folder and turns every subfolder into a menu + toolbar (see [Apps/README.md](./Apps/README.md) for how those subfolders are structured).
+Once loaded, it scans the `/RoboDK/Apps/` folder and turns every subfolder into a menu + toolbar. See [Apps/README.md](./Apps/README.md) for how those subfolders are structured.
 
 ## About RoboDK Plug-Ins (C++ development)
 
@@ -43,6 +43,7 @@ Things to keep in mind when writing a plugin:
 | Windows  | 5.15      | MSVC2019 |
 | macOS    | 6.10 (>= RoboDK 6.0), 5.15 (older) | clang 64-bit |
 | Linux    | 6.10 (>= RoboDK 6.0), 5.12 (older) | GCC |
+
 
 Building and loading:
 
