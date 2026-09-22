@@ -164,7 +164,7 @@ RoboDK treats `.rdkp` files as packaged Add-ins — a zipped copy of one or more
 - `PackageCreateOne.py` packs a single Add-in folder instead.
 - `PackageExtract.py` unpacks an existing `.rdkp` package.
 
-Double-clicking an `.rdkp` file tells RoboDK to load the AppLoader plugin automatically and open the package.
+Double-clicking an `.rdkp` file tells RoboDK to load the App Loader plugin automatically and open the package.
 
 ![Create a package](../doc/PackageCreate.png)
 

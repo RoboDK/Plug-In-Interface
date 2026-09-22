@@ -2,9 +2,9 @@
 
 This plugin allows integrating scripts as part of the RoboDK user interface and easily customize RoboDK for customized offline programming and simulation purposes.
 
-The App Loader plugin was created to load classic Add-ins, and is the open source version of the Add-in Manager included with RoboDK. This plugin provides an alternative lightweight option for development compared to the Add-in manager.
+The App Loader plugin was created to load classic Add-ins, and is the open source version of the Add-in Manager included with RoboDK. This plugin provides an alternative lightweight option for development compared to the Add-in Manager.
 
-Use the Add-in Manager to load, create or edit Add-ins: <https://robodk.com/doc/en/Add-ins.html#Addins>. AppLoader is kept in this repository as a real-world **example RoboDK Plug-In** — it is a good reference if you want to see a C++ plugin that builds its own dialogs, installs packages, and drives Python/executable scripts from the RoboDK UI.
+Use the Add-in Manager to load, create or edit Add-ins: <https://robodk.com/doc/en/Add-ins.html#Addins>. App Loader is kept in this repository as a real-world **example RoboDK Plug-In** — it is a good reference if you want to see a C++ plugin that builds its own dialogs, installs packages, and drives Python/executable scripts from the RoboDK UI.
 
 If you are looking for documentation on how to *write or package a script-based Add-in* (the `.py`/`AppConfig.ini` side of things), see [Apps/README.md](./Apps/README.md) instead — that folder also contains ready-to-load example Add-ins.
 
@@ -44,17 +44,16 @@ Things to keep in mind when writing a plugin:
 | macOS    | 6.10 (>= RoboDK 6.0), 5.15 (older) | clang 64-bit |
 | Linux    | 6.10 (>= RoboDK 6.0), 5.12 (older) | GCC |
 
-
 Building and loading:
 
 - Projects use **qmake**, not CMake. Double click a `.pro` file to open it in Qt Creator, or build from the command line (see the top-level [README.md](../README.md)).
 - Compiled plugins are placed in `C:/RoboDK/bin/plugins/` (release, Windows) — see the top-level README for the debug/macOS/Linux paths.
 - Start RoboDK with `-PLUGINSLOAD` to load all available plugins, or `-PLUGINLOAD=<path-to-plugin>` to load one on the fly, instead of using Tools -> Plug-Ins every time.
-- To get started with a new plugin from scratch, copy [`PluginExample/`](../PluginExample/) rather than AppLoader — it is the minimal reference template.
+- To get started with a new plugin from scratch, copy [`PluginExample/`](../PluginExample/) rather than App Loader — it is the minimal reference template.
 
 ## This plugin's project (AppLoader.pro)
 
-AppLoader is a standard RoboDK plugin project (`TEMPLATE = lib`, `CONFIG += plugin`, `TARGET = AppLoader`) that includes [`robodk_interface.pri`](../robodk_interface/robodk_interface.pri) like any other plugin in this repository, plus `QT += widgets network` (per `AppLoader.pro`, to allow using `QTcpSocket`).
+App Loader is a standard RoboDK plugin project (`TEMPLATE = lib`, `CONFIG += plugin`, `TARGET = AppLoader`) that includes [`robodk_interface.pri`](../robodk_interface/robodk_interface.pri) like any other plugin in this repository, plus `QT += widgets network` (per `AppLoader.pro`, to allow using `QTcpSocket`).
 
 | File | Purpose |
 |------|---------|
