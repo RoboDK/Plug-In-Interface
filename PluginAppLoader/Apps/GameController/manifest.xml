@@ -17,7 +17,7 @@
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
-    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/GameController</documentation>
+    <documentation>https://robodk.com/doc/en/Addin-Game-Controller.html</documentation>
     <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/GameController</repository>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>

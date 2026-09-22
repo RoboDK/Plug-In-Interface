@@ -17,7 +17,7 @@
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
-    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/Record</documentation>
+    <documentation>https://robodk.com/doc/en/Addin-Record.html</documentation>
     <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/Record</repository>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>
@@ -40,5 +40,6 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/SetSize.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/Settings.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/Settings.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Record/docs/menu.png</asset>
   </assets>
 </packageManifest>

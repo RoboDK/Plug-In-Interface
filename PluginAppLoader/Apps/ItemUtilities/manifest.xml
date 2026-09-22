@@ -33,5 +33,6 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/ReplaceRobot.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/ScaleObject.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/SimplifyObject.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ItemUtilities/docs/utilities.png</asset>
   </assets>
 </packageManifest>
