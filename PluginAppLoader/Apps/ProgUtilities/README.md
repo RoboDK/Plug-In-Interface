@@ -2,11 +2,6 @@
 
 The Program Utilities Add-in for RoboDK adds tools to edit programs and program instructions.
 
-- For more information about RoboDK Add-ins, visit the
-[documentation](https://robodk.com/doc/en/PythonAPI/app.html).
-- Submit bug reports and feature suggestions on our
-[GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
-
 ## Features
 
 ### Convert MoveC to MoveL
