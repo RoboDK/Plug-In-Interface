@@ -28,10 +28,12 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/ccma.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/CurveEditor.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/CurveEditor.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/icon.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/LICENSE.md</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/README.md</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/requirements.txt</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/_cutools.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/docs/icon.png</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/docs/interface.png</asset>
   </assets>
 </packageManifest>
