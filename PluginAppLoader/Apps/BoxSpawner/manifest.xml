@@ -17,7 +17,7 @@
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
-    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/BoxSpawner</documentation>
+    <documentation>https://robodk.com/doc/en/Addin-Box-Spawner.html</documentation>
     <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/BoxSpawner</repository>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>
@@ -37,7 +37,7 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/SpawnBox.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/SpawnBox.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/__init__.py</asset>
-    <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/docs/icons.png</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/docs/interface.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/BoxSpawner/docs/utilities.png</asset>
   </assets>
 </packageManifest>

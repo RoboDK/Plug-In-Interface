@@ -6,7 +6,6 @@ calling the RoboDK API (`IRoboDK`/`IItem`) directly from C++ for maximum perform
 
 ![Speed benchmark docked window showing kinematics and collision timing results](benchmark-info.png)
 
-
 ## Features
 
 - **Plugin Speed Information** (`Ctrl+I`): runs a benchmark of the RoboDK API on the selected robot (Forward
@@ -29,7 +28,6 @@ calling the RoboDK API (`IRoboDK`/`IItem`) directly from C++ for maximum perform
    - **RoboDK Plugins - Help**: opens the RoboDK Plug-in documentation in your browser.
 3. Results are displayed as a table in a docked window and are also printed as an aligned plain-text table in
    the console/debug output, which is useful when there is no GUI available (see below).
-
 
 ## Files
 

@@ -1,18 +1,19 @@
 # OPC UA
 
 The OPC UA Plug-in for RoboDK allows you to add OPC UA compatibility to your RoboDK projects.
+
 This Plug-in can be used as an OPC UA server and/or an OPC UA client.
 
 The OPC UA (Open Platform Communications Unified Architecture) is a cross-platform, open-source, IEC62541 standard for data exchange from sensors to cloud applications developed by the OPC Foundation.
 
 OPC UA provides a platform independent service-oriented architecture that integrates all the functionality of the classic OPC into one extensible framework.
 
-Documentation about how to use the OPC-UA Add-in to integrate with a PLC:
+Documentation about how to use the OPC-UA Plug-in to integrate with a PLC:
 https://robodk.com/doc/en/OPC-UA.html
 
 ## Features
 
-- Add RoboDK as a OPC UA server and/or an OPC UA client
+- Add RoboDK as an OPC UA server and/or an OPC UA client
 - Retrieve or set station parameters and robot joints
 
 ## Usage
@@ -26,13 +27,13 @@ You should see a message in the status bar that shows the port the server is ava
 With the server running you should see the following OPC UA variables and functions exposed:
 
 - **RoboDK**: this tag means you are connected to RoboDK and provides the RoboDK version in the description as a string. Example: `RoboDK 64 bit v5.5.1.22569`
-- **SimulationSpeed** this tag provide the current simulation speed ratio. For example, a value of 5 means that RoboDK is simulating 5 times faster.
-- **StationParameter** this tag allows you to specify what station variable you want to get or set. Right click on a station and select **Station Variables** to see or edit station variables.
-- **StationValue** this tag allows you to see the value of the station parameter you chose with **StationParameter**. Changing this value will change the station value in RoboDK.
-- **getJointsStr** this function allows you to get the robot joint values of a robot as a string.
-- **setJointsStr** this function allows you to set the robot joint values of a robot as a string.
-- **getJoints** this function is the same as getJointsStr but retrieves the robot joint values as a list of doubles.
-- **setJoints** this function is the same as setJointsStr but sets the robot joint values as a list of doubles.
+- **SimulationSpeed**: this tag provides the current simulation speed ratio. For example, a value of 5 means that RoboDK is simulating 5 times faster.
+- **StationParameter**: this tag allows you to specify what station variable you want to get or set. Right click on a station and select **Station Variables** to see or edit station variables.
+- **StationValue**: this tag allows you to see the value of the station parameter you chose with **StationParameter**. Changing this value will change the station value in RoboDK.
+- **getJointsStr**: this function allows you to get the robot joint values of a robot as a string.
+- **setJointsStr**: this function allows you to set the robot joint values of a robot as a string.
+- **getJoints**: this function is the same as getJointsStr but retrieves the robot joint values as a list of doubles.
+- **setJoints**: this function is the same as setJointsStr but sets the robot joint values as a list of doubles.
 
 You can select **OPC UA-OPC UA Settings** to see additional communication settings, such as the server port, start or stop the server.
 

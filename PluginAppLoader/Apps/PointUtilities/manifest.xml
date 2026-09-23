@@ -17,7 +17,7 @@
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
-    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/PointUtilities</documentation>
+    <documentation>https://robodk.com/doc/en/Addin-Point-Utilities.html</documentation>
     <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/PointUtilities</repository>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>
@@ -36,5 +36,6 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/SortPoints.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/SurfaceInfo.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/_putools.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/PointUtilities/docs/interface.png</asset>
   </assets>
 </packageManifest>

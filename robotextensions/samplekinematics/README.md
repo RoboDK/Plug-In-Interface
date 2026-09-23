@@ -44,6 +44,6 @@ More information: [RoboDK Plug-In documentation — Link Custom Kinematics](http
 
 ## Real-world example: FANUC CRX kinematics
 
-For a production-grade example of this interface in use, see [frfournier/robodk_crx_kinematics](https://github.com/frfournier/robodk_crx_kinematics), a community project that implements custom kinematics for the FANUC CRX collaborative robot family (CRX-5iA, CRX-10iA, CRX-10iA-L, CRX-30iA). 
+For a production-grade example of this interface in use, see [frfournier/robodk_crx_kinematics](https://github.com/frfournier/robodk_crx_kinematics), a community project that implements custom kinematics for the FANUC CRX collaborative robot family (CRX-5iA, CRX-10iA, CRX-10iA-L, CRX-30iA).
 
 The FANUC CRX has a non-spherical wrist, which RoboDK's default generic/iterative solver cannot handle reliably — the project instead implements a closed-form geometric solver (based on published research by M. Abbes and G. Poisson) that reduces the 6-axis inverse kinematics problem to 1D root finding, enumerates valid postures, and verifies candidates via forward kinematics. It implements all four callbacks described above (`SolveFK`, `SolveFK_CAD`, `SolveIK`, `Joints2Config`), builds on the Eigen linear algebra library, and includes a Python-based regression test suite alongside pre-configured robot/station assets.

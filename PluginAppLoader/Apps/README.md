@@ -1,50 +1,45 @@
-AppLoader Plug-in for RoboDK
-===========================
+# Example Add-ins
 
-The App loader plug-in allows you to easily load scripts and executable files as if they were plug-ins in RoboDK software. 
-This plugin allows integrating scripts as part of the RoboDK user interface and easily customize RoboDK for customized offline programming and simulation purposes. 
-Adding scripts to an app will add buttons in the menu and the toolbar automatically. A settings file allows you to easily customize the appearance of a specific set of buttons/actions.
+This folder contains ready-to-load example RoboDK Add-ins. Each subfolder is a self-contained Add-in that the App Loader plugin (or the Add-in Manager) turns into a menu and a toolbar — see the [App Loader plugin README](../README.md) for how the plugin itself works and how to load it. These Add-ins work as classic apps (.ini files), or as regular Add-ins for the Add-in Manager.
 
-Once you complete developing your app you can easily distribute your app or set of apps as a package file.
+**Note:** The App Loader plugin is an open source version of the Add-in Manager. You should use the new Add-in Manager to load, create or edit existing Add-ins. You can still use the App Loader plug-in to load classic (legacy) Add-ins: <https://robodk.com/doc/en/Add-ins.html#Addins>.
 
-The AppLoader plugin is available in RoboDK by default. However, the plugin is disabled by default. 
-Follow these steps to load the AppLoader plugin:
-* Select Tools->Plug-Ins
-* Select Load Plug-Ins
-* Select AppLoader
- 
+## Available examples
+
+| Add-in | Description |
+|--------|-------------|
+| [AppTemplate](./AppTemplate/README.md) | Template with the necessary examples to build your own RoboDK App. Start here for a new Add-in. |
+| [BoxSpawner](./BoxSpawner) | Programmatically add box objects to your RoboDK station. |
+| [CurveUtilities](./CurveUtilities) | Tools to generate and edit curve objects. |
+| [CycleTime](./CycleTime) | Toolbox for cycle time estimation of robot programs. |
+| [GameController](./GameController) | Control your robot arm using a game controller. |
+| [ItemUtilities](./ItemUtilities) | Utility functions to manipulate Items, such as objects and robots. |
+| [ObjectDeleter](./ObjectDeleter) | Customizable zones that delete objects. |
+| [PointUtilities](./PointUtilities) | Tools to generate and edit point objects. |
+| [ProgUtilities](./ProgUtilities) | Tools to edit programs and program instructions. |
+| [Reachability](./Reachability) | Preview reachable tool poses from the current position. |
+| [Record](./Record) | Cinematic recording capabilities. |
+| [SetStyle](./SetStyle) | Quick appearance presets for curves, points and objects. |
+| [SettingsImportExport](./SettingsImportExport) | Export and import RoboDK settings as an INI file. |
+| [Snapshot](./Snapshot) | High resolution snapshot (print screen) capabilities. |
+| [Sound](./Sound) | Programmable sound effects and background music/noise. |
+| [SurfacePatternGenerator](./SurfacePatternGenerator) | Generate simple surface patterns on an object surface. |
+| [ViewManager](./ViewManager) | 3D view and interface presets. |
+| [ViewUtilities](./ViewUtilities) | Bulk visibility functions (visible/hidden). |
+
+For a detailed, documented example/template of a RoboDK Add-in, see [AppTemplate](./AppTemplate/README.md) — it is the best starting point for building your own.
+
+## Running an example
+
+- Select Tools -> Plug-Ins
+- Select Load Plug-Ins
+- Select AppLoader
+
 ![Sample Apps Loaded](../doc/Apps-Loaded.png)
- 
-Each App is a subfolder inside the /RoboDK/Apps/ folder. You can add or remove apps by adding or deleting folders. You can also add or remove scripts (Python files) inside each subfolder to add or remove actions/buttons. Scripts that start with an underscore (_) are ignored and can be used as shared modules.
 
-Each App will have its own entry in the main menu and its own toolbar. Each script inside an app will create a new button in the menu and a new button in the toolbar.
+Each Add-in gets its own entry in the main menu and its own toolbar, and each script inside an Add-in becomes a button in both. For example, the `Record` and `SetStyle` folders shown below produce two menus and two toolbars:
 
-You can also use Executable files (EXE files) instead of PY files.
-
-You can optionally provide INI files to customize integration (order of appearance, context menu option, toolbar, etc.). 
-If the INI file does not exist it will be automatically generated the first time a new folder inside Apps is found.
-
-This plugin is provided with RoboDK by default. You don't need to change it or rebuild it to create and distribute your Apps in RoboDK. This document provides general information about how apps work in RoboDK and how you can easily customize RoboDK for your specific simulation and offline programing needs using this plugin.
-
-You can find more information about RoboDK Add-ins here:
-* https://robodk.com/doc/en/Add-ins.html
-
-More information about the RoboDK API for Python here:
-* https://github.com/RoboDK/RoboDK-API/tree/master/Python
-* https://pypi.org/project/robodk/
-* https://robodk.com/doc/en/RoboDK-API.html#PythonAPI
-* https://robodk.com/doc/en/PythonAPI/index.html
-
-Example
-=======
-
-For a detailed example / template of a RoboDK App, see the [App Template](./AppTemplate/README.md).
-
-The following tree shows the sample tree structure inside the Apps folder. The sample apps provided are:
-* Recorder: Tools to record a video from your simulations.
-* Style: Tools to change the appearance of objects and tools (change the color and appearance of surfaces, points and curves). Among other things you can change the appearance of points if you use a large point cloud.
-
-``` bash
+```bash
 C:/RoboDK/
 │
 ├───Apps
@@ -80,42 +75,32 @@ C:/RoboDK/
 │   │      Settings.py
 │   │      Settings.svg
 │   │
+│   ...
+│
 ├───bin
 ...
 
 ```
 
-The sample tree structure will create 2 menus and 2 toolbars (one for each subfolder). Each each script file in a subfolder will show as a button (action).
-
 ![Sample Apps Menu](../doc/Apps-Menu.png)
 
+## Add-in format
 
-Package
-=======
+Each Add-in is a subfolder inside `/RoboDK/Apps/`. You can add or remove Add-ins by adding or deleting folders, and add or remove actions/buttons by adding or removing Python (or executable) scripts inside a folder. Scripts that start with an underscore (`_`) are ignored and can be used as shared modules.
 
-RoboDK software treats rdkp files as RoboDK packaged apps. These file consists on the Apps tree structure Zipped in one folder using the RDKP extension. 
+You can also use executable files (EXE) instead of PY files.
 
-Double clicking an rdkp file provokes RoboDK to load the AppLoader plugin automatically (for example: Package.rdkp). Furthermore, the full path of the file is passed to the apploader plugin (or the corresponding plugin) as an "OpenFile" command (PluginCommand) if the plugin name is added before the extension.
+### Icons
 
-The script PackageCreate.py will pack the contents in the Apps folder and save it as Package.apploader.rdkp automatically. This file is then ready to distribute.
+Having an image with the same name as the script will automatically load the image as the action's icon. Supported image types include SVG, PNG, JPG and ICO (in this order of preference).
 
-![Create a package](../doc/PackageCreate.png)
+### AppConfig.ini
 
-Icons
-=====
+An `AppConfig.ini` is auto-generated the first time a new Add-in folder is found (if one doesn't already exist). It customizes the priority of the Add-in, the size of the toolbar, and the size and look of each action.
 
-Having an image with the same name as the script will automatically load the image as the action. Supported image types include SVG, PNG, JPG and ICO (in this order of preference).
+The top `[General]` section controls the Add-in itself. For example, the Record Add-in's settings look like this:
 
-
-AppConfig.ini
-============
-
-Once a new app or script is loaded for the first time, an AppConfig.ini is created. 
-The AppConfig.ini file allows you to customize the priority of the App, the size of the toolbar and the size and look of each action. 
-
-The top section (General) of the INI file allows you to customize the look. For example, the Recorder general App settings look like this:
-
-```
+```ini
 [General]
 MenuName=Recorder   # Name displayed in the main menu
 MenuParent=         # Name of the parent menu, if not using the main menu. For instance, menu-Utilities, menu-Program, menu-Tools, etc.
@@ -127,50 +112,65 @@ ToolbarSizeRatio=2  # Size of the toolbar as a ratio with respect to the default
 RunCommands=        # String with commands to execute when the toolbar is loaded
 ```
 
-Each action will also have some settings to customize the appearance. For example, the Record action (script Record.py) looks like this:
+Each action also has its own section. For example, the Record action (`Record.py`) looks like this:
 
-```
+```ini
 [Record]
 DisplayName=Record                  # Name displayed in the app menu
 Description=Start/stop recording    # Description to display on hover
 Visible=true                        # Set to false to disable this action (not show it)
+DeveloperOnly=false                 # Set to true to make this action enabled in Developer Mode only
 Shortcut=                           # Set a keyboard shortcut to trigger this action, Ctrl+M for instance
 Checkable=true                      # Set to true if we want this to be checkable
 CheckableGroup=1                    # Set to a number greater than zero if you want to group this action with other actions having the same group index
+AddToMenu=true                      # Set to false to not show this action in the main menu
 AddToToolbar=true                   # Set to false to not show this action in the toolbar
 Priority=1                          # Set the priority within the same app (lower shows first)
 TypeOnContextMenu=                  # Set to an item type to display this action when right clicking on the item (same index as the ITEM_TYPE_* in the API). -1 means any type, and you can use commas to specify multiple items
 TypeOnDoubleClick=                  # Set to an item type to run this action when double clicking on the item (same index as the ITEM_TYPE_* in the API). -1 means any type, and you can use commas to specify multiple items
 ```
 
-AppLink.ini
-============
+### AppLink.ini
 
-You can optionally create an AppLink.ini file to link the app to another folder. You should set the path to the app folder Path variable. Note: single backslashes (\\) are treated as special character. For example, the contents of an AppLink.ini file should look like this:
+You can optionally create an `AppLink.ini` file to link an Add-in to another folder, by setting the path to the Add-in's folder in the `Path` variable. Note: single backslashes (`\`) are treated as a special character.
 
-``` bash
+```bash
 [General]
-Path="D:/GitHub/Record" 
+Path="D:/GitHub/Record"
 # or Path="D:\\GitHub\\Record"
 ```
 
-The AppConfig.ini file (or Settings.ini in older versions) has priority over the AppLink.ini file, so the AppLink.ini file is ignored if one of the first 2 ini files are found.
+`AppConfig.ini` (or `Settings.ini` in older versions) has priority over `AppLink.ini`, so `AppLink.ini` is ignored if either of the other two is found.
 
- 
-Checkable actions
-=================
+### Checkable actions
 
-When an action is checkable, the corresponding script will be executed when the action is checked and also when it is unchecked. 
+When an action is checkable, its script runs both when the action is checked and when it is unchecked:
 
-A checkable action also includes the additional behavior compared to non-checkable actions:
-* A station parameter with the corresponding script name (name of the script file) will be set to 1 or 0 if the action is checked or uncheck respectively.
-* The argument "Checked" or "Unchecked" will be passed as argument through the process.  
-* An icon can be provided for the checked state by adding the Checked keyword (as shown with the RecordChecked.svg example) 
+- A station parameter with the script's name is set to `1` or `0` depending on whether the action is checked or unchecked.
+- The argument `"Checked"` or `"Unchecked"` is passed to the script.
+- An icon for the checked state can be provided by adding the `Checked` keyword to the icon filename (as with `RecordChecked.svg`).
 
+### Importing Apps
 
-Importing Apps
-=================
+RoboDK automatically adds each Add-in's directory to the `PYTHONPATH` environment variable when running Python scripts, so you can import and reuse an Add-in's code from other scripts. Add an empty `__init__.py` file to the Add-in folder to enable this.
 
-RoboDK will automatically add your App's directories to the environnement variable `PYTHONPATH` when executing python scripts, allowing you to import and reuse Apps in your own scripts. Simply add a `__init__.py` file in you App folder (this file can be left empty).
+If you are developing or debugging in your own IDE, you may need to manually add the Add-in's directory to your system's `PYTHONPATH` — the system environment variable takes precedence over RoboDK's.
 
-If you are developing or debugging in your IDE, you might want to manually add your App's directories to the system environnement variable `PYTHONPATH`. The system environnement variable will precede on RoboDK's.
+## Packaging an example
+
+RoboDK treats `.rdkp` files as packaged Add-ins — a zipped copy of one or more Add-in folders.
+
+- `PackageCreate.py` packs every Add-in in this `Apps/` folder into a single `Package.apploader.rdkp`, ready to distribute.
+- `PackageCreateOne.py` packs a single Add-in folder instead.
+- `PackageExtract.py` unpacks an existing `.rdkp` package.
+
+Double-clicking an `.rdkp` file tells RoboDK to load the App Loader plugin automatically and open the package.
+
+![Create a package](../doc/PackageCreate.png)
+
+## More information
+
+- [RoboDK API for Python on GitHub](https://github.com/RoboDK/RoboDK-API/tree/master/Python)
+- [robodk on PyPI](https://pypi.org/project/robodk/)
+- [RoboDK API introduction](https://robodk.com/doc/en/RoboDK-API.html#PythonAPI)
+- [RoboDK Python API reference](https://robodk.com/doc/en/PythonAPI/index.html)

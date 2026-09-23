@@ -24,5 +24,6 @@
   </extraProperties>
   <assets>
     <asset cpu="any" system="any">/PluginExample.dll</asset>
+    <asset cpu="any" system="any">/README.md</asset>
   </assets>
 </packageManifest>

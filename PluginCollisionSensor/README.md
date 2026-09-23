@@ -1,7 +1,8 @@
 # Collision Sensor
 
-The Collision Sensor Plug-in for RoboDK adds the ability to simulate sensors, such as a laser sensors or contact switches.
-It uses collision detection between a sensor and its environnement to update a station parameter (simulated digital input).
+The Collision Sensor Plug-in for RoboDK adds the ability to simulate sensors, such as laser sensors or contact switches.
+
+It uses collision detection between a sensor and its environment to update a station parameter (simulated digital input).
 
 ## Features
 

@@ -72,6 +72,14 @@ def MainAction(RDK=None, S=None):
     if robot_dof_ext > 0:
         RDK.ShowMessage('Robot has synchronized axis. Only reachable poses can be shown.')
 
+    # Cache initial robot configuration if config locking is enabled
+    initial_config = None
+    if S.LOCK_CONFIG:
+        try:
+            initial_config = robot.JointsConfig(robot_joints)
+        except Exception:
+            initial_config = None
+
     # Iterate through all pose combinations and collect all valid poses
     reachable_poses = []
     unreachable_poses = []
@@ -85,9 +93,32 @@ def MainAction(RDK=None, S=None):
 
                             pose_add = robomath.transl(tx, ty, tz) * robomath.rotx(rx * robomath.pi / 180) * robomath.roty(ry * robomath.pi / 180) * robomath.rotz(rz * robomath.pi / 180)
                             pose_test = robot_pose_ref * pose_add
-                            jnts_sol = robot.SolveIK(pose_test, robot_joints, robot_tool, robot_base)
 
-                            if len(jnts_sol.list()) != robot_dof + robot_dof_ext:
+                            is_reachable = False
+
+                            if S.USE_MOVEL_TEST:
+                                # MoveL_Test returns 0 if the linear movement is feasible
+                                issues = robot.MoveL_Test(robot_joints, pose_test)
+                                if issues == 0:
+                                    if S.LOCK_CONFIG and initial_config is not None:
+                                        # Verify destination pose maintains the configuration
+                                        jnts_dest = robot.SolveIK(pose_test, robot_joints, robot_tool, robot_base)
+                                        if len(jnts_dest.list()) == (robot_dof + robot_dof_ext):
+                                            dest_config = robot.JointsConfig(jnts_dest)
+                                            is_reachable = (dest_config.list() == initial_config.list())
+                                    else:
+                                        is_reachable = True
+                            else:
+                                # Standard inverse kinematics check
+                                jnts_sol = robot.SolveIK(pose_test, robot_joints, robot_tool, robot_base)
+                                if len(jnts_sol.list()) == (robot_dof + robot_dof_ext):
+                                    if S.LOCK_CONFIG and initial_config is not None:
+                                        dest_config = robot.JointsConfig(jnts_sol)
+                                        is_reachable = (dest_config.list() == initial_config.list())
+                                    else:
+                                        is_reachable = True
+
+                            if not is_reachable:
                                 print(msg + " -> Not reachable")
                                 unreachable_poses.append(pose_test)
                             else:

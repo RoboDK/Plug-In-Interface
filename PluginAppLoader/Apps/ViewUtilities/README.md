@@ -1,11 +1,6 @@
 # View Utilities
 
-The View Utilities App for RoboDK provide bulk visibility functions (visible/hidden) to RoboDK.
-
-- For more information about RoboDK Apps, visit the
-[documentation](https://robodk.com/doc/en/PythonAPI/app.html).
-- Submit bug reports and feature suggestions on our
-[GitHub](https://github.com/RoboDK/Plug-In-Interface/issues).
+The View Utilities Add-in for RoboDK provides bulk visibility functions (visible/hidden) to RoboDK.
 
 ## Features
 

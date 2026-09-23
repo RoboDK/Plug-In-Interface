@@ -63,6 +63,13 @@ class Settings(roboapps.AppSettings):
         self.RANGE_RY = (-120, 180, 60)
         self.RANGE_RZ = (-90, 90, 0)
 
+        # --------------------------------------------
+        self._FIELDS_UI['SECTION_KINEMATICS'] = "$Reachability Method$"
+        self._FIELDS_UI['USE_MOVEL_TEST'] = 'Check linear path with MoveL_Test'
+        self._FIELDS_UI['LOCK_CONFIG'] = 'Lock robot configuration'
+        self.USE_MOVEL_TEST = False
+        self.LOCK_CONFIG = False
+
 
 def runmain():
     """

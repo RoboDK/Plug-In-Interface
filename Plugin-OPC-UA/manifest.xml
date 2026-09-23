@@ -17,7 +17,7 @@
   </cp:coreProperties>
   <extraProperties>
     <website>https://robodk.com/</website>
-    <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/Plugin-OPC-UA</documentation>
+    <documentation>https://robodk.com/doc/en/OPC-UA.html</documentation>
     <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/Plugin-OPC-UA</repository>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>

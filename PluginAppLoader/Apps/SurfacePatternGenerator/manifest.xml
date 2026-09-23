@@ -32,5 +32,7 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/SurfacePatternGenerator/SurfacePatternGenerator.png</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/SurfacePatternGenerator/SurfacePatternGenerator.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/SurfacePatternGenerator/_spgtools.py</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SurfacePatternGenerator/docs/icon.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/SurfacePatternGenerator/docs/interface.png</asset>
   </assets>
 </packageManifest>

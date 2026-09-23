@@ -1,7 +1,8 @@
 # Sound
 
-The Sound App for RoboDK adds programmable sound effects and background music/noise to RoboDK stations.
-You can use this App to create immersive VR stations.
+The Sound Add-in for RoboDK adds programmable sound effects and background music/noise to RoboDK stations.
+
+You can use this Add-in to create immersive VR stations.
 
 ## Features
 

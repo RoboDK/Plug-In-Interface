@@ -4,7 +4,7 @@ The Lock TCP Plug-in for RoboDK adds the ability to lock the TCP position for a 
 
 ## Features
 
-- Lock the the robot's tool position so that the TCP absolute position is kept
+- Lock the robot's tool position so that the TCP absolute position is kept
 - Reject out-of-reach positions
 - Change the lock state through the API
 
@@ -16,7 +16,7 @@ This example adds a "Lock TCP" checkable menu item when right-clicking a tool.
 
 ### Behaviour
 
-Locking the TCP will allow the external axis to move the robot base while keeping the tool position. New pose in limit cases, such as new joints configuration or robot fully extended, will be rejected.
+Locking the TCP will allow the external axis to move the robot base while keeping the tool position. New poses in limit cases, such as a new joint configuration or a fully extended robot, will be rejected.
 
 |  Original lock position              | Moved back position                  |
 | ------------------------------------ | ------------------------------------ |
