@@ -1,7 +1,9 @@
 # --------------------------------------------
 # --------------- DESCRIPTION ----------------
 #
-# Import an SVG file as a curve(s) or point(s) object.
+# Shared utilities of the Curve Utilities App: curve/point file I/O (CSV, SVG, DXF),
+# program to curve conversion, transformations and filters.
+# Sharable module, ignored by the AppLoader when prefixed with '_'.
 #
 # More information about the RoboDK API for Python here:
 #     https://robodk.com/doc/en/RoboDK-API.html
@@ -15,6 +17,24 @@
 from robodk import robolink, robomath, roboapps, robodialogs
 
 import os
+import re
+import sys
+import math
+from pathlib import Path
+from collections import OrderedDict
+
+DXF_DEFAULT_RESOLUTION = 0.01  # Default flattening distance [mm] when discretizing DXF entities
+
+
+def _to_number(val_str):
+    """Convert a CSV cell to an int or a float when possible, otherwise return the string as-is."""
+    try:
+        val = float(val_str)
+        if int(val) == val:
+            return int(val)
+        return val
+    except ValueError:
+        return val_str
 
 
 def save_curves(curves, file_path=None):
@@ -52,20 +72,10 @@ def load_curves(file_path=None):
     with open(file_path, 'r') as f:
         curves_str = f.readlines()
 
-    def to_pod(val_str):
-        try:
-            val = float(val_str)
-            if int(val) == val:
-                return int(val)
-            return val
-        except ValueError as e:
-            pass
-        return val_str
-
     curves = []
     ic = 0
     for ip, point_str in enumerate(curves_str):
-        point = [to_pod(x.strip()) for x in point_str.split(',')]
+        point = [_to_number(x.strip()) for x in point_str.split(',')]
 
         x, y, z, i, j, k = point[:6]
         if len(point) > 6:
@@ -114,19 +124,9 @@ def load_points(file_path=None):
     with open(file_path, 'r') as f:
         curves_str = f.readlines()
 
-    def to_pod(val_str):
-        try:
-            val = float(val_str)
-            if int(val) == val:
-                return int(val)
-            return val
-        except ValueError as e:
-            pass
-        return val_str
-
     points = []
     for ip, point_str in enumerate(curves_str):
-        point = [to_pod(x.strip()) for x in point_str.split(',')]
+        point = [_to_number(x.strip()) for x in point_str.split(',')]
 
         x, y, z, i, j, k = point[:6]
         points.append([x, y, z, i, j, k])
@@ -172,7 +172,7 @@ def load_svg(file_path=None):
             "Keep segments smaller that the step size": True,
         }
 
-        outputs = robodialogs.InputDialog("Project points on the object's surface, and recalculate position and normal accordingly.", inputs, 'Project Points')
+        outputs = robodialogs.InputDialog("Scale the SVG to fit the specified size and discretize its paths using the step size.", inputs, 'Import SVG')
         if outputs is None:
             # User cancelled
             return None
@@ -191,7 +191,7 @@ def load_svg(file_path=None):
     TRANSLATE = complex((width - svg_width) / 2 - svg_width_min, (height - svg_height) / 2 - svg_height_min)
 
     #-------------------------------------------
-    print(f"Importing {file_path}..", False)
+    print(f"Importing {file_path}..")
 
     curves = []
     for path_count, (path, attrib) in enumerate(zip(paths, path_attribs)):
@@ -214,7 +214,7 @@ def load_svg(file_path=None):
         if 'stroke' in styles and not styles['stroke'].startswith('#'):
             styles.pop('stroke')
 
-        print(f"Importing path {attrib['id'] if 'id' in attrib else path_count}", False)
+        print(f"Importing path {attrib['id'] if 'id' in attrib else path_count}")
 
         for segment in path.scaled(SCALE).translated(TRANSLATE):
             points = []
@@ -224,10 +224,10 @@ def load_svg(file_path=None):
                 if not SVG_KEEP_SMALLER_STEP:
                     continue
                 elif segment_len < 1e-3:
-                    print(f'Segment is too small, skipping ({segment_len:.6f}).', False)
+                    print(f'Segment is too small, skipping ({segment_len:.6f}).')
                     continue
                 else:
-                    print(f'Recovering small segment ({segment_len:.6f}).', False)
+                    print(f'Recovering small segment ({segment_len:.6f}).')
                     steps = 1
 
             for i in range(steps + 1):
@@ -248,7 +248,7 @@ def load_svg(file_path=None):
     return curves
 
 
-def LoadDXF(file_path=None, merge_continuous_segments=True, resolution=0.01, orient_closed_curves=False, create_machining_project=False):
+def load_dxf(file_path=None, merge_continuous_segments=True, resolution=DXF_DEFAULT_RESOLUTION, orient_closed_curves=False, create_machining_project=False):
     # Please also maintain:
     # - RoboDK-API/Python/Scripts/Import_DXF.py
     # - Apps-Private/Public/ImportDXF
@@ -272,18 +272,10 @@ def LoadDXF(file_path=None, merge_continuous_segments=True, resolution=0.01, ori
     :rtype: robolink.Item or None
     """
 
-    from robodk import robolink, robomath, robodialogs
-
-    from collections import OrderedDict
-    import sys
-    from pathlib import Path
-
     robolink.import_install('ezdxf')  # >= 1.4.1
-
     import ezdxf
-    from ezdxf import recover, path
+    from ezdxf import path
     from ezdxf.math import Matrix44
-    import math
 
     def insert_transform(ins):
         """
@@ -297,7 +289,6 @@ def LoadDXF(file_path=None, merge_continuous_segments=True, resolution=0.01, ori
         :return: Transformation matrix (excluding translation).
         :rtype: ezdxf.math.Matrix44
         """
-        location = ins.dxf.insert
         rotation = ins.dxf.rotation
         xscale = getattr(ins.dxf, 'xscale', 1.0)
         yscale = getattr(ins.dxf, 'yscale', 1.0)
@@ -328,11 +319,8 @@ def LoadDXF(file_path=None, merge_continuous_segments=True, resolution=0.01, ori
 
         for entity in layout_or_block:
             dxftype = entity.dxftype()
-            print(dxftype)
 
             if dxftype == 'INSERT':
-                print(f"INSERT {entity.dxf.name} at {entity.dxf.insert}, rotation {entity.dxf.rotation}")
-
                 block_name = entity.dxf.name
                 if block_name not in entity.doc.blocks:
                     return []
@@ -515,18 +503,19 @@ def LoadDXF(file_path=None, merge_continuous_segments=True, resolution=0.01, ori
     if not file_path or not Path(file_path).is_file():
         file_path = robodialogs.getOpenFileName(defaultextension='.dxf', filetypes=[('DXF files', '.DXF .dxf')])
 
-    if not file_path or not Path(file_path).is_file():
-        print("Invalid file:")
-        print(file_path)
-        RDK.ShowMessage("Could not open the provided DXF file.\n"
-                        "Please check the file path and try again.")
+    RDK = robolink.Robolink()
+
+    if not file_path:
+        return None  # User cancelled
+
+    if not Path(file_path).is_file():
+        RDK.ShowMessage("Could not open the provided DXF file:\n" + str(file_path) + "\nPlease check the file path and try again.")
         return None
 
-    RDK = robolink.Robolink()
     RDK.ShowMessage("Loading DXF file: " + file_path, False)
 
     if resolution is None:
-        resolution = robodialogs.InputDialog("Specify the segment resolution", DEFAULT_RESOLUTION + 1e-10)
+        resolution = robodialogs.InputDialog("Specify the segment resolution [mm]", DXF_DEFAULT_RESOLUTION, 'Import DXF')
         if resolution is None:
             RDK.ShowMessage("Operation cancelled")
             return None
@@ -558,7 +547,7 @@ def LoadDXF(file_path=None, merge_continuous_segments=True, resolution=0.01, ori
     objects = []
     base_name = Path(file_path).stem
     for layer, curves in layer_objects.items():
-        layer_objects = []
+        layer_items = []
 
         if merge_continuous_segments:
             curves = merge_connected_curves(curves)
@@ -569,12 +558,12 @@ def LoadDXF(file_path=None, merge_continuous_segments=True, resolution=0.01, ori
         # Import in RoboDK
         for curve in curves:
             if len(curve) == 1:
-                layer_objects.append(RDK.AddPoints(curve))
+                layer_items.append(RDK.AddPoints(curve))
             else:
-                layer_objects.append(RDK.AddCurve(curve))
-            layer_objects[-1].setVisible(False)
-            layer_objects[-1].setVisible(True)  # Force toggle from Object to Curve Object
-        dxf = RDK.MergeItems(layer_objects)
+                layer_items.append(RDK.AddCurve(curve))
+            layer_items[-1].setVisible(False)
+            layer_items[-1].setVisible(True)  # Force toggle from Object to Curve Object
+        dxf = RDK.MergeItems(layer_items)
         dxf.setName(base_name + " - " + layer)
         dxf.setVisible(False)  # Force toggle from Object to Curve Object
         dxf.setVisible(True)
@@ -589,16 +578,18 @@ def LoadDXF(file_path=None, merge_continuous_segments=True, resolution=0.01, ori
             dxf = RDK.MergeItems(objects)
             dxf.setName(base_name)
             RDK.Render(True)
+            objects = [dxf]
 
     RDK.ShowMessage("Done loading: " + file_path, False)
 
     if create_machining_project:
         RDK.Render(False)
-        cfp = RDK.AddMachiningProject(dxf.Name())
-        cfp.setMachiningParameters(part=dxf, params="ReorderAuto=0")
+        for dxf_object in objects:
+            cfp = RDK.AddMachiningProject(dxf_object.Name())
+            cfp.setMachiningParameters(part=dxf_object, params="ReorderAuto=0")
         RDK.Render(True)
 
-    return dxf
+    return objects[0]
 
 
 def load_program(RDK=None, progs=None):
@@ -606,26 +597,31 @@ def load_program(RDK=None, progs=None):
     Convert RoboDK program(s) to curve(s).
     """
 
-    def inst_pose(inst: str) -> robomath.Mat:
-        from robodk.robomath import transl
-        import math
+    def inst_pose(inst):
+        """
+        Parse the pose string of an instruction, i.e. 'transl(x,y,z)*rotx(a)*roty(b)*rotz(c)' (mm and degrees).
+        Returns None if the string is not a supported pose expression.
+        """
+        operations = {
+            'transl': lambda v: robomath.transl(*v),
+            'rotx': lambda v: robomath.rotx(math.radians(v[0])),
+            'roty': lambda v: robomath.roty(math.radians(v[0])),
+            'rotz': lambda v: robomath.rotz(math.radians(v[0])),
+        }
 
-        def rotx(deg):
-            from robodk.robomath import rotx as rotx_rad
-            return rotx_rad(math.radians(deg))
+        pose = robomath.eye(4)
+        found = False
+        for name, args in re.findall(r'(\w+)\(([^)]*)\)', str(inst)):
+            if name not in operations:
+                return None
+            try:
+                values = [float(x) for x in args.split(',') if x.strip()]
+                pose = pose * operations[name](values)
+            except (TypeError, ValueError):
+                return None
+            found = True
 
-        def roty(deg):
-            from robodk.robomath import roty as roty_rad
-            return roty_rad(math.radians(deg))
-
-        def rotz(deg):
-            from robodk.robomath import rotz as rotz_rad
-            return rotz_rad(math.radians(deg))
-
-        try:
-            return eval(inst)
-        except:
-            return None
+        return pose if found else None
 
     def get_item_from_inst_ptr(inst_ptr, RDK):
         """Get an item from an instruction pointer, typically a TargetPtr, FramePtr, ToolPtr, etc."""
@@ -651,7 +647,6 @@ def load_program(RDK=None, progs=None):
         if not progs:
             return None
 
-    RDK.Render(False)
     curves = []
     for prog_item in progs:
 
@@ -662,15 +657,20 @@ def load_program(RDK=None, progs=None):
 
             if inst_dict['Type'] == robolink.INS_TYPE_CHANGEFRAME:
                 frame_item = get_item_from_inst_ptr(inst_dict['FramePtr'], RDK)
-                if not frame_item:
-                    pose_frame = inst_pose(inst_dict['Pose'])
-                else:
+                if frame_item:
                     pose_frame = frame_item.PoseAbs()
+                else:
+                    pose_frame = inst_pose(inst_dict.get('Pose', ''))
+                    if pose_frame is None:
+                        pose_frame = robomath.eye(4)
 
             if inst_dict['Type'] != robolink.INS_TYPE_MOVE:
                 continue
 
-            pose = inst_pose(inst_dict['Pose'])
+            pose = inst_pose(inst_dict.get('Pose', ''))
+            if pose is None:
+                continue  # Joint target or unsupported pose format
+
             pose_abs = pose_frame * pose
 
             xyz = pose_abs.Pos()
@@ -1045,7 +1045,9 @@ def get_start_point(object_item, show_message=''):
             point_mouse, _ = object_item.GetPoints(robolink.FEATURE_SURFACE)
             if not point_mouse:
                 continue
-            curve, _ = get_curve(object_item, feature_id)
+            curve = get_curve(object_item, feature_id)
+            if not curve:
+                continue
             xyzijk = closest_point(curve, point_mouse[0][:6])
             print('Selection error: %.3f mm' % robomath.distance(xyzijk[:3], point_mouse[0][:3]))
 
@@ -1099,8 +1101,8 @@ def offset_curve_ijk(curve, offset_distance):
     for idx in range(len(curve)):
         # Current point
         x, y, z = curve[idx][:3]
-        i, j, k, = [0, 0, 1]
-        if len(curve[i]) >= 6:
+        i, j, k = [0, 0, 1]
+        if len(curve[idx]) >= 6:
             i, j, k = curve[idx][3:6]
 
         # Calculate the new point offset
@@ -1130,8 +1132,8 @@ def offset_curve_sideways(curve, offset_distance):
     for idx in range(len(curve)):
         # Current point
         x, y, z = curve[idx][:3]
-        i, j, k, = [0, 0, 1]
-        if len(curve[i]) >= 6:
+        i, j, k = [0, 0, 1]
+        if len(curve[idx]) >= 6:
             i, j, k = curve[idx][3:6]
 
         # If it's the last point, use the last valid direction
@@ -1167,13 +1169,8 @@ def offset_curve_sideways(curve, offset_distance):
     return offset_curve
 
 
-def runmain():
+if __name__ == '__main__':
     """
-    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
-    Important: Use the function name 'runmain()' if you want to compile this action.
+    There is no need for an entrypoint for sharable modules, as they are not expected to be run standalone.
     """
     pass
-
-
-if __name__ == '__main__':
-    runmain()

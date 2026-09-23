@@ -1,32 +1,46 @@
 
 # --------------------------------------------
-# Imports
+# --------------- DESCRIPTION ----------------
+#
+# Curve Editor: a graphical editor for the curves and points of a RoboDK object.
+# Select an object in the RoboDK tree to load its curves and points in the editor,
+# then edit, transform, filter, import or export them.
+#
+# More information about the RoboDK API for Python here:
+#     https://robodk.com/doc/en/RoboDK-API.html
+#     https://robodk.com/doc/en/PythonAPI/index.html
+#
+# More information on RoboDK Apps here:
+#     https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader
+#
 # --------------------------------------------
+
 from robodk import robolink, robomath, roboapps, robodialogs
 
 robolink.import_install('PySide2')
 from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2 import QtWidgets, QtCore, QtGui
 from PySide2.QtCore import Qt, QMimeData
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QApplication
 
-import _cutools as cutools
-
-import os
-import typing
-from pathlib import Path
-import math
+robolink.import_install('numpy')
 import numpy as np
-import sys
 
-from enum import Enum, Flag, auto
+import _cutools as cutools
+import ccma
+
+import colorsys
+import math
+import sys
+import typing
+from enum import Enum, auto
+from pathlib import Path
 
 # --------------------------------------------
 # Globals
 # --------------------------------------------
 
-DEBUG_LEVEL = 1
+DEBUG_LEVEL = 0  # Set to 1 to print debug information in the console
 DEBUG_SHOW_TEMP_ITEMS = False
 
 ENABLE_CURVE_PREVIEW_ARROWS = False  # TODO This crashes RoboDK when there is a lot of curves
@@ -46,10 +60,9 @@ CURVE_POINT_SIZE = 2
 # display
 CURVE_LINE_SIZE = 1
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent  # Folder of this App, used to locate resources such as icons
 if Path(__file__).suffix != ".py":
-    ROOT = ROOT.parent
-os.chdir(ROOT)  # the .ui use relative path to the working directly
+    ROOT = ROOT.parent  # Compiled Apps (.pyc) are located in a subfolder
 
 # --------------------------------------------
 # Utility functions
@@ -70,7 +83,7 @@ def calculate_curve_length(curve_points):  # TODO: Add travel length as a statis
     return length
 
 
-def Draw_Wire_Arrows(wire, invert, ratio_spacing, size_curve_arrow):
+def draw_wire_arrows(wire, invert, ratio_spacing, size_curve_arrow):
     # This function was ported from RoboDK 'as-is'
 
     arrows = []  # list of (point, vector)
@@ -136,17 +149,16 @@ def arrow_mesh():
     ])
 
 
-# TODO
 def curve_to_arrows(wire, invert, ratio_spacing, size_curve_arrow):
-    arrows = Draw_Wire_Arrows(wire, invert, ratio_spacing, size_curve_arrow)  # [(xyz, ijk), (xyz, ijk)..]
+    arrows = draw_wire_arrows(wire, invert, ratio_spacing, size_curve_arrow)  # [(xyz, ijk), (xyz, ijk)..]
     return [xyz + ijk for (xyz, ijk) in arrows]  # [xyzijk, xyzijk..]
 
 
 # --------------------------------------------
 # Clipboard
 # --------------------------------------------
-# This function was ported from RoboDK 'as-is'
-GLOBAL_MAX_DECIMALS_XYZ = 6  # Example global value
+# The pose string format matches the format RoboDK uses when copying a pose to the clipboard
+GLOBAL_MAX_DECIMALS_XYZ = 6  # Number of decimals used when copying a pose to the clipboard
 
 
 def copy_string_to_clipboard(string):
@@ -339,8 +351,8 @@ def object_has_mesh(object_item):
     return True
 
 
-def MatMultiplyRow(m, s):
-    """Multiply coordinate Y by dist to create the scale along Y"""
+def scale_mesh(m, s):
+    """Scale a mesh (3xN matrix of XYZ columns) uniformly by a factor"""
     new_m = m.copy()
     new_m.rows[0] = [e * s for e in new_m.rows[0]]
     new_m.rows[1] = [e * s for e in new_m.rows[1]]
@@ -348,11 +360,9 @@ def MatMultiplyRow(m, s):
     return new_m
 
 
-def MatMoveRef(pose, m):
-    """Multiple a Mesh (3xN) of by a pose"""
-    #sz1 = len(m.rows)
+def transform_mesh(pose, m):
+    """Transform a mesh (3xN matrix of XYZ columns) by a pose"""
     sz2 = len(m.rows[0])
-    #new_m = robomath.Mat(sz1, sz2)
     new_m = m.copy()
     for c in range(sz2):
 
@@ -411,7 +421,6 @@ def base1toQColor(color):
 
 def get_distinct_color(index, total_indices):
     """Get a repeatable distinctive color out of N distinct colors"""
-    import colorsys
     if total_indices <= 0:
         raise ValueError("Total indices must be greater than 0")
 
@@ -459,7 +468,7 @@ def create_spinbox(parent=None, data_type=""):
     if col in COLORS.keys():
         palette = editor.palette()
         palette.setColor(QtGui.QPalette.Base, COLORS[col])
-        palette.setColor(QtGui.QPalette.Text, QtGui.QColor(0, 0, 0))  # TODO assuming black is better
+        palette.setColor(QtGui.QPalette.Text, QtGui.QColor(0, 0, 0))  # Dark text stays readable on the light backgrounds above
         editor.setPalette(palette)
 
     if col in ["i", "j", "k"]:
@@ -638,7 +647,7 @@ class RoboDKManager(metaclass=Singleton):
             self.RDK.Render(False)
 
         item.setParam('Reset', 'Curves')  # Note: There is no way to reset a single point using an index, we need to overwrite all the points!
-        for i, curve in enumerate(curves):
+        for curve in curves:
             cutools.add_curve(item, curve, add_to_ref=True, projection_type=robolink.PROJECTION_NONE)
 
         if render_status:
@@ -678,13 +687,13 @@ class RoboDKManager(metaclass=Singleton):
             item.setColorCurve(color, i)
 
             if self._enable_curve_arrows_previews:
-                wire_arrows = Draw_Wire_Arrows(curve, False, 0, ARROW_SIZE)  # TODO SizeCurveArrow
+                wire_arrows = draw_wire_arrows(curve, False, 0, ARROW_SIZE)  # TODO SizeCurveArrow
                 for arrow in wire_arrows:
                     xyz, axis = arrow[0], arrow[1]
                     pose = robomath.point_Zaxis_2_pose(xyz, axis)
                     mesh = arrow_mesh()
-                    mesh = MatMultiplyRow(mesh, ARROW_SIZE / 10)
-                    mesh = MatMoveRef(pose, mesh)
+                    mesh = scale_mesh(mesh, ARROW_SIZE / 10)
+                    mesh = transform_mesh(pose, mesh)
                     shape.append(mesh)
                     shape.append(COLOR_ARROW)
 
@@ -927,11 +936,6 @@ class CurveSelectionModel(QtCore.QItemSelectionModel):
                 for i in range(self.model().rowCount(parent)):
                     curve_points.remove(parent.child(i, 0))
 
-        # Remove duplicates
-        # curves = list(dict.fromkeys(curves))
-        # curve_points = list(dict.fromkeys(curve_points))
-        # points = list(dict.fromkeys(points))
-
         return curves, curve_points, points
 
     def selectedExpanded(self):
@@ -943,28 +947,12 @@ class CurveSelectionModel(QtCore.QItemSelectionModel):
         """
         curves, curve_points, points = self.selectedUnique()
 
-        # curves = []
-        # curve_points = []
-        # points = []
-        # for r in self.selectedRows():
-        #     if self.is_curve_index(r):
-        #         curves.append(r)
-        #     elif self.is_curve_point_index(r):
-        #         curve_points.append(r)
-        #     elif self.is_point_index(r):
-        #         points.append(r)
-
         # Expand curves
         for c in list(curves):
             for i in range(self.model().rowCount(c)):
                 cp = c.child(i, 0)
                 if cp not in curve_points:
                     curve_points.append(cp)  # TODO: Keep original order
-
-        # Remove duplicates
-        # curves = list(dict.fromkeys(curves))
-        # curve_points = list(dict.fromkeys(curve_points))
-        # points = list(dict.fromkeys(points))
 
         return curves, curve_points, points
 
@@ -1067,6 +1055,25 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
     def selectAllPoints(self):
         self.selectionModel().selectAllPoints()
+
+    def selectedCurvesOrAll(self):
+        """Selected curve indexes (unique), or all the curves when nothing is selected."""
+        curves, _, _ = self.selectionModel().selectedUnique()
+        if not curves:
+            curves = self.model().curveIndexes()
+        return curves
+
+    def selectedPointsOrAll(self):
+        """
+        Selected curve points (expanded) and standalone points, or all of them when nothing is selected.
+
+        :return: [curve_points, points]
+        """
+        _, curve_points, points = self.selectionModel().selectedExpanded()
+        if not curve_points and not points:
+            curve_points = [ip for ic in self.model().curveIndexes() for ip in self.model().curvePointIndexes(ic)]
+            points = self.model().pointIndexes()
+        return curve_points, points
 
     def copySelection(self):
         """
@@ -1289,16 +1296,14 @@ class CurvesTreeView(QtWidgets.QTreeView):
         return success
 
     def reverseCurve(self):
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
 
         self.model().blockSignals(True)
         for index in selected_curves:
             curve = self.model().getCurveData(index)
-            curve_parsed = reversed(curve)
+            curve_parsed = curve[::-1]
             if curve == curve_parsed:
                 continue
 
@@ -1308,9 +1313,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         self.model().on_data_changed()
 
     def mergeCurves(self):
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves or len(selected_curves) < 2:
             return
 
@@ -1341,9 +1344,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         """
         Split selected curves into standalone points, deleting the original curves.
         """
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
 
@@ -1388,9 +1389,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         self.model().addCurve(curve)
 
     def filterRemoveDuplicates(self):
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
 
@@ -1432,9 +1431,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         self.model().on_data_changed()
 
     def filterProjectPoints(self):
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
 
@@ -1512,9 +1509,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
     def filterOffsetPoints(self):
         """Add a fixed offset to a curve along the IJK vectors"""
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
 
@@ -1528,7 +1523,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
             return
 
         if not offset:
-            return False
+            return
 
         self.model().blockSignals(True)
         for index in selected_curves:
@@ -1545,16 +1540,14 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
     def filterOffsetPointsIJK(self):
         """Offsets a curve along the IJK vectors."""
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
 
         # Open dialog
-        offset = robodialogs.InputDialog("Offset [mm]", 10)
-        if not offset:
-            return False
+        offset = robodialogs.InputDialog("Offset [mm]", 10.0, 'Offset Along Normal')
+        if offset is None:
+            return  # User cancelled
 
         self.model().blockSignals(True)
         for index in selected_curves:
@@ -1571,9 +1564,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
     def filterOffsetPointsSideways(self):
         """Offsets a curve sideways based on the cross product of direction and IJK vectors."""
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
 
@@ -1582,9 +1573,9 @@ class CurvesTreeView(QtWidgets.QTreeView):
             return
 
         # Open dialog
-        offset = robodialogs.InputDialog("Side Offset [mm]", 10)
-        if not offset:
-            return False
+        offset = robodialogs.InputDialog("Side Offset [mm]", 10.0, 'Offset Tangent')
+        if offset is None:
+            return  # User cancelled
 
         self.model().blockSignals(True)
         for index in selected_curves:
@@ -1600,10 +1591,8 @@ class CurvesTreeView(QtWidgets.QTreeView):
         self.model().on_data_changed()
 
     def filterFlipIJK(self):
-        _, selected_curve_points, selected_points = self.selectionModel().selectedExpanded()
-        if len(selected_curve_points) + len(selected_points) == 0:
-            selected_curve_points, selected_points = [ip for ic in self.model().curveIndexes() for ip in self.model().curvePointIndexes(ic)], self.model().pointIndexes()
-        if len(selected_curve_points) + len(selected_points) == 0:
+        selected_curve_points, selected_points = self.selectedPointsOrAll()
+        if not selected_curve_points and not selected_points:
             return
 
         self.model().blockSignals(True)
@@ -1614,10 +1603,8 @@ class CurvesTreeView(QtWidgets.QTreeView):
         self.model().on_data_changed()
 
     def filterBulkEditPoints(self):
-        _, selected_curve_points, selected_points = self.selectionModel().selectedExpanded()
-        if len(selected_curve_points) + len(selected_points) == 0:
-            selected_curve_points, selected_points = [ip for ic in self.model().curveIndexes() for ip in self.model().curvePointIndexes(ic)], self.model().pointIndexes()
-        if len(selected_curve_points) + len(selected_points) == 0:
+        selected_curve_points, selected_points = self.selectedPointsOrAll()
+        if not selected_curve_points and not selected_points:
             return
 
         # Open dialog
@@ -1643,10 +1630,8 @@ class CurvesTreeView(QtWidgets.QTreeView):
             self.model().on_data_changed()
 
     def filterSetNormals(self):
-        _, selected_curve_points, selected_points = self.selectionModel().selectedExpanded()
-        if len(selected_curve_points) + len(selected_points) == 0:
-            selected_curve_points, selected_points = [ip for ic in self.model().curveIndexes() for ip in self.model().curvePointIndexes(ic)], self.model().pointIndexes()
-        if len(selected_curve_points) + len(selected_points) == 0:
+        selected_curve_points, selected_points = self.selectedPointsOrAll()
+        if not selected_curve_points and not selected_points:
             return
 
         # Open dialog to ask for angles
@@ -1664,7 +1649,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
         phi = outputs["Phi (0-180) [Tilt/Elevation]"]
         theta = outputs["Theta (0-360) [Azimuth/Bearing]"]
-        
+
         # Clamp phi to its valid range
         phi = max(0, min(180, phi))
 
@@ -1684,10 +1669,8 @@ class CurvesTreeView(QtWidgets.QTreeView):
         self.model().on_data_changed()
 
     def filterSetNormalsRelative(self):
-        _, selected_curve_points, selected_points = self.selectionModel().selectedExpanded()
-        if len(selected_curve_points) + len(selected_points) == 0:
-            selected_curve_points, selected_points = [ip for ic in self.model().curveIndexes() for ip in self.model().curvePointIndexes(ic)], self.model().pointIndexes()
-        if len(selected_curve_points) + len(selected_points) == 0:
+        selected_curve_points, selected_points = self.selectedPointsOrAll()
+        if not selected_curve_points and not selected_points:
             return
 
         # Open dialog
@@ -1713,20 +1696,20 @@ class CurvesTreeView(QtWidgets.QTreeView):
         self.model().blockSignals(True)
         for index in selected_curve_points + selected_points:
             x, y, z, old_i, old_j, old_k = self.model().getPointData(index)  # Get existing XYZ and IJK
-            
+
             # Convert current IJK to polar angles
             old_phi, old_theta = normal_vector_2_polar([old_i, old_j, old_k])
-            
+
             # Apply the relative delta
             new_phi = old_phi + delta_phi
             new_theta = old_theta + delta_theta
-            
+
             # Clamp Phi to its [0, 180] degree range
             new_phi = max(0, min(180, new_phi))
-            
+
             # Wrap Theta to its [0, 360] degree range
             new_theta = new_theta % 360
-            
+
             # Convert new angles back to a normalized IJK vector
             try:
                 new_ijk = normal_polar_2_vector(new_phi, new_theta)
@@ -1734,15 +1717,13 @@ class CurvesTreeView(QtWidgets.QTreeView):
                 new_ijk = [0.0, 0.0, 1.0] # Fallback
 
             self.model().editPointData(index, [x, y, z, new_ijk[0], new_ijk[1], new_ijk[2]])  # Set new IJK
-            
+
         self.model().blockSignals(False)
         self.model().on_data_changed()
 
     def filterSetNormalsTangent(self):
-        _, selected_curve_points, selected_points = self.selectionModel().selectedExpanded()
-        if len(selected_curve_points) + len(selected_points) == 0:
-            selected_curve_points, selected_points = [ip for ic in self.model().curveIndexes() for ip in self.model().curvePointIndexes(ic)], self.model().pointIndexes()
-        if len(selected_curve_points) + len(selected_points) == 0:
+        selected_curve_points, selected_points = self.selectedPointsOrAll()
+        if not selected_curve_points and not selected_points:
             return
 
         # Open dialog
@@ -1830,31 +1811,27 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
         self.model().blockSignals(False)
         self.model().on_data_changed()
-    
+
     def filterAverageNormals(self):
-        _, selected_curve_points, selected_points = self.selectionModel().selectedExpanded()
-        if len(selected_curve_points) + len(selected_points) == 0:
-            selected_curve_points, selected_points = [ip for ic in self.model().curveIndexes() for ip in self.model().curvePointIndexes(ic)], self.model().pointIndexes()
-        if len(selected_curve_points) + len(selected_points) == 0:
+        selected_curve_points, selected_points = self.selectedPointsOrAll()
+        if not selected_curve_points and not selected_points:
             return
 
         # Open dialog
-        filter_size_str = robodialogs.mbox(
+        filter_size = robodialogs.InputDialog(
             "Enter the filter size (the number of points/normals used for the average filter).\n" +
             "For example, a size of 10 will average each point with 5 neighbors on each side.",
-            entry="10"
+            10,
+            'Average Normals',
         )
-        if not filter_size_str:
+        if filter_size is None:
             return  # User cancelled
-        
-        try:
-            filter_size = int(filter_size_str)
-            if filter_size <= 0:
-                raise ValueError
-        except ValueError:
+
+        filter_size = int(filter_size)
+        if filter_size <= 0:
             robodialogs.ShowMessage("Invalid filter size. Please enter a positive number.")
             return
-            
+
         self.model().blockSignals(True)
 
         # Group points by their parent curve to efficiently get curve data
@@ -1864,7 +1841,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
             if parent_index not in points_by_parent:
                 points_by_parent[parent_index] = []
             points_by_parent[parent_index].append(point_index)
-        
+
         # Process one curve at a time
         for parent_index, point_indices in points_by_parent.items():
             curve = self.model().getCurveData(parent_index)
@@ -1874,7 +1851,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
             # We create a new list so that the averaging calculations all use the original, non-averaged normals.
             new_curve_points = curve.copy()
-            
+
             # Create a set of rows for quick lookup
             selected_rows = set(p.row() for p in point_indices)
 
@@ -1882,24 +1859,24 @@ class CurvesTreeView(QtWidgets.QTreeView):
                 # Calculate the window for averaging
                 id_avg_from = round(max(0, idx - 0.5 * filter_size))
                 id_avg_to = round(min(curve_len - 1, idx + 0.5 * filter_size))
-                
+
                 sum_normals = [0, 0, 0]
 
                 # Sum all normals within the window
                 for j in range(id_avg_from, id_avg_to + 1):
                     # Use the original curve data for the calculation
-                    n_j = curve[j][3:6] 
+                    n_j = curve[j][3:6]
                     sum_normals = robomath.add3(sum_normals, n_j)
-                
+
                 try:
                     # Normalize the sum
                     avg_normal = robomath.normalize3(sum_normals)
                 except Exception:
                     avg_normal = [0, 0, 1] # Fallback
-                
+
                 # Get the original XYZ
                 x, y, z = curve[idx][:3]
-                
+
                 # Store the new point in our new_curve_points list
                 new_curve_points[idx] = [x, y, z, avg_normal[0], avg_normal[1], avg_normal[2]]
 
@@ -1914,7 +1891,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         parent_curves = set(selected_curves)
         for cp in selected_curve_points:
             parent_curves.add(cp.parent())
-        
+
         curves_to_process = list(parent_curves)
 
         if not curves_to_process:
@@ -1931,7 +1908,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
             return  # User cancelled or invalid value
 
         self.model().blockSignals(True)
-        
+
         for index in curves_to_process:
             curve = self.model().getCurveData(index)
             if not curve or len(curve) < 2:
@@ -1999,7 +1976,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
         self.model().blockSignals(False)
         self.model().on_data_changed()
-    
+
     def filterResampleByFactor(self):
         """
         Curve Filter
@@ -2031,7 +2008,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
                 return
         except (TypeError, ValueError):
             return # User cancelled or invalid input
-            
+
         self.model().blockSignals(True)
 
         for index in curves_to_process:
@@ -2047,7 +2024,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
                 xyz_start = p_start[:3]
                 ijk_start = p_start[3:6] if len(p_start) >= 6 else [0, 0, 1]
-                
+
                 xyz_end = p_end[:3]
                 ijk_end = p_end[3:6] if len(p_end) >= 6 else [0, 0, 1]
 
@@ -2086,17 +2063,14 @@ class CurvesTreeView(QtWidgets.QTreeView):
     def filterCCMASmoothing(self):
         """
         Curve Filter
-        
+
         CCMA smoothing filter for 2D/3D paths.
         Smooths the path while correcting inwards bending using the CCMA algorithm.
-        """   
-        import ccma   
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        """
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
-        
+
         # Dialog to get CCMA parameters
         inputs = {
             "MA Window Width (w_ma)": 5,
@@ -2116,32 +2090,29 @@ class CurvesTreeView(QtWidgets.QTreeView):
         j = outputs["Boundary Mode"][0]
         mode = outputs["Boundary Mode"][1][j]
 
-        print(f"DEBUG: Kernel Type received: '{distrib}' (Length: {len(distrib)})")
-        print(f"DEBUG: Boundary Mode received: '{mode}' (Length: {len(mode)})")
-
         # Initialize the filter
-        ccma_var = ccma.CCMA(w_ma=w_ma, w_cc=w_cc, distrib=distrib)
+        ccma_filter = ccma.CCMA(w_ma=w_ma, w_cc=w_cc, distrib=distrib)
         self.model().blockSignals(True)
         for index in selected_curves:
             # 1. Get current curve data as a list of [x, y, z, i, j, k]
             curve_data = self.model().getCurveData(index)
             if len(curve_data) < (w_ma + w_cc + 1) * 2:
                 continue
-            
+
             # 2. Extract XYZ for smoothing (CCMA operates on coordinates)
             points_np = np.array([p[:3] for p in curve_data])
             normals_np = np.array([p[3:6] for p in curve_data])
-        
+
             # 3. Apply Filter
-            smoothed_xyz = ccma_var.filter(points_np, mode=mode, cc_mode=True)
+            smoothed_xyz = ccma_filter.filter(points_np, mode=mode, cc_mode=True)
             smoothed_normals = []
             for i in range(len(normals_np)):
                 start = max(0, i - w_ma)
                 end = min(len(normals_np), i + w_ma + 1)
                 avg_n = np.mean(normals_np[start:end], axis=0)
                 smoothed_normals.append(robomath.normalize3(avg_n.tolist()))
-        
-            # 4. Reconstruct points. 
+
+            # 4. Reconstruct points.
             # Note: If CCMA changes the number of points (mode='none'), we use dummy normals.
             # If mode='padding' or 'fill_boundary', length is preserved.
             new_curve = []
@@ -2159,50 +2130,50 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
         self.model().blockSignals(False)
         self.model().on_data_changed()
-    
-    def filterBSplineSmoothing(self):
-        from scipy.interpolate import splprep, splev
-        
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
 
-        s_factor = robodialogs.InputDialog("Smoothing Factor: Higher is smoother but less accurate.", 500.0)
-        if s_factor is None:
+    def filterBSplineSmoothing(self):
+        """
+        Curve Filter
+
+        Smooth curves by fitting a cubic B-Spline (scipy).
+        The normals are smoothed with the same spline parametrization when they vary along the curve.
+        """
+        selected_curves = self.selectedCurvesOrAll()
+        if not selected_curves:
             return
+
+        robolink.import_install('scipy')
+        from scipy.interpolate import splprep, splev
+
+        s_factor = robodialogs.InputDialog("Smoothing Factor: Higher is smoother but less accurate.", 500.0, 'B-Spline Smoothing')
+        if s_factor is None:
+            return  # User cancelled
 
         self.model().blockSignals(True)
         for index in selected_curves:
             curve_data = self.model().getCurveData(index)
             if len(curve_data) < 5:
-                continue
-        
-            pts = np.array(curve_data)
-            x, y, z = pts[:, 0], pts[:, 1], pts[:, 2]
-            i_comp, j_comp, k_comp = pts[:, 3], pts[:, 4], pts[:, 5]
-            ijk = np.column_stack((i_comp, j_comp, k_comp))
+                continue  # Not enough points for a cubic spline
 
-            tckp, u = splprep([x, y, z], s=s_factor, k=3)
-            new_xyz = splev(u, tckp)
+            pts = np.array(curve_data, dtype=float)
+            xyz = pts[:, 0:3]
+            ijk = pts[:, 3:6]
 
+            tck_xyz, u = splprep([xyz[:, 0], xyz[:, 1], xyz[:, 2]], s=s_factor, k=3)
+            new_xyz = np.array(splev(u, tck_xyz)).T  # N x 3
+
+            new_ijk = ijk
             if np.sum(np.std(ijk, axis=0)) > 1e-6:
-                # TODO: Albert comment: I get this error
-                # ValueError: Invalid inputs.
-                # The data needs to be sorted?
-                tckn, un = splprep([i_comp, j_comp, k_comp], s=s_factor, k=3)
-                new_ijk_raw = splev(u, tckn)
-                for idx in range(len(new_ijk_raw[0])):
-                    norm = [new_ijk_raw[0][idx], new_ijk_raw[1][idx], new_ijk_raw[2][idx]]
-            
-            else:
-                for idx in range(len(ijk[0])):
-                    norm = [ijk[0][idx], ijk[1][idx], ijk[2][idx]]
+                try:
+                    # Reuse the XYZ parametrization: splprep fails to build its own when subsequent normals are identical
+                    tck_ijk, _ = splprep([ijk[:, 0], ijk[:, 1], ijk[:, 2]], u=u, s=s_factor, k=3)
+                    new_ijk = np.array(splev(u, tck_ijk)).T
+                except ValueError:
+                    pass  # Keep the original normals
 
             smoothed_curve = []
-            for idx in range(len(new_xyz[0])):
-                pos = [new_xyz[0][idx], new_xyz[1][idx], new_xyz[2][idx]]
-                norm = robomath.normalize3(norm)
-                smoothed_curve.append(pos + norm)
+            for pos, normal in zip(new_xyz.tolist(), new_ijk.tolist()):
+                smoothed_curve.append(pos + robomath.normalize3(normal))
 
             self.model().editCurveData(index, smoothed_curve)
 
@@ -2217,9 +2188,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         The normal of subsequent points must be equal to count as a line, unless specified otherwise.
         The first and last point will never be altered.
         """
-        selected_curves, _, _ = self.selectionModel().selectedUnique()
-        if not selected_curves:
-            selected_curves = self.model().curveIndexes()
+        selected_curves = self.selectedCurvesOrAll()
         if not selected_curves:
             return
 
@@ -2256,7 +2225,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
             if curve == filtered_curve:
                 continue
 
-            self.model().editCurveData(curve_index, curve)
+            self.model().editCurveData(curve_index, filtered_curve)
 
         self.model().blockSignals(False)
         self.model().on_data_changed()
@@ -2407,7 +2376,9 @@ class CurvesTreeView(QtWidgets.QTreeView):
         if settings is None:
             return
 
-        curves = [self.model().getCurveData(ci) for ci in selected_curves] + [self.model().getPointData(pi) for pi in selected_curve_points + selected_points]
+        # Standalone points and curve points are converted as one-point curves
+        curves = [self.model().getCurveData(ci) for ci in selected_curves]
+        curves += [[self.model().getPointData(pi)] for pi in selected_curve_points + selected_points]
 
         [invert] = list(settings.values())
 
@@ -2434,7 +2405,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
             return
 
         selected_item = self.model().object_item(allow_new=True)  # Get or create a new container object of the curves
-        for i, curve in enumerate(curves):
+        for curve in curves:
             cutools.add_curve(selected_item, curve, add_to_ref=True, projection_type=robolink.PROJECTION_NONE)
 
     def loadCSVCurves(self):
@@ -2443,7 +2414,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
             return
 
         selected_item = self.model().object_item(allow_new=True)  # Get or create a new container object of the curves
-        for i, curve in enumerate(curves):
+        for curve in curves:
             cutools.add_curve(selected_item, curve, add_to_ref=True, projection_type=robolink.PROJECTION_NONE)
 
     def loadCSVPoints(self):
@@ -2455,7 +2426,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         cutools.add_points(selected_item, points, add_to_ref=True, projection_type=robolink.PROJECTION_NONE)
 
     def loadDXF(self):
-        cutools.LoadDXF()
+        cutools.load_dxf()
 
     def loadProgram(self):
         curves = cutools.load_program()
@@ -2463,7 +2434,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
             return
 
         selected_item = self.model().object_item(allow_new=True)  # Get or create a new container object of the curves
-        for i, curve in enumerate(curves):
+        for curve in curves:
             cutools.add_curve(selected_item, curve, add_to_ref=True, projection_type=robolink.PROJECTION_NONE)
 
 
@@ -2484,6 +2455,7 @@ class QCurvesItemModel(QtGui.QStandardItemModel):
 
         self.selected_item = None
         self.original_curves = []
+        self.original_points = []
 
         self.RDK = RDK
 
@@ -2499,11 +2471,13 @@ class QCurvesItemModel(QtGui.QStandardItemModel):
     def on_rows_changed(self, *args, **kwargs):
         self.on_data_changed(roles=[Qt.EditRole])
 
-    def on_data_changed(self, top_left=-1, bottom_right=-1, roles=[Qt.EditRole]):
+    def on_data_changed(self, top_left=-1, bottom_right=-1, roles=None):
         if self.signalsBlocked():
             return
 
-        if not roles or Qt.EditRole not in roles:
+        if roles is None:
+            roles = [Qt.EditRole]
+        if Qt.EditRole not in roles:
             return
 
         if DEBUG_LEVEL:
@@ -2532,7 +2506,7 @@ class QCurvesItemModel(QtGui.QStandardItemModel):
             return QCurvesItemModel.DataTypes.CURVE
         elif self.is_curve_point_index(index):
             return QCurvesItemModel.DataTypes.CURVE_POINT
-        raise
+        raise ValueError('Invalid model index: not a curve, a curve point or a point')
 
     def curveCount(self):
         return len(self.curveIndexes())
@@ -2872,7 +2846,7 @@ class QCurvesItemModel(QtGui.QStandardItemModel):
 
         curve_node = QtGui.QStandardItem('Curve')
         curve_node.setEditable(False)
-        for ip, point in enumerate(curve):
+        for point in curve:
             point_row = self.create_point_row(point)
             curve_node.appendRow(point_row)
 
@@ -2917,10 +2891,10 @@ class QCurvesItemModel(QtGui.QStandardItemModel):
 
         self.removeRows(0, self.rowCount())  # dont use self.clear()
 
-        for ic, curve in enumerate(curves):
+        for curve in curves:
             self.addCurve(curve, skip_validate=True)
 
-        for ip, point in enumerate(points):
+        for point in points:
             self.addPoint(point)
 
         self.blockSignals(blocked)
@@ -3082,16 +3056,16 @@ class CurveEditor(QtWidgets.QMainWindow):
                 if cmd in ['SizeRatioCurves', 'SizeCurvePoints', 'SizeNormals', 'SizeCurveArrow']:
                     self._app_settings[cmd] = max(self._user_settings[cmd], value)
                     value = self._app_settings[cmd]
-            except:
-                pass
-            print(self.RDK.Command(cmd, value))
+            except (TypeError, ValueError):
+                pass  # Older versions of RoboDK do not support this command
+            self.RDK.Command(cmd, value)
         self.RDK.Render(True)
 
         global ARROW_SIZE
         try:
             ARROW_SIZE = float(self.RDK.Command('SizeCurveArrow'))  # Added in RoboDK v5.7.1
-        except:
-            pass
+        except (TypeError, ValueError):
+            pass  # Older versions of RoboDK do not support this command
 
         self.initUI()
 
@@ -3102,7 +3076,7 @@ class CurveEditor(QtWidgets.QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("Curve Editor")
-        self.setWindowIcon(QtGui.QIcon("CurveEditor.svg"))
+        self.setWindowIcon(QtGui.QIcon(str(ROOT / "CurveEditor.svg")))
         self.setWindowFlag(Qt.WindowStaysOnTopHint)
 
         centralWidget = QtWidgets.QWidget(self)
@@ -3366,8 +3340,9 @@ class CurveEditor(QtWidgets.QMainWindow):
         self.selection_thread.requestInterruption()
         self.selection_thread.wait(500)
 
+        # Restore the user's display settings
         for cmd, value in self._user_settings.items():
-            print(self.RDK.Command(cmd, value))
+            self.RDK.Command(cmd, value)
 
         super().closeEvent(event)
 
@@ -3397,7 +3372,7 @@ class SelectionThread(QtCore.QThread):
             # Force clear selection if we change the active station
             if active_station != RDK.ActiveStation():
                 if DEBUG_LEVEL:
-                    print(f'Selection: Active station changed!')
+                    print('Selection: Active station changed!')
                 active_station = RDK.ActiveStation()
                 selected_items_prev = []
                 self.selection_changed.emit([])
@@ -3477,9 +3452,16 @@ class BulkEditDialog(QtWidgets.QDialog):
             ]
 
 
-if __name__ == '__main__':
-
+def runmain():
+    """
+    Entrypoint of this action when it is executed on its own or interacted with in RoboDK.
+    Important: Use the function name 'runmain()' if you want to compile this action.
+    """
     app = roboapps.get_qt_app()
-    ex = CurveEditor()
-    ex.show()
+    editor = CurveEditor()
+    editor.show()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    runmain()

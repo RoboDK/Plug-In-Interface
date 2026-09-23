@@ -18,17 +18,19 @@ You can open the curve editor by going to **Utilities - Curve Utilities - Open C
 
 **Point and Curve Management**
 
-- Operations: Add, remove, and edit points; set point normals using polar coordinates; duplicate curves - and points quickly.
+- Operations: Add, remove, and edit points; set point normals using polar coordinates; duplicate curves and points quickly.
 - Curve Conversion: Convert curves to singular points and vice versa; convert robot programs to curves.
-- Reordering and Orientation: Reorder curves and points, reverse the order of curves, and flip normals/- orientation vectors.
-- Merge and Split: Merge curve segments into a single curve or split discontinuous curves into separate - objects.
+- Reordering and Orientation: Reorder curves and points, reverse the order of curves, and flip normals/orientation vectors.
+- Merge and Split: Merge curve segments into a single curve or split discontinuous curves into separate objects.
 - Surface Projection: Project curve points onto any object surface and recalculate normals.
-- Simplification and Sorting: Automatically simplify curves, remove duplicate points, sort curves for - continuous paths, and remove points along straight lines.
+- Smoothing: Smooth curves with the CCMA or B-Spline filters, resample curves with a fixed step or by a factor.
+- Simplification and Sorting: Automatically simplify curves, remove duplicate points, sort curves for continuous paths, and remove points along straight lines.
 - Dynamic Offsets: Apply relative, normal, and tangent offsets dynamically.
 - Bulk Editing: Edit multiple points simultaneously for efficiency.
 
 **Import/Export Functionality**
 
-- CSV and SVG Files: Import and export curves and points from CSV files; import curves from SVG (.svg) files for added versatility.
+- CSV, SVG and DXF Files: Import and export curves and points from CSV files; import curves from SVG (.svg) and DXF (.dxf) files.
+- Programs: Convert robot programs to curves, and curves or points to robot targets.
 
 **Note:** Curve colors are not supported and will be lost.
