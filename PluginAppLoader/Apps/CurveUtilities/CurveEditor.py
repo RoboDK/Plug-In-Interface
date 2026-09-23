@@ -1924,7 +1924,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         # Open dialog
         step_mm = robodialogs.InputDialog(
             "Enter the desired step size (mm) between points.\n" +
-            "New points will be added to the curve.",
+            "The curve will be rebuilt with uniform spacing.",
             5.0  # Default to 5mm
         )
         if step_mm is None or step_mm <= 1e-3:
@@ -1937,59 +1937,62 @@ class CurvesTreeView(QtWidgets.QTreeView):
             if not curve or len(curve) < 2:
                 continue  # Need at least 2 points to resample
 
-            resampled_curve = []
-            
+            # 1. Compute cumulative arc-length distances for each original vertex
+            cum_dists = [0.0]
             for i in range(len(curve) - 1):
-                # Get start and end point of the segment
-                p_start = curve[i]
-                p_end = curve[i+1]
-                
+                d = robomath.distance(curve[i][:3], curve[i + 1][:3])
+                cum_dists.append(cum_dists[-1] + d)
+
+            total_length = cum_dists[-1]
+            if total_length < 1e-4:
+                continue
+
+            # 2. Resample along the cumulative distance at exact step intervals
+            resampled_curve = []
+            current_target_dist = 0.0
+            seg_idx = 0
+
+            while current_target_dist <= total_length:
+                # Advance to the segment containing current_target_dist
+                while seg_idx < len(curve) - 2 and cum_dists[seg_idx + 1] < current_target_dist:
+                    seg_idx += 1
+
+                p_start = curve[seg_idx]
+                p_end = curve[seg_idx + 1]
+                d_start = cum_dists[seg_idx]
+                d_end = cum_dists[seg_idx + 1]
+                seg_len = d_end - d_start
+
+                if seg_len < 1e-6:
+                    ratio = 0.0
+                else:
+                    ratio = (current_target_dist - d_start) / seg_len
+
+                # Position interpolation
                 xyz_start = p_start[:3]
                 xyz_end = p_end[:3]
-                
-                # Default normals if not present
+                dir_vec = robomath.subs3(xyz_end, xyz_start)
+                new_xyz = robomath.add3(xyz_start, robomath.mult3(dir_vec, ratio))
+
+                # Normal vector (IJK) interpolation
                 ijk_start = p_start[3:6] if len(p_start) >= 6 else [0, 0, 1]
                 ijk_end = p_end[3:6] if len(p_end) >= 6 else [0, 0, 1]
+                norm_vec = robomath.subs3(ijk_end, ijk_start)
+                interp_ijk = robomath.add3(ijk_start, robomath.mult3(norm_vec, ratio))
+                new_ijk = robomath.normalize3(interp_ijk)
 
-                # Add the first point of the segment
-                resampled_curve.append(p_start)
+                resampled_curve.append(new_xyz + new_ijk)
+                current_target_dist += step_mm
 
-                segment_length = robomath.distance(xyz_start, xyz_end)
-                if segment_length <= step_mm:
-                    # Segment is shorter than or equal to the step size.
-                    # No new points needed, just continue.
-                    # The end point (p_end) will be added as the p_start of the next loop.
-                    continue
-                
-                # Calculate how many new points to add
-                num_steps = int(math.floor(segment_length / step_mm))
-                
-                # Get the direction vector for position and normal
-                dir_vec = robomath.subs3(xyz_end, xyz_start)
-                normal_vec = robomath.subs3(ijk_end, ijk_start)
-                
-                for j in range(1, num_steps + 1):
-                    # Calculate the interpolation ratio (0.0 to 1.0)
-                    ratio = (j * step_mm) / segment_length
-                    
-                    # For the last point, use a ratio of 1.0 to avoid precision errors
-                    if j == num_steps:
-                         # If the last step is very close to the end, just skip it.
-                         # The p_end point will be added by the next loop.
-                        if (segment_length - (j * step_mm)) < (step_mm * 0.5):
-                            continue
-                            
-                    # Interpolate XYZ position
-                    new_xyz = robomath.add3(xyz_start, robomath.mult3(dir_vec, ratio))
-                    
-                    # Interpolate IJK normal (linear interpolation)
-                    interp_ijk = robomath.add3(ijk_start, robomath.mult3(normal_vec, ratio))
-                    new_ijk = robomath.normalize3(interp_ijk) # Re-normalize the interpolated vector
-                    
-                    resampled_curve.append(new_xyz + new_ijk)
+            # 3. Always include the exact final endpoint of the original path
+            p_last = curve[-1]
+            last_xyz = p_last[:3]
+            last_ijk = robomath.normalize3(p_last[3:6] if len(p_last) >= 6 else [0, 0, 1])
+            final_pt = last_xyz + last_ijk
 
-            # Add the very last point of the original curve
-            resampled_curve.append(curve[-1])
+            # Only append if not duplicate of the last stepped point
+            if not resampled_curve or robomath.distance(resampled_curve[-1][:3], final_pt[:3]) > 1e-3:
+                resampled_curve.append(final_pt)
 
             # Update the model with the new resampled curve
             self.model().editCurveData(index, resampled_curve)
@@ -2037,7 +2040,6 @@ class CurvesTreeView(QtWidgets.QTreeView):
                 continue
 
             resampled_curve = []
-            num_insert_points = factor_n - 1
 
             for i in range(len(curve) - 1):
                 p_start = curve[i]
@@ -2049,16 +2051,16 @@ class CurvesTreeView(QtWidgets.QTreeView):
                 xyz_end = p_end[:3]
                 ijk_end = p_end[3:6] if len(p_end) >= 6 else [0, 0, 1]
 
-                # Add the start point of the segment
-                resampled_curve.append(p_start)
+                # 1. Add the starting point of this segment
+                resampled_curve.append(xyz_start + ijk_start)
 
-                # Get the difference vectors for linear interpolation
+                # 2. Compute vectors for interpolation
                 dir_vec = robomath.subs3(xyz_end, xyz_start)
                 normal_vec = robomath.subs3(ijk_end, ijk_start)
 
-                for j in range(1, num_insert_points + 1):
-                    # Calculate the interpolation ratio (1/N, 2/N, ..., (N-1)/N)
-                    ratio = j / factor_n
+                # 3. Insert intermediate points strictly in order
+                for j in range(1, factor_n):
+                    ratio = float(j) / float(factor_n)
 
                     # Interpolate XYZ position
                     new_xyz = robomath.add3(xyz_start, robomath.mult3(dir_vec, ratio))
@@ -2069,9 +2071,11 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
                     resampled_curve.append(new_xyz + new_ijk)
 
-            # Add the very last point of the original curve (p_end of the last segment)
-            if curve:
-                resampled_curve.append(curve[-1])
+            # 4. Append the definitive end point of the curve
+            p_last = curve[-1]
+            last_xyz = p_last[:3]
+            last_ijk = robomath.normalize3(p_last[3:6] if len(p_last) >= 6 else [0, 0, 1])
+            resampled_curve.append(last_xyz + last_ijk)
 
             # Update the model with the new resampled curve
             self.model().editCurveData(index, resampled_curve)
@@ -2661,7 +2665,7 @@ class QCurvesItemModel(QtGui.QStandardItemModel):
         return True
 
     def editCurveData(self, index: QtCore.QModelIndex, curve):
-        """Edit an existing curve. If the length of the curve has changed, new rows are added."""
+        """Edit an existing curve. Properly adds or removes rows to match curve length."""
         if not self.is_curve_index(index):
             return False
 
@@ -2669,18 +2673,28 @@ class QCurvesItemModel(QtGui.QStandardItemModel):
         self.blockSignals(True)
 
         point_count = self.rowCount(index)
+        new_count = len(curve)
         curve_item = self.itemFromIndex(index)
-        for ip, point in enumerate(curve):
-            if ip >= point_count:
-                point_row = self.create_point_row(point)
+
+        # 1. Update existing overlapping rows
+        min_len = min(point_count, new_count)
+        for ip in range(min_len):
+            self.editPointData(self.index(ip, 0, index), curve[ip])
+
+        # 2. Append new rows if the new curve has more points
+        if new_count > point_count:
+            for ip in range(point_count, new_count):
+                point_row = self.create_point_row(curve[ip])
                 curve_item.appendRow(point_row)
-            else:
-                self.editPointData(self.index(ip, 0, index), point)
+
+        # 3. CRUCIAL: Remove trailing stale rows if the new curve has fewer points
+        elif new_count < point_count:
+            curve_item.removeRows(new_count, point_count - new_count)
 
         self.blockSignals(signal_blocked)
         if not signal_blocked:
-            self.rowsInserted.emit(-1, -1, -1)
-            #self.dataChanged.emit(-1, -1, [Qt.EditRole])
+            self.dataChanged.emit(index, index, [Qt.EditRole])
+            self.on_data_changed()
 
         return True
 

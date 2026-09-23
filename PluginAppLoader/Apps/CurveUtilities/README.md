@@ -1,6 +1,6 @@
 # Curve Utilities
 
-The Curve Utilities App for RoboDK adds tools to edit, import and export curves and points.
+The Curve Utilities Add-in for RoboDK adds tools to edit, import and export curves and points.
 
 ![Interface](./docs/interface.png)
 
