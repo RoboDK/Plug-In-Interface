@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <packageManifest xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.robodk.com/package/2022/manifest" version="1.0">
   <cp:coreProperties>
     <cp:category>Application</cp:category>
@@ -7,7 +7,8 @@
     <dc:creator>RoboDK</dc:creator>
     <dc:description>The Curve Utilities App for RoboDK adds tools to edit, import and export curves and points.</dc:description>
     <dc:identifier>com.robodk.app.curveutilities</dc:identifier>
-    <dc:language>en</dc:language>
+    <cp:keywords/>
+    <dc:language>eng</dc:language>
     <cp:lastModifiedBy>RoboDK</cp:lastModifiedBy>
     <dcterms:modified xsi:type="dcterms:W3CDTF">2025-12-12T19:56:42.951Z</dcterms:modified>
     <cp:revision>1</cp:revision>
@@ -15,20 +16,18 @@
     <cp:version>2.2.5</cp:version>
   </cp:coreProperties>
   <extraProperties>
-    <icon>/icon.svg</icon>
     <website>https://robodk.com/</website>
     <documentation>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/CurveUtilities</documentation>
     <repository>https://github.com/RoboDK/Plug-In-Interface/tree/master/PluginAppLoader/Apps/CurveUtilities</repository>
     <company>RoboDK Inc.</company>
     <email>info@robodk.com</email>
+    <icon>/icon.svg</icon>
   </extraProperties>
-  <dependencies/>
   <assets>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/AppConfig.ini</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/ccma.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/CurveEditor.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/CurveEditor.svg</asset>
-    <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/icon.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/LICENSE.md</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/README.md</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/CurveUtilities/requirements.txt</asset>
