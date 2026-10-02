@@ -1,24 +1,26 @@
-# Reachability
+# View Manager
 
-The Reachability Add-in for RoboDK shows which tool poses a robot can reach around its current position.
+The View Manager Add-in for RoboDK adds 3D view and interface presets.
 
-It helps you quickly check if a robot has enough room to move or rotate its tool at a specific point, before you create targets or programs.
+It can be used to set up the interface for VR, prepare the environment for video recordings, or simply save and reuse your preferred camera views.
 
-![Preview](./docs/preview.png)
+![Interface](./docs/interface.png)
 
-You can access its features from the menu by going to **Utilities - Reachability** or by clicking the **Check reachability** icon in the toolbar. You can also use the **Alt+R** shortcut or right-click a robot in the station tree.
+You can access all its features directly from the **View Manager** menu in the top menu bar or by clicking the **View Manager** icon in the toolbar. You can also open the View Manager window with the **Shift+V** shortcut.
 
-![Settings](./docs/settings.png)
+![Options](./docs/options.png)
 
 ## Features
 
-- **Reachability Preview:** Display reachable poses in green and unreachable poses in red directly in the 3D view.
-- **Tool and Robot Preview:** Show only the tool, or the full robot arm, at each tested pose.
-- **Rotation and Translation Ranges:** Set the minimum, maximum, and step values to test around the X, Y, and Z axes.
-- **Reachability Methods:** Check poses using inverse kinematics or a linear movement test (MoveL), and optionally keep the same robot configuration.
+- **Named Views:** Save, rename, reorder, and delete camera views from a simple list.
+- **Smooth Camera Moves:** Move the camera smoothly from one saved view to the next, with adjustable step size and delay.
+- **Interface Presets:** Switch between Default, Basic, Fullscreen, VR, and your own Custom interface settings.
+- **VR Support:** Send the current view to your VR headset.
+- **Display Options:** Show or hide reference frames, text, points, and curves in the 3D view.
+- **Program Control:** Start or stop all programs in the station with one click.
 
 ## Usage
 
-Move the robot to the position you want to test. Click the **Check reachability** toolbar icon and select the robot. The Add-in tests all pose combinations and shows the results in the 3D view. Uncheck the icon to clear the preview.
+Click the **View Manager** toolbar icon to open the list of views. Move the camera in the 3D view and click **Add View** to save it. Select a view and click **Go to view** to jump to it, or **Move to view** to move the camera smoothly. Select multiple views to move through them in order.
 
-**Note:** Access the Reachability Settings via **Utilities - Reachability - Settings** to adjust the test ranges, preview options, and display time.
+**Tip:** Use **View Manager - Set Interface (Custom)** to create your own interface preset.
