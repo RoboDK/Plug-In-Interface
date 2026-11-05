@@ -1,0 +1,42 @@
+<svg id="_72_roboui" data-name="72_roboui" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: #8daaf8;
+      }
+
+      .cls-3 {
+        fill: none;
+        stroke: #a3a3a3;
+        stroke-width: 5px;
+        stroke-linecap: round;
+      }
+
+      .cls-4 {
+        fill: #8daaf8;
+        stroke: #0e3da1;
+        stroke-width: 4.5px;
+        stroke-linejoin: round;
+      }
+
+      .cls-5 {
+        fill: none;
+        stroke: #0e3da1;
+        stroke-width: 6px;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" x="12" y="22" width="104" height="84" rx="8" ry="8"/>
+  <path class="cls-2" d="M12,44L116,44L116,30A8,8 0 0,0 108,22L20,22A8,8 0 0,0 12,30Z"/>
+  <circle class="cls-1" cx="104" cy="33" r="4"/>
+  <circle class="cls-1" cx="92" cy="33" r="4"/>
+  <path class="cls-3" d="M28,62L100,62"/>
+  <circle class="cls-4" cx="76" cy="62" r="9"/>
+  <rect class="cls-4" x="28" y="80" width="52" height="18" rx="5" ry="5"/>
+  <rect class="cls-5" x="12" y="22" width="104" height="84" rx="8" ry="8"/>
+</svg>

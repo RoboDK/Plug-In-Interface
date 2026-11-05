@@ -1,0 +1,46 @@
+<svg id="_78_locktcp" data-name="78_locktcp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        stroke: #ba8f04;
+        stroke-width: 5.6px;
+        stroke-linejoin: round;
+      }
+
+      .cls-2 {
+        fill: #ffdc6b;
+        stroke: #ba8f04;
+        stroke-width: 5.6px;
+        stroke-linejoin: round;
+      }
+
+      .cls-3 {
+        fill: #fff;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+      }
+
+      .cls-4 {
+        fill: none;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+        stroke-linecap: round;
+      }
+
+      .cls-5 {
+        fill: #0e3da1;
+      }
+
+      .cls-6 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <path class="cls-1" d="m 64.583,109.056 -7.182,10.709 c -3.031,-4.181 -7.332,-10.665 -7.332,-10.665 l 0.05,-52.249 14.56,0 c 0.249,15.561 0.132,31.637 -0.096,52.204 z"/>
+  <rect class="cls-2" x="39.766" y="4.643" width="34.353" height="82.15" rx="5.343" ry="5.343"/>
+  <circle class="cls-3" cx="97" cy="31" r="26"/>
+  <path class="cls-4" d="M90,29L90,23A7,7 0 0,1 104,23L104,29"/>
+  <rect class="cls-5" x="84" y="29" width="26" height="19" rx="3" ry="3"/>
+  <circle class="cls-6" cx="97" cy="38" r="3.6"/>
+</svg>

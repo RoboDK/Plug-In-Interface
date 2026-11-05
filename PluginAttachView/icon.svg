@@ -1,0 +1,43 @@
+<svg id="_69_attachview" data-name="69_attachview" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #8daaf8;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #a3a3a3;
+        stroke-width: 3.556px;
+        stroke-dasharray: 8 8;
+      }
+
+      .cls-3 {
+        fill: none;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+      }
+
+      .cls-4 {
+        fill: #fff;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+      }
+
+      .cls-5 {
+        fill: none;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+        stroke-linecap: round;
+      }
+    </style>
+  </defs>
+  <path class="cls-1" d="M48,34L86,53L86,95L48,114L10,95L10,53Z"/>
+  <path class="cls-2" d="M48,76L48,34M48,76L10,95M48,76L86,95"/>
+  <path class="cls-3" d="M48,34L86,53L86,95L48,114L10,95L10,53Z"/>
+  <path class="cls-3" d="M10,53L48,72L86,53M48,72L48,114"/>
+  <circle class="cls-4" cx="97" cy="31" r="26"/>
+  <path class="cls-5" d="M111.14,30.44L96.44,45.14A9.6,9.6 0 0,1 82.86,31.56L97.56,16.86A6.4,6.4 0 0,1 106.62,25.91L91.9,40.62A3.2,3.2 0 0,1 87.37,36.09L100.95,22.52"/>
+</svg>

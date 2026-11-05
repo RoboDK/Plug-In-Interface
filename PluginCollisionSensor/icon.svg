@@ -1,0 +1,35 @@
+<svg id="_76_collisionsensor" data-name="76_collisionsensor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ecf1fe;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+        stroke-linejoin: round;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #b81f29;
+        stroke-width: 8px;
+        stroke-linecap: round;
+      }
+
+      .cls-3 {
+        fill: #94030c;
+      }
+
+      .cls-4 {
+        fill: #8daaf8;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" x="100" y="24" width="18" height="80" rx="4" ry="4"/>
+  <path class="cls-2" d="M56,64L98,64"/>
+  <circle class="cls-3" cx="100" cy="64" r="11"/>
+  <rect class="cls-4" x="8" y="42" width="46" height="44" rx="6" ry="6"/>
+  <circle class="cls-1" cx="50" cy="64" r="10"/>
+</svg>

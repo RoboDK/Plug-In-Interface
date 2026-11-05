@@ -1,0 +1,32 @@
+<svg id="_74_opcua" data-name="74_opcua" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #8daaf8;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+        stroke-linejoin: round;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 5px;
+        stroke-linecap: round;
+      }
+
+      .cls-3 {
+        fill: #ffdc6b;
+        stroke: #ba8f04;
+        stroke-width: 4px;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" x="5" y="34" width="38" height="60" rx="6" ry="6"/>
+  <path class="cls-2" d="M15,50L33,50M15,64L33,64M15,78L33,78"/>
+  <rect class="cls-1" x="85" y="34" width="38" height="60" rx="6" ry="6"/>
+  <path class="cls-2" d="M95,50L113,50M95,64L113,64M95,78L113,78"/>
+  <path class="cls-3" d="M48,47L70,47L70,39L84,52L70,65L70,57L48,57Z"/>
+  <path class="cls-3" d="M80,71L58,71L58,63L44,76L58,89L58,81L80,81Z"/>
+</svg>

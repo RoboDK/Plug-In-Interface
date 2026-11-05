@@ -1,0 +1,37 @@
+<svg id="_67_apptemplate" data-name="67_apptemplate" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #8daaf8;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+        stroke-linejoin: round;
+      }
+
+      .cls-2 {
+        fill: #ecf1fe;
+        stroke: #0e3da1;
+        stroke-width: 5.6px;
+        stroke-linejoin: round;
+      }
+
+      .cls-3 {
+        fill: none;
+        stroke: #ba8f04;
+        stroke-width: 5.6px;
+        stroke-linecap: round;
+      }
+
+      .cls-4 {
+        fill: #ffdc6b;
+        stroke: #ba8f04;
+        stroke-width: 4px;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+  <path class="cls-1" d="M36,56L36,82C36,96 92,96 92,82L92,56Z"/>
+  <path class="cls-2" d="M64,26L114,50L64,74L14,50Z"/>
+  <path class="cls-3" d="M106,56C106,70 108,74 108,82"/>
+  <circle class="cls-4" cx="108" cy="92" r="8"/>
+</svg>
