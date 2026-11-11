@@ -41,5 +41,6 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/Settings.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/Settings.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Record/docs/menu.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Record/docs/settings.png</asset>
   </assets>
 </packageManifest>

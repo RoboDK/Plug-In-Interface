@@ -51,5 +51,7 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/ViewManager/View2VR.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ViewManager/ViewManager.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/ViewManager/ViewManager.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ViewManager/docs/interface.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/ViewManager/docs/options.png</asset>
   </assets>
 </packageManifest>

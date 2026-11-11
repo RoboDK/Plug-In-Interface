@@ -41,5 +41,9 @@
     <asset cpu="any" system="any" target="$(SourcePath)">/Snapshot/TakeSnapshot.svg</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Snapshot/TakeSnapshotHighRes.py</asset>
     <asset cpu="any" system="any" target="$(SourcePath)">/Snapshot/TakeSnapshotHighRes.svg</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Snapshot/docs/hdsnapshot.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Snapshot/docs/settings.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Snapshot/docs/snapshot.png</asset>
+    <asset cpu="any" system="any" target="$(SourcePath)">/Snapshot/docs/toolbar.png</asset>
   </assets>
 </packageManifest>
