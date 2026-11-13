@@ -698,16 +698,30 @@ def transform_curve(pose: robomath.Mat, curve):
     return [transform_xyzijk(pose, p) for p in curve]
 
 
+CURVE_HOLDER_TYPES = [robolink.ITEM_TYPE_OBJECT, robolink.ITEM_TYPE_TOOL]  # Item types that can hold curves/points
+
+
+def geometry_pose(item):
+    """
+    Returns the pose of the item's geometry frame (where curves/points are stored), as expected by AddCurve/AddPoints.
+    Objects store curves relative to the object origin, while AddCurve is relative to the object pose.
+    Tools (objects attached to a robot) store curves relative to the robot flange, and Pose() returns the TCP instead.
+    """
+    if item.type == robolink.ITEM_TYPE_TOOL:
+        return robomath.eye(4)
+    return item.Pose()
+
+
 def add_curve(reference_object, curve_points, add_to_ref=False, projection_type=robolink.PROJECTION_ALONG_NORMAL_RECALC, original_object_item=None):
     """
     Adds a curve (list of points) to an object, taking into consideration the object pose.
     Optionally, pass the original source object of the curve to transpose the points automatically to the new object.
     """
     # Curves/points are relative to the object origin (with no regard to the object pose), while AddCurve is relative to the object pose
-    offset_pose_from = reference_object.Pose()
+    offset_pose_from = geometry_pose(reference_object)
     if original_object_item is not None and original_object_item != reference_object:
         # Pose is the transformation matrix from the original object to the new object
-        offset_pose_from = (original_object_item.PoseAbs().inv() * reference_object.Parent().PoseAbs()) * reference_object.Pose()
+        offset_pose_from = (original_object_item.PoseAbs().inv() * reference_object.Parent().PoseAbs()) * geometry_pose(reference_object)
 
     offset_curve = transform_curve(offset_pose_from, curve_points)
     reference_object.AddCurve(offset_curve, add_to_ref, projection_type)
@@ -719,10 +733,10 @@ def add_points(reference_object, points, add_to_ref=False, projection_type=robol
     Optionally, pass the original source object of the points to transpose the points automatically to the new object.
     """
     # Curves/points are relative to the object origin (with no regard to the object pose), while AddPoints is relative to the object pose
-    offset_pose_from = reference_object.Pose()
+    offset_pose_from = geometry_pose(reference_object)
     if original_object_item is not None and original_object_item != reference_object:
         # Pose is the transformation matrix from the original object to the new object
-        offset_pose_from = (original_object_item.PoseAbs().inv() * reference_object.Parent().PoseAbs()) * reference_object.Pose()
+        offset_pose_from = (original_object_item.PoseAbs().inv() * reference_object.Parent().PoseAbs()) * geometry_pose(reference_object)
 
     offset_curve = transform_curve(offset_pose_from, points)
     reference_object.AddPoints(offset_curve, add_to_ref, projection_type)
@@ -895,7 +909,7 @@ def merge_curves(curves):
 
 def get_curve(object_item, curve_id=0):
     """Retrieve the curve of an object item, as specified by the curve ID."""
-    if object_item.type != robolink.ITEM_TYPE_OBJECT:
+    if object_item.type not in CURVE_HOLDER_TYPES:
         return []
     return object_item.GetPoints(robolink.FEATURE_CURVE, curve_id)[0]
 
@@ -914,7 +928,7 @@ def get_curves(object_item):
 
 
 def get_points(object_item):
-    if object_item.type != robolink.ITEM_TYPE_OBJECT:
+    if object_item.type not in CURVE_HOLDER_TYPES:
         return []
 
     return object_item.GetPoints(robolink.FEATURE_POINT)[0]

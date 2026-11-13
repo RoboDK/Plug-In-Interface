@@ -32,6 +32,7 @@ import ccma
 import colorsys
 import math
 import sys
+import time
 import typing
 from enum import Enum, auto
 from pathlib import Path
@@ -54,8 +55,14 @@ COLOR_POINT = [0, 0, 1, 0.7]  # RoboDK curve points blue
 
 # items
 ARROW_SIZE = 10
+ARROW_SIZE_FROM_RDK = False  # True once ARROW_SIZE is synced with RoboDK's SizeCurveArrow (v5.7.1+)
 POINT_SIZE = 4
-CURVE_POINT_SIZE = 2
+CURVE_POINT_SIZE = 1.25
+CURVE_POINT_SIZE_RATIO = 1.0  # RoboDK's SizeCurvePoints ("Display curve points. Size:"), synced with RoboDK (+/- keys)
+RDK_POINT_RADIUS_RATIO = 1.0  # RoboDK's point sphere radius, as a ratio of POINT_SIZE/CURVE_POINT_SIZE (a smaller bead is hidden inside RoboDK's sphere)
+BEAD_OVERSIZE = 1.1  # Selection beads are slightly larger than RoboDK's points so they cover them
+BEAD_MIN_VIEW_RATIO = 0.003  # Minimum bead radius, as a ratio of the camera distance (keeps beads visible when zoomed out, ~5 px)
+VIEW_DISTANCE = 0  # Distance (mm) from the RoboDK camera to the edited item, synced with RoboDK
 
 # display
 CURVE_LINE_SIZE = 1
@@ -81,6 +88,22 @@ def calculate_curve_length(curve_points):  # TODO: Add travel length as a statis
         length += segment_length
 
     return length
+
+
+def bead_radius(base_size):
+    """
+    Radius of the selection bead (mm).
+    Up close, it matches RoboDK's point spheres: base size (mm) scaled by SizeCurvePoints (+/- keys).
+    Zoomed out, it keeps a minimum size on screen so it stays visible.
+    """
+    return max(base_size * RDK_POINT_RADIUS_RATIO * CURVE_POINT_SIZE_RATIO * BEAD_OVERSIZE, VIEW_DISTANCE * BEAD_MIN_VIEW_RATIO)
+
+
+def bead_display(base_size):
+    """RoboDK 'Display' parameter for selection beads"""
+    r = bead_radius(base_size)
+    color = COLOR_HIGHLIGHT[:3] + [1]  # Opaque: transparent beads interfere with RoboDK's zoom under the mouse cursor
+    return f'PARTICLE=SPHERE({r:.3f},{POINT_SIZE*10}) COLOR={rgba2hex(base1to255(color))}'
 
 
 def draw_wire_arrows(wire, invert, ratio_spacing, size_curve_arrow):
@@ -536,6 +559,39 @@ class RoboDKManager(metaclass=Singleton):
     def enable_points_previews(self, enable):
         self._enable_points_previews = enable
 
+    def _attach_preview(self, preview_item, item, name):
+        """
+        Attach a temporary preview item to its source item, so that its points are expressed in the source item geometry frame.
+        """
+        preview_item.setParent(item)
+        if item.type == robolink.ITEM_TYPE_TOOL:
+            # Tool geometry/curves are relative to the robot flange, while the children of a tool are relative to the TCP
+            preview_item.setPose(item.PoseTool().inv())
+        else:
+            preview_item.setPose(robomath.eye(4))  # Points are expressed in the parent geometry frame
+        preview_item.setName(name)
+        #preview_item.setVisible(False)
+        if not DEBUG_SHOW_TEMP_ITEMS:
+            preview_item.setParam('Tree', 'Hide')  # Won't be saved with the station
+            self.RDK.setFlagsItem(preview_item, robolink.FLAG_ITEM_NONE)
+
+    def refresh_bead_size(self, render_status=True):
+        """
+        Update the size of existing selection beads (i.e. when the point size or the camera distance changes in RoboDK).
+        """
+        if render_status:
+            self.RDK.Render(False)
+
+        for preview_item in self.object_points_preview.values():
+            if preview_item.Valid():
+                preview_item.setParam('Display', bead_display(POINT_SIZE))
+        for preview_item in self.object_curves_points_preview.values():
+            if preview_item.Valid():
+                preview_item.setParam('Display', bead_display(CURVE_POINT_SIZE))
+
+        if render_status:
+            self.RDK.Render(True)
+
     def set_object_points(self, item, points, render_status=True):
         """
         Set the object points, and store them.
@@ -604,13 +660,8 @@ class RoboDKManager(metaclass=Singleton):
         self.object_points_preview[item] = self.RDK.AddPoints(selected_points, 0, False, robolink.PROJECTION_NONE)
         preview_item = self.object_points_preview[item]
 
-        preview_item.setParent(item)
-        preview_item.setName(self.POINT_NAME)
-        #preview_item.setVisible(False)
-        if not DEBUG_SHOW_TEMP_ITEMS:
-            preview_item.setParam('Tree', 'Hide')  # Won't be saved with the station
-            self.RDK.setFlagsItem(preview_item, robolink.FLAG_ITEM_NONE)
-        preview_item.setParam('Display', f'PARTICLE=SPHERE({POINT_SIZE*1.1},{POINT_SIZE*10}) COLOR={rgba2hex(base1to255(COLOR_HIGHLIGHT))}')
+        self._attach_preview(preview_item, item, self.POINT_NAME)
+        preview_item.setParam('Display', bead_display(POINT_SIZE))
 
         if render_status:
             self.RDK.Render(True)
@@ -704,14 +755,7 @@ class RoboDKManager(metaclass=Singleton):
 
         if shape:
             self.object_curves_arrows_preview[item] = self.RDK.AddShape(shape)
-            preview_item = self.object_curves_arrows_preview[item]
-
-            preview_item.setParent(item)
-            preview_item.setName(self.CURVE_ARROW_NAME)
-            #preview_item.setVisible(False)
-            if not DEBUG_SHOW_TEMP_ITEMS:
-                preview_item.setParam('Tree', 'Hide')  # Won't be saved with the station
-                self.RDK.setFlagsItem(preview_item, robolink.FLAG_ITEM_NONE)
+            self._attach_preview(self.object_curves_arrows_preview[item], item, self.CURVE_ARROW_NAME)
 
         if render_status:
             self.RDK.Render(True)
@@ -744,21 +788,17 @@ class RoboDKManager(metaclass=Singleton):
         for (ic, ip) in selected_points_indexes:
             fake_curve.append(curves[ic][ip])
 
+        # Recreate the preview every time: adding points to an attached preview item would interpret them relative to the item pose,
+        # which is not the identity for tools (offset beads)
         if item in self.object_curves_points_preview:
-            self.object_curves_points_preview[item].setParam('Reset', 'Points')
-            if fake_curve:
-                self.object_curves_points_preview[item].AddPoints(fake_curve, add_to_ref=True, projection_type=robolink.PROJECTION_NONE)
-        else:
-            if fake_curve:
-                self.object_curves_points_preview[item] = self.RDK.AddPoints(fake_curve, 0, False, robolink.PROJECTION_NONE)
-                preview_item = self.object_curves_points_preview[item]
-                preview_item.setParent(item)
-                preview_item.setName(self.POINT_NAME)
-                #preview_item.setVisible(False)
-                if not DEBUG_SHOW_TEMP_ITEMS:
-                    preview_item.setParam('Tree', 'Hide')  # Won't be saved with the station
-                    self.RDK.setFlagsItem(preview_item, robolink.FLAG_ITEM_NONE)
-                preview_item.setParam('Display', f'PARTICLE=SPHERE({CURVE_POINT_SIZE*1.1},{CURVE_POINT_SIZE*10}) COLOR={rgba2hex(base1to255(COLOR_HIGHLIGHT))}')
+            if self.object_curves_points_preview[item].Valid():
+                self.object_curves_points_preview[item].Delete()
+            del self.object_curves_points_preview[item]
+        if fake_curve:
+            self.object_curves_points_preview[item] = self.RDK.AddPoints(fake_curve, 0, False, robolink.PROJECTION_NONE)
+            preview_item = self.object_curves_points_preview[item]
+            self._attach_preview(preview_item, item, self.POINT_NAME)
+            preview_item.setParam('Display', bead_display(CURVE_POINT_SIZE))
 
         if render_status:
             self.RDK.Render(True)
@@ -956,31 +996,22 @@ class CurveSelectionModel(QtCore.QItemSelectionModel):
 
         return curves, curve_points, points
 
-    def selectAllCurves(self):
-        model = self.model()
-
+    def selectRows(self, indexes):
         self.blockSignals(True)
 
         self.clearSelection()
-        for index in model.curveIndexes():
+        for index in indexes:
             self.select(index, QtCore.QItemSelectionModel.Select | QtCore.QItemSelectionModel.Rows)
 
         self.blockSignals(False)
 
         self.selectionChanged.emit(self.selection(), QtCore.QItemSelectionModel.Select)
+
+    def selectAllCurves(self):
+        self.selectRows(self.model().curveIndexes())
 
     def selectAllPoints(self):
-        model = self.model()
-
-        self.blockSignals(True)
-
-        self.clearSelection()
-        for index in model.pointIndexes():
-            self.select(index, QtCore.QItemSelectionModel.Select | QtCore.QItemSelectionModel.Rows)
-
-        self.blockSignals(False)
-
-        self.selectionChanged.emit(self.selection(), QtCore.QItemSelectionModel.Select)
+        self.selectRows(self.model().pointIndexes())
 
 
 class QDoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
@@ -1050,29 +1081,46 @@ class CurvesTreeView(QtWidgets.QTreeView):
         if isinstance(self.selectionModel(), CurveSelectionModel):
             self.model().updateRoboDKSelectionHighlights(*self.selectionModel().selectedExpanded())
 
+    def visibleRows(self, indexes):
+        """Filter out hidden rows (sections filtered out after clicking a single section in RoboDK)"""
+        return [index for index in indexes if not self.isRowHidden(index.row(), index.parent())]
+
+    def selectAll(self):  # override, hidden rows (filtered sections) must not be selected
+        model = self.model()
+        self.selectionModel().selectRows(self.visibleRows([model.index(row, 0) for row in range(model.rowCount())]))
+
     def selectAllCurves(self):
-        self.selectionModel().selectAllCurves()
+        self.selectionModel().selectRows(self.visibleRows(self.model().curveIndexes()))
 
     def selectAllPoints(self):
-        self.selectionModel().selectAllPoints()
+        self.selectionModel().selectRows(self.visibleRows(self.model().pointIndexes()))
+
+    def showOnlyRow(self, index):
+        """Only show a single curve/point row, i.e. the section clicked in RoboDK"""
+        for row in range(self.model().rowCount()):
+            self.setRowHidden(row, QtCore.QModelIndex(), row != index.row())
+
+    def showAllRows(self):
+        for row in range(self.model().rowCount()):
+            self.setRowHidden(row, QtCore.QModelIndex(), False)
 
     def selectedCurvesOrAll(self):
-        """Selected curve indexes (unique), or all the curves when nothing is selected."""
+        """Selected curve indexes (unique), or all the visible curves when nothing is selected."""
         curves, _, _ = self.selectionModel().selectedUnique()
         if not curves:
-            curves = self.model().curveIndexes()
+            curves = self.visibleRows(self.model().curveIndexes())
         return curves
 
     def selectedPointsOrAll(self):
         """
-        Selected curve points (expanded) and standalone points, or all of them when nothing is selected.
+        Selected curve points (expanded) and standalone points, or all the visible ones when nothing is selected.
 
         :return: [curve_points, points]
         """
         _, curve_points, points = self.selectionModel().selectedExpanded()
         if not curve_points and not points:
-            curve_points = [ip for ic in self.model().curveIndexes() for ip in self.model().curvePointIndexes(ic)]
-            points = self.model().pointIndexes()
+            curve_points = [ip for ic in self.visibleRows(self.model().curveIndexes()) for ip in self.model().curvePointIndexes(ic)]
+            points = self.visibleRows(self.model().pointIndexes())
         return curve_points, points
 
     def copySelection(self):
@@ -1369,7 +1417,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
         """
         _, _, selected_points = self.selectionModel().selectedUnique()
         if not selected_points:
-            selected_points = self.model().pointIndexes()
+            selected_points = self.visibleRows(self.model().pointIndexes())
         if not selected_points:
             return
 
@@ -1478,7 +1526,7 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
         # Curves are relative to the object origin, while AddCurve and ProjectPoints is relative to the object pose
 
-        offset_pose_from = selected_item.Pose()
+        offset_pose_from = cutools.geometry_pose(selected_item)
         offset_pose_to = offset_pose_from.inv()
         if destination_item != selected_item:
             offset_pose_from = (selected_item.PoseAbs().inv() * destination_item.Parent().PoseAbs()) * destination_item.Pose()
@@ -2351,8 +2399,8 @@ class CurvesTreeView(QtWidgets.QTreeView):
 
         selected_curves, selected_curve_points, selected_points = self.selectionModel().selectedUnique()
         if not selected_curves and not selected_curve_points and not selected_points:
-            selected_curves = self.model().curveIndexes()
-            selected_points = self.model().pointIndexes()
+            selected_curves = self.visibleRows(self.model().curveIndexes())
+            selected_points = self.visibleRows(self.model().pointIndexes())
             selected_curve_points = []
         if not selected_curves and not selected_curve_points and not selected_points:
             return
@@ -3061,9 +3109,11 @@ class CurveEditor(QtWidgets.QMainWindow):
             self.RDK.Command(cmd, value)
         self.RDK.Render(True)
 
-        global ARROW_SIZE
+        global ARROW_SIZE, ARROW_SIZE_FROM_RDK, CURVE_POINT_SIZE_RATIO
         try:
             ARROW_SIZE = float(self.RDK.Command('SizeCurveArrow'))  # Added in RoboDK v5.7.1
+            ARROW_SIZE_FROM_RDK = True
+            CURVE_POINT_SIZE_RATIO = float(self.RDK.Command('SizeCurvePoints'))
         except (TypeError, ValueError):
             pass  # Older versions of RoboDK do not support this command
 
@@ -3072,6 +3122,9 @@ class CurveEditor(QtWidgets.QMainWindow):
         # Threads
         self.selection_thread = SelectionThread()
         self.selection_thread.selection_changed.connect(self.selectionChanged)
+        self.selection_thread.display_size_changed.connect(self.displaySizeChanged)
+        self.selection_thread.feature_selected.connect(self.featureSelected)
+        self.selection_thread.view_changed.connect(self.viewChanged)
         self.selection_thread.start()
 
     def initUI(self):
@@ -3174,6 +3227,9 @@ class CurveEditor(QtWidgets.QMainWindow):
         menu_view = menu_bar.addMenu("View")
         menu_view.addAction('Expand All').triggered.connect(self.treeView.expandAll)
         menu_view.addAction('Collapse All').triggered.connect(self.treeView.collapseAll)
+        action_show_all = menu_view.addAction('Show All Sections')
+        action_show_all.setToolTip("Show all curves and points, after clicking a single section in RoboDK")
+        action_show_all.triggered.connect(self.showAllSections)
 
         menu_view.addSeparator()
 
@@ -3350,12 +3406,81 @@ class CurveEditor(QtWidgets.QMainWindow):
         items = [robolink.Item(self.RDK, x) for x in selection]
         items = [x for x in items if x.Valid(True)]
         self.model.from_items(items)
+        self.showAllSections()
         self.treeView.expandAll()
+
+        try:
+            self.viewChanged(*self.RDK.ViewPose().inv().Pos())  # Initial bead size for this item
+        except Exception:
+            pass  # The bead size is updated on the next camera move
+
+    def displaySizeChanged(self, arrow_size, curve_point_size):
+        """Rescale the selection beads when the point size changes in RoboDK (+/- keys)"""
+        global ARROW_SIZE, CURVE_POINT_SIZE_RATIO
+        ARROW_SIZE = arrow_size
+        CURVE_POINT_SIZE_RATIO = curve_point_size
+        if DEBUG_LEVEL:
+            print(f'Display sizes: SizeCurveArrow={arrow_size}, SizeCurvePoints={curve_point_size}, curve bead radius={bead_radius(CURVE_POINT_SIZE):.3f} mm')
+        self.RDKM.refresh_bead_size()
+
+    def viewChanged(self, x, y, z):
+        """Rescale the selection beads when the camera distance to the edited item changes (zoom)"""
+        global VIEW_DISTANCE
+        selected_item = self.model.object_item()
+        if not selected_item:
+            return
+
+        distance = robomath.distance([x, y, z], selected_item.PoseAbs().Pos())
+        if VIEW_DISTANCE > 0 and abs(distance - VIEW_DISTANCE) / VIEW_DISTANCE < 0.05:
+            return  # Not worth updating
+
+        VIEW_DISTANCE = distance
+        self.RDKM.refresh_bead_size()
+
+    def featureSelected(self, item_str, feature_type, feature_id):
+        """
+        Show and select only the curve or point row matching the section clicked in the RoboDK 3D view.
+        A feature type of -1 means the item itself is selected (no section), and all rows are shown again.
+        """
+        selected_item = self.model.object_item()
+        if not selected_item or str(selected_item.item) != item_str:
+            return
+
+        if feature_type == -1:
+            self.showAllSections()
+            return
+
+        if feature_type == robolink.FEATURE_CURVE:
+            indexes = self.model.curveIndexes()
+        else:
+            indexes = self.model.pointIndexes()
+        if feature_id < 0 or feature_id >= len(indexes):
+            return
+
+        index = indexes[feature_id]
+        self.treeView.showOnlyRow(index)
+        self.treeView.selectionModel().select(index, QtCore.QItemSelectionModel.ClearAndSelect | QtCore.QItemSelectionModel.Rows)
+        self.treeView.selectionModel().setCurrentIndex(index, QtCore.QItemSelectionModel.NoUpdate)
+        self.treeView.expand(index)
+        self.treeView.scrollTo(index)
+
+        section = f'Curve {feature_id + 1}' if feature_type == robolink.FEATURE_CURVE else f'Point {feature_id + 1}'
+        self.setWindowTitle(f'Curve Editor - {selected_item.Name()}: {section} only')
+
+    def showAllSections(self):
+        self.treeView.showAllRows()
+        self.setWindowTitle('Curve Editor')
 
 
 class SelectionThread(QtCore.QThread):
 
     selection_changed = QtCore.Signal(list)
+    display_size_changed = QtCore.Signal(float, float)  # SizeCurveArrow, SizeCurvePoints
+    feature_selected = QtCore.Signal(str, int, int)  # item (as str), feature type (-1: no section), feature id
+    view_changed = QtCore.Signal(float, float, float)  # camera position (mm, absolute)
+
+    DISPLAY_SIZE_POLL_S = 0.25
+    VIEW_POLL_S = 0.1
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -3364,10 +3489,38 @@ class SelectionThread(QtCore.QThread):
         RDK = robolink.Robolink()
         selected_items_prev = []
         active_station = RDK.ActiveStation()
+        display_sizes_prev = None
+        display_sizes_tic = 0
+        view_prev = None
+        view_tic = 0
+        loaded_items = []  # Items currently loaded in the editor
+        cleared_by_us = False  # The RoboDK selection was cleared by this thread, not by the user
         while True:
             robomath.pause(0.01)
             if self.isInterruptionRequested():
                 return
+
+            # Track the camera (zoom) to keep the selection beads visible when zoomed out
+            if time.time() - view_tic > self.VIEW_POLL_S:
+                view_tic = time.time()
+                try:
+                    camera = RDK.ViewPose().inv().Pos()  # ViewPose is the station with respect to the camera
+                    if camera != view_prev:
+                        view_prev = camera
+                        self.view_changed.emit(*camera)
+                except Exception:
+                    pass  # Try again on the next poll
+
+            # Track the curve arrow and curve point sizes (+/- keys in RoboDK) to rescale the selection beads
+            if ARROW_SIZE_FROM_RDK and time.time() - display_sizes_tic > self.DISPLAY_SIZE_POLL_S:
+                display_sizes_tic = time.time()
+                try:
+                    sizes = (float(RDK.Command('SizeCurveArrow')), float(RDK.Command('SizeCurvePoints')))
+                    if sizes != display_sizes_prev:
+                        display_sizes_prev = sizes
+                        self.display_size_changed.emit(*sizes)
+                except (TypeError, ValueError):
+                    pass  # Older versions of RoboDK do not support this command
 
             # Force clear selection if we change the active station
             if active_station != RDK.ActiveStation():
@@ -3375,16 +3528,55 @@ class SelectionThread(QtCore.QThread):
                     print('Selection: Active station changed!')
                 active_station = RDK.ActiveStation()
                 selected_items_prev = []
+                loaded_items = []
+                cleared_by_us = False
                 self.selection_changed.emit([])
                 continue
 
-            selection = [x for x in RDK.Selection() if x.type == robolink.ITEM_TYPE_OBJECT]
+            selection = [x for x in RDK.Selection() if x.type in cutools.CURVE_HOLDER_TYPES]
             selected_items = [str(x.item) for x in selection]
-            if selected_items_prev != selected_items:
+            if selected_items_prev == selected_items:
+                continue
+            selected_items_prev = selected_items
+
+            if not selected_items:
+                if cleared_by_us:
+                    # We cleared the RoboDK selection after a section click: keep the item in the editor
+                    cleared_by_us = False
+                    continue
+                if DEBUG_LEVEL:
+                    print('Selection: []')
+                loaded_items = []
+                self.selection_changed.emit([])
+                continue
+
+            cleared_by_us = False
+            if selected_items != loaded_items:
                 if DEBUG_LEVEL:
                     print(f'Selection: {[x.Name() for x in selection]}')
-                selected_items_prev = selected_items
+                loaded_items = selected_items
                 self.selection_changed.emit(selected_items)  # item.item must be send as a str to avoid int overflow
+
+            # Read the curve/point clicked in the 3D view only when the selection changes (the click).
+            # While an item stays selected, RoboDK updates the selected feature as the mouse hovers over it.
+            # Emitted after selection_changed, so that the editor loads the item first.
+            feature_type, feature_id = -1, -1
+            try:
+                is_selected, _feature_type, _feature_id = selection[0].SelectedFeature()
+                if is_selected and _feature_type in [robolink.FEATURE_CURVE, robolink.FEATURE_POINT]:
+                    feature_type, feature_id = _feature_type, _feature_id
+            except Exception:
+                pass  # Treat as no section selected
+
+            if DEBUG_LEVEL:
+                print(f'Selected feature: {feature_type}, {feature_id}')
+            self.feature_selected.emit(selected_items[0], feature_type, feature_id)
+
+            if feature_type != -1:
+                # Clear the RoboDK selection to detect the next click on the same item (rising edge),
+                # this also removes RoboDK's whole-item highlight that hides the selected section highlight.
+                cleared_by_us = True
+                RDK.setSelection([])
 
 
 class BulkEditDialog(QtWidgets.QDialog):
